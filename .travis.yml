@@ -52,6 +52,7 @@ install:
       conda update -n root --yes --quiet conda conda-env conda-build
       conda install -n root --yes --quiet jinja2 anaconda-client
       conda install -n root --yes --quiet conda-build=2
+      conda info
 
 script:
   - conda build ./recipe
