@@ -55,11 +55,10 @@ echo "$config" > ~/.condarc
 conda clean --lock
 
 conda install --yes --quiet conda-forge-build-setup
-# Overriding global conda-forge-build-setup with local copy.
-source /recipe_root/run_conda_forge_build_setup_linux
+source run_conda_forge_build_setup
 
 conda build /recipe_root --quiet || exit 1
-/recipe_root/upload_or_check_non_existence.py /recipe_root conda-forge --channel=main || exit 1
+upload_or_check_non_existence /recipe_root conda-forge --channel=main || exit 1
 
 touch /feedstock_root/build_artefacts/conda-forge-build-done
 EOF
