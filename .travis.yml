@@ -49,6 +49,9 @@ install:
       conda config --set show_channel_urls true
       conda install --yes --quiet conda-forge-build-setup
       source run_conda_forge_build_setup
+      conda update -n root --yes --quiet conda conda-env conda-build
+      conda install -n root --yes --quiet jinja2 anaconda-client
+      conda install -n root --yes --quiet conda-build=2
 
 script:
   - conda build ./recipe
