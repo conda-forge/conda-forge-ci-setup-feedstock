@@ -48,10 +48,13 @@ install:
       conda config --add channels conda-forge
       conda config --set show_channel_urls true
       conda install --yes --quiet conda-forge-build-setup
-      # Overriding global conda-forge-build-setup with local copy.
-      source recipe/run_conda_forge_build_setup_osx
+      source run_conda_forge_build_setup
+      conda update -n root --yes --quiet conda conda-env conda-build
+      conda install -n root --yes --quiet jinja2 anaconda-client
+      conda install -n root --yes --quiet conda-build=2
+      conda info
 
 script:
   - conda build ./recipe
 
-  - recipe/upload_or_check_non_existence.py ./recipe conda-forge --channel=main
+  - upload_or_check_non_existence ./recipe conda-forge --channel=main

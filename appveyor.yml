@@ -27,6 +27,7 @@ install:
     # If there is a newer build queued for the same PR, cancel this one.
     - cmd: |
         recipe\ff_ci_pr_build -v --ci "appveyor" "%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%" "%APPVEYOR_BUILD_NUMBER%" "%APPVEYOR_PULL_REQUEST_NUMBER%"
+        del ff_ci_pr_build.py
 
     # Cywing's git breaks conda-build. (See https://github.com/conda-forge/conda-smithy-feedstock/pull/2.)
     - cmd: rmdir C:\cygwin /s /q
@@ -45,8 +46,10 @@ install:
 
     # Configure the VM.
     - cmd: conda.exe install -n root --quiet --yes conda-forge-build-setup
-    # Overriding global conda-forge-build-setup with local copy.
-    - cmd: recipe\run_conda_forge_build_setup_win
+    - cmd: run_conda_forge_build_setup
+    - cmd: conda.exe update -n root --yes --quiet conda conda-env conda-build
+    - cmd: conda.exe install -n root --yes --quiet jinja2 anaconda-client
+    - cmd: conda.exe install -n root --yes --quiet conda-build=2
 
 # Skip .NET project specific build phase.
 build: off
@@ -54,4 +57,4 @@ build: off
 test_script:
     - conda.exe build recipe --quiet
 deploy_script:
-    - cmd: recipe\upload_or_check_non_existence .\recipe conda-forge --channel=main
+    - cmd: upload_or_check_non_existence .\recipe conda-forge --channel=main
