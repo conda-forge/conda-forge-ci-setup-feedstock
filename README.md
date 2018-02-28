@@ -14,14 +14,16 @@ Summary: A package installed by conda-forge each time a build is run on CI. This
 Current build status
 ====================
 
-Linux: [![Circle CI](https://circleci.com/gh/conda-forge/conda-forge-ci-setup-feedstock.svg?style=shield)](https://circleci.com/gh/conda-forge/conda-forge-ci-setup-feedstock)
-OSX: [![TravisCI](https://travis-ci.org/conda-forge/conda-forge-ci-setup-feedstock.svg?branch=master)](https://travis-ci.org/conda-forge/conda-forge-ci-setup-feedstock)
-Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/conda-forge/conda-forge-ci-setup-feedstock?svg=True)](https://ci.appveyor.com/project/conda-forge/conda-forge-ci-setup-feedstock/branch/master)
+[![Linux](https://img.shields.io/circleci/project/github/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=Linux)](https://circleci.com/gh/conda-forge/conda-forge-ci-setup-feedstock)
+[![OSX](https://img.shields.io/travis/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=macOS)](https://travis-ci.org/conda-forge/conda-forge-ci-setup-feedstock)
+[![Windows](https://img.shields.io/appveyor/ci/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=Windows)](https://ci.appveyor.com/project/conda-forge/conda-forge-ci-setup-feedstock/branch/master)
 
 Current release info
 ====================
-Version: [![Anaconda-Server Badge](https://anaconda.org/conda-forge/conda-forge-ci-setup/badges/version.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
-Downloads: [![Anaconda-Server Badge](https://anaconda.org/conda-forge/conda-forge-ci-setup/badges/downloads.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
+
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
+[![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
 
 Installing conda-forge-ci-setup
 ===============================
