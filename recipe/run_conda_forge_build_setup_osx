@@ -22,6 +22,12 @@ else
     exit 1
 fi
 
+if [ ! -z "$CONFIG" ]; then
+    echo "CONDA_BUILD_SYSROOT:" >> ./.ci_support/${CONFIG}.yaml
+    echo "- ${CONDA_BUILD_SYSROOT}" >> ./.ci_support/${CONFIG}.yaml
+    cat ./.ci_support/${CONFIG}.yaml
+fi
+
 conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
