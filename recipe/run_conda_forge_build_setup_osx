@@ -14,12 +14,18 @@ export MACOSX_DEPLOYMENT_TARGET="10.9"
 
 export CONDA_BUILD_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk"
 
-if [ -f "${CONDA_BUILD_SYSROOT}" ]
+if [ -d "${CONDA_BUILD_SYSROOT}" ]
 then
     echo "Found CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
 else
     echo "Missing CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
     exit 1
+fi
+
+if [ ! -z "$CONFIG" ]; then
+    echo "CONDA_BUILD_SYSROOT:" >> ./.ci_support/${CONFIG}.yaml
+    echo "- ${CONDA_BUILD_SYSROOT}" >> ./.ci_support/${CONFIG}.yaml
+    cat ./.ci_support/${CONFIG}.yaml
 fi
 
 conda config --set show_channel_urls true
