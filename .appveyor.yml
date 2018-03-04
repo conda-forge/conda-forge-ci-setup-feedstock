@@ -32,9 +32,6 @@ install:
     #     symlink to the current version.
     - cmd: call C:\Miniconda3-x64\Scripts\activate.bat
 
-    # workaround for https://github.com/conda/conda/issues/6057
-    - cmd: conda.exe update conda --yes --quiet
-
     - cmd: set PYTHONUNBUFFERED=1
 
     # Add our channels.
@@ -42,6 +39,9 @@ install:
     - cmd: conda.exe config --remove channels defaults
     - cmd: conda.exe config --add channels defaults
     - cmd: conda.exe config --add channels conda-forge
+
+    # workaround for https://github.com/conda/conda/issues/6057
+    - cmd: conda.exe update --yes --quiet conda
 
     # Configure the VM.
     - cmd: conda.exe install -n root --quiet --yes conda-forge-ci-setup=1
