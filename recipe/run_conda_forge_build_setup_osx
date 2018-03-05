@@ -12,6 +12,13 @@ export PYTHONUNBUFFERED=1
 #   way is working well enough.
 export MACOSX_DEPLOYMENT_TARGET="10.9"
 
+if [ "$CIRCLECI" == "true" ]; then
+    echo "Downloading sdk"
+    curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX10.9.sdk.tar.xz
+    tar -xf MacOSX10.9.sdk.tar.xz -C $(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/
+    sed -i '' "s|<string>10.11</string>|<string>10.9</string>|g" $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+fi
+
 export CONDA_BUILD_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk"
 
 if [ -d "${CONDA_BUILD_SYSROOT}" ]
@@ -23,8 +30,10 @@ else
 fi
 
 if [ ! -z "$CONFIG" ]; then
+    echo "" >> ./.ci_support/${CONFIG}.yaml
     echo "CONDA_BUILD_SYSROOT:" >> ./.ci_support/${CONFIG}.yaml
     echo "- ${CONDA_BUILD_SYSROOT}" >> ./.ci_support/${CONFIG}.yaml
+    echo "" >> ./.ci_support/${CONFIG}.yaml
     cat ./.ci_support/${CONFIG}.yaml
 fi
 
