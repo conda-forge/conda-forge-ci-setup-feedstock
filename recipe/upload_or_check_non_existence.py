@@ -13,7 +13,7 @@ import tempfile
 from binstar_client.utils import get_server_api
 import binstar_client.errors
 from conda_build.conda_interface import subdir as conda_subdir
-from conda.api import get_index
+from conda_build.conda_interface import get_index
 import conda_build.api
 
 
