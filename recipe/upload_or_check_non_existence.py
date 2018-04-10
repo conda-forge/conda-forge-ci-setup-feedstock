@@ -12,7 +12,7 @@ import tempfile
 
 from binstar_client.utils import get_server_api
 import binstar_client.errors
-import conda.config
+from conda_build.conda_interface import subdir as conda_subdir
 from conda.api import get_index
 import conda_build.api
 
@@ -81,7 +81,7 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
 
     try:
         on_channel = (distributions_on_channel[fname]['subdir'] ==
-                      conda.config.subdir)
+                      conda_subdir)
     except KeyError:
         on_channel = False
 
