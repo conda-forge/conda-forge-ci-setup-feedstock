@@ -28,9 +28,8 @@ install:
     - cmd: rmdir C:\cygwin /s /q
 
     # Add path, activate `conda` and update conda.
-    # Around November of 2017, Appveyor changed Miniconda3-x64 from an old 3.4 install to a
-    #     symlink to the current version.
-    - cmd: call C:\Miniconda3-x64\Scripts\activate.bat
+    - cmd: call C:\Miniconda36-x64\Scripts\activate.bat
+    - cmd: conda.exe update --yes --quiet conda
 
     - cmd: set PYTHONUNBUFFERED=1
 
@@ -39,9 +38,6 @@ install:
     - cmd: conda.exe config --remove channels defaults
     - cmd: conda.exe config --add channels defaults
     - cmd: conda.exe config --add channels conda-forge
-
-    # workaround for https://github.com/conda/conda/issues/6057
-    - cmd: conda.exe update --yes --quiet conda
 
     # Configure the VM.
     - cmd: conda.exe install -n root --quiet --yes conda-forge-ci-setup=1
