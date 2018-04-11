@@ -5,14 +5,14 @@ set CPU_COUNT=2
 
 set PYTHONUNBUFFERED=1
 
-conda config --set show_channel_urls true
-conda config --set auto_update_conda false
-conda config --set add_pip_as_python_dependency false
+conda.exe config --set show_channel_urls true
+conda.exe config --set auto_update_conda false
+conda.exe config --set add_pip_as_python_dependency false
 
 call setup_x64
 
 :: Set the conda-build working directory to a smaller path
 set "CONDA_BLD_PATH=C:\\bld\\"
 
-conda info
-conda config --get
+conda.exe info
+conda.exe config --get
