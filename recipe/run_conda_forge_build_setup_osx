@@ -42,4 +42,4 @@ conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
 
 conda info
-conda config --get
+conda config --show-sources
