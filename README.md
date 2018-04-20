@@ -21,9 +21,9 @@ Current build status
 Current release info
 ====================
 
-[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
-[![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup)
+| Name | Downloads | Version | Platforms |
+| --- | --- | --- | --- |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-conda--forge--ci--setup-green.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/conda-forge-ci-setup.svg)](https://anaconda.org/conda-forge/conda-forge-ci-setup) |
 
 Installing conda-forge-ci-setup
 ===============================
