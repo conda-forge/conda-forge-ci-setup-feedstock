@@ -9,9 +9,8 @@ environment:
     secure: ipv/06DzgA7pzz2CIAtbPxZSsphDtF+JFyoWRnXkn3O8j7oRe3rzqj3LOoq2DZp4
 
   matrix:
-    - CONFIG: appveyor_target_platformwin-32
-
-    - CONFIG: appveyor_target_platformwin-64
+    - CONFIG: win_
+      CONDA_INSTALL_LOCN: C:\Miniconda36-x64
 
 
 # We always use a 64-bit machine, but can build x86 distributions
@@ -28,7 +27,7 @@ install:
     - cmd: rmdir C:\cygwin /s /q
 
     # Add path, activate `conda` and update conda.
-    - cmd: call C:\Miniconda36-x64\Scripts\activate.bat
+    - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
     - cmd: conda.exe update --yes --quiet conda
 
     - cmd: set PYTHONUNBUFFERED=1

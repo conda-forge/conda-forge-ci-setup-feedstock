@@ -15,4 +15,4 @@ call setup_x64
 set "CONDA_BLD_PATH=C:\\bld\\"
 
 conda.exe info
-conda.exe config --get
+conda.exe config --show-sources
