@@ -33,7 +33,9 @@ def built_distribution_already_exists(cli, meta, fname, owner):
     exists on the owner/user's binstar account.
 
     """
-    distro_name = '/'.join(os.path.split(fname)[-2:])
+    folder, basename = os.path.split(fname)
+    _, platform = os.path.split(folder)
+    distro_name = '{}/{}'.format(platform, basename)
 
     try:
         dist_info = cli.distribution(owner, meta.name(), meta.version(),
