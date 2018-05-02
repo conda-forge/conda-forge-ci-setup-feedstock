@@ -10,5 +10,7 @@ conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
 
+export "CONDA_BLD_PATH=/home/conda/feedstock_root/build_artifacts"
+
 conda info
 conda config --show-sources
