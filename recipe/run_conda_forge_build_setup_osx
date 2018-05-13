@@ -43,3 +43,4 @@ conda config --set add_pip_as_python_dependency false
 
 conda info
 conda config --show-sources
+conda list --show-channel-urls
