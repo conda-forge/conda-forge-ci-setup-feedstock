@@ -16,4 +16,4 @@ set "CONDA_BLD_PATH=C:\\bld\\"
 
 conda.exe info
 conda.exe config --show-sources
-conda list --show-channel-urls
+conda.exe list --show-channel-urls
