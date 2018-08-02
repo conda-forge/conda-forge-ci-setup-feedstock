@@ -24,7 +24,7 @@ CONDARC
 # A lock sometimes occurs with incomplete builds. The lock file is stored in build_artifacts.
 conda clean --lock
 
-conda install --yes --quiet conda-forge-ci-setup=1 conda-build
+conda install --yes --quiet conda-forge-ci-setup=1 conda-build click
 # Overriding global run_conda_forge_build_setup_linux with local copy.
 source /home/conda/recipe_root/run_conda_forge_build_setup_linux
 

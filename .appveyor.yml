@@ -39,7 +39,7 @@ install:
     - cmd: conda.exe config --add channels conda-forge
 
     # Configure the VM.
-    - cmd: conda.exe install -n root --quiet --yes conda-forge-ci-setup=1
+    - cmd: conda.exe install -n root --quiet --yes conda-forge-ci-setup=1 click
     # Overriding global run_conda_forge_build_setup_win with local copy.
     - cmd: recipe\run_conda_forge_build_setup_win
 
