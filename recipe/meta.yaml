@@ -1,6 +1,6 @@
 package:
   name: conda-forge-ci-setup
-  version: 1.3.5
+  version: 2.0.0a
 
 build:
   number: 0
@@ -10,15 +10,23 @@ build:
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
-    - COPY "%RECIPE_DIR%\\ff_ci_pr_build.py" "%SCRIPTS%\\ff_ci_pr_build.py"                                              # [win]
-    - cp "${RECIPE_DIR}/ff_ci_pr_build.py" "${PREFIX}/bin/ff_ci_pr_build"                                                # [unix]
-    - COPY "%RECIPE_DIR%\\upload_or_check_non_existence.py" "%SCRIPTS%\\upload_or_check_non_existence.py"                # [win]
-    - cp "${RECIPE_DIR}/upload_or_check_non_existence.py" "${PREFIX}/bin/upload_or_check_non_existence"                  # [unix]
+    - flit install
+  entry_points:
+    ff_ci_pr_build = conda_force_ci_utils.ff_ci_pr_build:main
+    upload_or_check_non_existence = conda_force_ci_utils.upload_or_check_non_existence:main
+    setup_conda_rc = conda_force_ci_utils.build_utils:setup_conda_rc
+    upload_package = conda_force_ci_utils.build_utils:upload_package
+    setup_conda_rc = conda_force_ci_utils.build_utils:setup_conda_rc
+    make_build_number = conda_force_ci_utils.build_utils:setup_conda_rc
 
 requirements:
+  host:
+    - python >=3
+    - flit
   run:
     - conda >=4.3
     - conda-env
+    - click
     - jinja2
     - anaconda-client
     - conda-build 3.*
@@ -28,10 +36,12 @@ test:
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1                                                   # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                                                                # [unix]
-    - if not exist "%PREFIX%\\Scripts\\ff_ci_pr_build.py" exit 1                                                                 # [win]
-    - test -f "${PREFIX}/bin/ff_ci_pr_build"                                                                             # [unix]
-    - if not exist "%PREFIX%\\Scripts\\upload_or_check_non_existence.py" exit 1                                                  # [win]
-    - test -f "${PREFIX}/bin/upload_or_check_non_existence"                                                              # [unix]
+    - ff_ci_pr_build --help
+    - upload_or_check_non_existence --help
+    - setup_conda_rc --help
+    - upload_package --help
+    - make_build_number --help
+
 
 about:
   home: https://github.com/conda-forge/conda-forge-build-setup-feedstock
@@ -49,3 +59,4 @@ extra:
     - patricksnape
     - pelson
     - scopatz
+    - mariusvniekerk
