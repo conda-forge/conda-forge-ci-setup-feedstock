@@ -3,7 +3,7 @@ requires = ["flit"]
 build-backend = "flit.buildapi"
 
 [tool.flit.metadata]
-module = "conda_forge_ci_utils"
+module = "conda_forge_ci_setup"
 author = "conda-forge/core"
 author-email = "conda-forge/core@github.com"
 home-page = "https://conda-forge.org"

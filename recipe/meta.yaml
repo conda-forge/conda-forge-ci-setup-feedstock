@@ -10,14 +10,16 @@ build:
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
+    - cd "%RECIPE_DIR%"   # [win]
+    - cd "${RECIPE_DIR}"  # [unix]
     - flit install
   entry_points:
-    ff_ci_pr_build = conda_force_ci_utils.ff_ci_pr_build:main
-    upload_or_check_non_existence = conda_force_ci_utils.upload_or_check_non_existence:main
-    setup_conda_rc = conda_force_ci_utils.build_utils:setup_conda_rc
-    upload_package = conda_force_ci_utils.build_utils:upload_package
-    setup_conda_rc = conda_force_ci_utils.build_utils:setup_conda_rc
-    make_build_number = conda_force_ci_utils.build_utils:setup_conda_rc
+    - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
+    - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
+    - setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc
+    - upload_package = conda_forge_ci_setup.build_utils:upload_package
+    - setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc
+    - make_build_number = conda_forge_ci_setup.build_utils:setup_conda_rc
 
 requirements:
   host:
