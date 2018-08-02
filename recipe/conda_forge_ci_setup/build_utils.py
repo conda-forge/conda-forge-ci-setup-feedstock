@@ -44,8 +44,9 @@ def update_global_config(feedstock_root):
 
 @click.command()
 @arg_feedstock_root
+@arg_recipe_root
 @arg_config_file
-def setup_conda_rc(feedstock_root, config_file):
+def setup_conda_rc(feedstock_root, recipe_root, config_file):
     specific_config = safe_load(open(config_file))
     if "channel_sources" in specific_config:
         # Due to rendering we may have more than one row for channel_sources
@@ -66,6 +67,7 @@ def setup_conda_rc(feedstock_root, config_file):
 @click.command()
 @arg_feedstock_root
 @arg_recipe_root
+@arg_config_file
 def upload_package(feedstock_root, recipe_root, config_file):
     specific_config = safe_load(open(config_file))
     if "channel_targets" in specific_config:
@@ -79,9 +81,10 @@ def upload_package(feedstock_root, recipe_root, config_file):
 
 
 @click.command()
+@arg_feedstock_root
 @arg_recipe_root
 @arg_config_file
-def make_build_number(recipe_root, config_file):
+def make_build_number(feedstock_root, recipe_root, config_file):
     """
     General logic
 
@@ -140,6 +143,9 @@ def make_build_number(recipe_root, config_file):
 
 
 @click.command()
-def mangle_compiler():
+@arg_feedstock_root
+@arg_recipe_root
+@arg_config_file
+def mangle_compiler(feedstock_root, recipe_root, config_file):
     """Try hard to break the compilers for osx"""
     # TODO
