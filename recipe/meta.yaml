@@ -1,6 +1,6 @@
 package:
   name: conda-forge-ci-setup
-  version: 2.0.0a
+  version: 2.0.0
 
 build:
   number: 0
@@ -36,8 +36,8 @@ requirements:
 
 test:
   commands:
-    - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1                                                   # [win]
-    - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                                                                # [unix]
+    - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
+    - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
     - ff_ci_pr_build --help
     - upload_or_check_non_existence --help
     - setup_conda_rc --help
