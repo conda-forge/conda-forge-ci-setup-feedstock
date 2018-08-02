@@ -21,7 +21,7 @@ platform:
 install:
     # If there is a newer build queued for the same PR, cancel this one.
     - cmd: |
-        recipe\ff_ci_pr_build -v --ci "appveyor" "%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%" "%APPVEYOR_BUILD_NUMBER%" "%APPVEYOR_PULL_REQUEST_NUMBER%"
+        recipe\conda_forge_ci_setup\ff_ci_pr_build -v --ci "appveyor" "%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%" "%APPVEYOR_BUILD_NUMBER%" "%APPVEYOR_PULL_REQUEST_NUMBER%"
 
     # Cywing's git breaks conda-build. (See https://github.com/conda-forge/conda-smithy-feedstock/pull/2.)
     - cmd: rmdir C:\cygwin /s /q
@@ -49,4 +49,6 @@ build: off
 test_script:
     - conda.exe build recipe -m .ci_support\%CONFIG%.yaml --quiet
 deploy_script:
-    - cmd: recipe\upload_or_check_non_existence.py .\recipe conda-forge --channel=main -m .ci_support\%CONFIG%.yaml
+    - cmd: |
+        cd recipe
+        python -m conda_forge_ci_setup.upload_or_check_non_existence .\recipe conda-forge --channel=main -m .ci_support\%CONFIG%.yaml

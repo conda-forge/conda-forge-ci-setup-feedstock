@@ -18,7 +18,7 @@ env:
 before_install:
     # Fast finish the PR.
     - |
-      (cat recipe/ff_ci_pr_build.py | \
+      (cat recipe/conda_forge_ci_setup/ff_ci_pr_build.py | \
           python - -v --ci "travis" "${TRAVIS_REPO_SLUG}" "${TRAVIS_BUILD_NUMBER}" "${TRAVIS_PULL_REQUEST}") || exit 1
 
     # Remove homebrew.
@@ -57,4 +57,7 @@ install:
 script:
   - conda build ./recipe -m ./.ci_support/${CONFIG}.yaml
 
-  - recipe/upload_or_check_non_existence.py ./recipe conda-forge --channel=main -m ./.ci_support/${CONFIG}.yaml
+  - |
+    pushd recipe 
+    python -m conda_forge_ci_setup.upload_or_check_non_existence ./recipe conda-forge --channel=main -m ./.ci_support/${CONFIG}.yaml
+    popd
