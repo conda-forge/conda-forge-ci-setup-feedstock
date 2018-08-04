@@ -115,30 +115,32 @@ def main():
 
 
     # The list of built/not skipped distributions
-    built_distributions = [ (m, conda_build.api.get_output_file_paths(m)) for m, _, _ in metas
-                            if not m.skip() ]
+    built_distributions = [(m, path)
+                           for m, _, _ in metas
+                           for path in conda_build.api.get_output_file_paths(m))
+                           if not m.skip()]
 
     # These are the ones that already exist on the owner channel's
-    existing_distributions = [ d for m, d in built_distributions
-                               if built_distribution_already_exists(cli, m, d, owner) ]
+    existing_distributions = [path for m, path in built_distributions
+                              if built_distribution_already_exists(cli, m, path, owner)]
     for d in existing_distributions:
         print('Distribution {} already exists for {}'.format(d, owner))
 
 
     # These are the ones that are new to the owner channel's
-    new_distributions = [ d for m, d in built_distributions
-                          if not built_distribution_already_exists(cli, m, d, owner) ]
+    new_distributions = [path for m, path in built_distributions
+                         if not built_distribution_already_exists(cli, m, path, owner)]
 
     # This is the actual fix where we create the token file once and reuse it for all uploads
     if token:
       with get_temp_token(cli.token) as token_fn:
-        for d in new_distributions:
-            upload(token_fn, d, owner, channel)
-            print('Uploaded {}'.format(d))
+        for path in new_distributions:
+            upload(token_fn, path, owner, channel)
+            print('Uploaded {}'.format(path))
     else:
-      for d in new_distributions:
+      for path in new_distributions:
           print("Distribution {} is new for {}, but no upload is taking place "
-                "because the BINSTAR_TOKEN is missing.".format(d, owner))
+                "because the BINSTAR_TOKEN is missing.".format(path, owner))
 
 if __name__ == '__main__':
     main()
