@@ -110,7 +110,7 @@ def main():
 
     # Print the skipped distributions
     skipped_distributions = [ m for m, _, _ in metas if m.skip() ]
-    for m in skipped_meta:
+    for m in skipped_distributions:
         print("{} configuration was skipped in build/skip.".format(m.name()))
 
 
