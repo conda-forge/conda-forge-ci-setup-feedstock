@@ -117,7 +117,7 @@ def main():
     # The list of built/not skipped distributions
     built_distributions = [(m, path)
                            for m, _, _ in metas
-                           for path in conda_build.api.get_output_file_paths(m))
+                           for path in conda_build.api.get_output_file_paths(m)
                            if not m.skip()]
 
     # These are the ones that already exist on the owner channel's
