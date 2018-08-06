@@ -59,13 +59,12 @@ def built_distribution_already_exists(cli, meta, fname, owner):
     return exists
 
 
-def upload(cli, path, owner, channels):
-    with get_temp_token(cli.token) as fn:
-        subprocess.check_call(['anaconda', '--quiet', '-t', fn,
-                               'upload', path,
-                               '--user={}'.format(owner),
-                               '--channel={}'.format(channels)],
-                              env=os.environ)
+def upload(token_fn, path, owner, channels):
+    subprocess.check_call(['anaconda', '--quiet', '-t', token_fn,
+                           'upload', path,
+                           '--user={}'.format(owner),
+                           '--channel={}'.format(channels)],
+                          env=os.environ)
 
 
 def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='main'):
@@ -108,24 +107,40 @@ def main():
 
     cli = get_server_api(token=token)
     metas = conda_build.api.render(recipe_dir, variant_config_files=args.variant_config_files)
-    for meta, _, _ in metas:
-        fnames = conda_build.api.get_output_file_paths(meta)
-        print("Processing {}".format(meta.name()))
-        if meta.skip():
-            print("No upload to take place - this configuration was skipped in build/skip.")
-            continue
-        for fname in fnames:
-            exists = built_distribution_already_exists(cli, meta, fname, owner)
-            if token:
-                if not exists:
-                    upload(cli, fname, owner, channel)
-                    print('Uploaded {}'.format(fname))
-                else:
-                    print('Distribution {} already \nexists for {}.' .format(fname, owner))
-            else:
-                print("No BINSTAR_TOKEN present, so no upload is taking place. "
-                    "The distribution just built {} already available for {}."
-                    "".format('is' if exists else 'is not', owner))
+
+    # Print the skipped distributions
+    skipped_distributions = [ m for m, _, _ in metas if m.skip() ]
+    for m in skipped_distributions:
+        print("{} configuration was skipped in build/skip.".format(m.name()))
+
+
+    # The list of built/not skipped distributions
+    built_distributions = [(m, path)
+                           for m, _, _ in metas
+                           for path in conda_build.api.get_output_file_paths(m)
+                           if not m.skip()]
+
+    # These are the ones that already exist on the owner channel's
+    existing_distributions = [path for m, path in built_distributions
+                              if built_distribution_already_exists(cli, m, path, owner)]
+    for d in existing_distributions:
+        print('Distribution {} already exists for {}'.format(d, owner))
+
+
+    # These are the ones that are new to the owner channel's
+    new_distributions = [path for m, path in built_distributions
+                         if not built_distribution_already_exists(cli, m, path, owner)]
+
+    # This is the actual fix where we create the token file once and reuse it for all uploads
+    if token:
+      with get_temp_token(cli.token) as token_fn:
+        for path in new_distributions:
+            upload(token_fn, path, owner, channel)
+            print('Uploaded {}'.format(path))
+    else:
+      for path in new_distributions:
+          print("Distribution {} is new for {}, but no upload is taking place "
+                "because the BINSTAR_TOKEN is missing.".format(path, owner))
 
 if __name__ == '__main__':
     main()
