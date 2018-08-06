@@ -1,6 +1,6 @@
 package:
   name: conda-forge-ci-setup
-  version: 2.0.0
+  version: 2.0.1
 
 build:
   number: 0
@@ -18,8 +18,8 @@ build:
     - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
     - setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc
     - upload_package = conda_forge_ci_setup.build_utils:upload_package
-    - setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc
-    - make_build_number = conda_forge_ci_setup.build_utils:setup_conda_rc
+    - mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler
+    - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
 
 requirements:
   host:
