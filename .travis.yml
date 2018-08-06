@@ -47,16 +47,22 @@ install:
       echo "Configuring conda."
       source /Users/travis/miniconda3/bin/activate root
 
-      conda install --yes -c conda-forge pip click
+      conda install --yes -c conda-forge pip click conda-forge::conda-forge-ci-setup
       # install this into our container
       pushd recipe
       pip install .
       popd
 
+    - |
+      echo ""
+      echo "Configure conda-build"
       setup_conda_rc ./ ./recipe ./.ci_support/${CONFIG}.yaml
 
-      # Overriding global run_conda_forge_build_setup_osx with local copy.
+    - |
+      echo ""
+      #Overriding global run_conda_forge_build_setup_osx with local copy.
       source recipe/run_conda_forge_build_setup_osx
+      conda
 
     # compiler cleanup
     - |
