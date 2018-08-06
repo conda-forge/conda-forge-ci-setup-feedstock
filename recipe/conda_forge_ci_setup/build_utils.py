@@ -10,7 +10,6 @@ import os
 import subprocess
 import click
 
-from .upload_or_check_non_existence import upload_or_check
 
 call = subprocess.check_call
 
@@ -75,6 +74,8 @@ def upload_package(feedstock_root, recipe_root, config_file):
     else:
         update_global_config(feedstock_root)
         channels = _global_config["targets"]
+
+    from .upload_or_check_non_existence import upload_or_check
 
     for owner, channel in channels:
         upload_or_check(recipe_root, owner, channel, [config_file])
