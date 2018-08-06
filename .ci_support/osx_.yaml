@@ -1,7 +1,9 @@
 MACOSX_DEPLOYMENT_TARGET:
 - '10.9'
-build_number_decrement: '0'
-channel_sources: conda-forge,defaults
+build_number_decrement:
+- '0'
+channel_sources:
+- conda-forge,defaults
 channel_targets:
 - conda-forge main
 - conda-forge gcc7
