@@ -4,7 +4,6 @@ channel_sources:
 - conda-forge,defaults
 channel_targets:
 - conda-forge main
-- conda-forge gcc7
 docker_image:
 - conda/c3i-linux-64
 zip_keys:

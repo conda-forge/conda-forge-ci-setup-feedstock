@@ -6,8 +6,8 @@ channel_sources:
 - conda-forge,defaults
 channel_targets:
 - conda-forge main
-- conda-forge gcc7
-docker_image: condaforge/linux-anvil
+docker_image:
+- condaforge/linux-anvil
 macos_machine:
 - x86_64-apple-darwin13.4.0
 macos_min_version:
