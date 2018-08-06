@@ -50,5 +50,5 @@ test_script:
     - conda.exe build recipe -m .ci_support\%CONFIG%.yaml --quiet
 deploy_script:
     - cmd: |
-        cd recipe
-        python -m conda_forge_ci_setup.upload_or_check_non_existence .\recipe conda-forge --channel=main -m .ci_support\%CONFIG%.yaml
+        conda.exe install -n root --quiet --yes --use-local conda-forge-ci-setup
+        upload_package .\ .\recipe .\.ci_support\%CONFIG%.yaml
