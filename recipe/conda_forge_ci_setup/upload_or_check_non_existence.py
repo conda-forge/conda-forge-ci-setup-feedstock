@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import argparse
 import contextlib
-import hashlib
 import os
 import shutil
 import subprocess
-import sys
+import click
 import tempfile
 
 from binstar_client.utils import get_server_api
@@ -90,24 +88,11 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
     return on_channel
 
 
-def main():
+def upload_or_check(recipe_dir, owner, channel, variant):
     token = os.environ.get('BINSTAR_TOKEN')
 
-    description = ('Upload or check consistency of a built version of a '
-                   'conda recipe with binstar. Note: The existence of the '
-                   'BINSTAR_TOKEN environment variable determines '
-                   'whether the upload should actually take place.')
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('recipe_dir', help='the conda recipe directory')
-    parser.add_argument('owner', help='the binstar owner/user')
-    parser.add_argument('--channel', help='the binstar channel', default='main')
-    parser.add_argument("-m", "--variant-config-files", action="append",
-                        help="path to conda_build_config.yaml defining your base matrix")
-    args = parser.parse_args()
-    recipe_dir, owner, channel = args.recipe_dir, args.owner, args.channel
-
     cli = get_server_api(token=token)
-    metas = conda_build.api.render(recipe_dir, variant_config_files=args.variant_config_files)
+    metas = conda_build.api.render(recipe_dir, variant_config_files=variant)
     for meta, _, _ in metas:
         fnames = conda_build.api.get_output_file_paths(meta)
         print("Processing {}".format(meta.name()))
@@ -126,6 +111,25 @@ def main():
                 print("No BINSTAR_TOKEN present, so no upload is taking place. "
                     "The distribution just built {} already available for {}."
                     "".format('is' if exists else 'is not', owner))
+
+
+@click.command()
+@click.argument('recipe_dir',
+                type=click.Path(exists=True, file_okay=False, dir_okay=True),
+                )  # help='the conda recipe directory'
+@click.argument('owner')  # help='the binstar owner/user'
+@click.option('--channel', default='main',
+              help='the anaconda label channel')
+@click.option('--variant', '-m', multiple=True,
+              type=click.Path(exists=True, file_okay=True, dir_okay=False),
+              help="path to conda_build_config.yaml defining your base matrix")
+def main(recipe_dir, owner, channel, variant):
+    """
+    Upload or check consistency of a built version of a conda recipe with binstar.
+    Note: The existence of the BINSTAR_TOKEN environment variable determines
+    whether the upload should actually take place."""
+    upload_or_check(recipe_dir, owner, channel, variant)
+
 
 if __name__ == '__main__':
     main()
