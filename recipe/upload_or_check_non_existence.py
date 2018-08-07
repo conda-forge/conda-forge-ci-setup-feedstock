@@ -9,12 +9,15 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 from binstar_client.utils import get_server_api
 import binstar_client.errors
 from conda_build.conda_interface import subdir as conda_subdir
 from conda_build.conda_interface import get_index
 import conda_build.api
+
+on_win = (sys.platform == "win32")
 
 
 @contextlib.contextmanager
@@ -24,7 +27,16 @@ def get_temp_token(token):
     with open(fn, "w") as fh:
         fh.write(token)
     yield fn
-    shutil.rmtree(dn)
+    try:
+        shutil.rmtree(dn)
+    except OSError:
+        if on_win:
+            # On Windows, rmtree might have failed due to something else
+            # accessing the directory -- just wait a bit and try again.
+            time.sleep(0.1)
+            shutil.rmtree(dn)
+        else:
+            raise
 
 
 def built_distribution_already_exists(cli, meta, fname, owner):
