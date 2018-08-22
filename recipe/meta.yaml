@@ -1,6 +1,15 @@
+{% set name = "conda-forge-ci-setup" %}
+{% set version = "2.0.3" %}
+{% set sha256 = "d02a670bc600abab006fdad107300b04bebf4dd100187ed616de8b1d2defa877" %}
+
 package:
-  name: conda-forge-ci-setup
-  version: 2.0.3
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://github.com/CJ-Wright/{{ name }}/archive/{{ version }}.tar.gz
+  sha256: {{ sha256 }}
 
 build:
   number: 0
@@ -10,8 +19,6 @@ build:
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
-    - cd "%RECIPE_DIR%"   # [win]
-    - cd "${RECIPE_DIR}"  # [unix]
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
     - echo "${RECIPE_DIR}"
   entry_points:
@@ -63,3 +70,4 @@ extra:
     - pelson
     - scopatz
     - mariusvniekerk
+    - CJ-Wright
