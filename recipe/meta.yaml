@@ -1,9 +1,9 @@
 package:
   name: conda-forge-ci-setup
-  version: 2.0.2
+  version: 2.0.3
 
 build:
-  number: 1
+  number: 0
   script:
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
