@@ -1,6 +1,9 @@
+{% set name = "conda-forge-ci-setup" %}
+{% set version = "2.0.3" %}
+
 package:
-  name: conda-forge-ci-setup
-  version: 2.0.2
+  name: {{ name|lower }}
+  version: {{ version }}
 
 build:
   number: 0
@@ -12,7 +15,8 @@ build:
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
     - cd "%RECIPE_DIR%"   # [win]
     - cd "${RECIPE_DIR}"  # [unix]
-    - python -m pip install --no-deps --ignore-installed .
+    - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+    - echo "${RECIPE_DIR}"
   entry_points:
     - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
     - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
@@ -20,12 +24,14 @@ build:
     - upload_package = conda_forge_ci_setup.build_utils:upload_package
     - mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
+  skip: True  # [py2k]
 
 requirements:
   host:
-    - python >=3
+    - python
     - pip
   run:
+    - python
     - conda >=4.3
     - conda-env
     - click
@@ -62,3 +68,4 @@ extra:
     - pelson
     - scopatz
     - mariusvniekerk
+    - CJ-Wright
