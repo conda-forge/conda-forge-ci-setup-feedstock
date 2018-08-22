@@ -107,8 +107,9 @@ def make_build_number(feedstock_root, recipe_root, config_file):
     build_number_dec = int(specific_config.get("build_number_decrement", [0])[0])
 
     use_legacy_compilers = False
-    for key in {"c_compiler", "cxx_compiler", "fortran_compiler"}:
-        if "toolchain_" in specific_config.get(key, ""):
+    for key in {"c", "cxx", "fortran"}:
+        if "toolchain_{}".format(key) in specific_config.get(
+                '{}_compiler'.format(key), ""):
             use_legacy_compilers = True
             break
 
