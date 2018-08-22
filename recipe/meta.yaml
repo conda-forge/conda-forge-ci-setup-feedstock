@@ -1,6 +1,6 @@
 {% set name = "conda-forge-ci-setup" %}
 {% set version = "2.0.3" %}
-{% set sha256 = "d02a670bc600abab006fdad107300b04bebf4dd100187ed616de8b1d2defa877" %}
+{% set sha256 = "09af53f9a67bf31ef5b7803114f0b7716b0719db8cb7a24eb65be0079cf2ad06" %}
 
 package:
   name: {{ name|lower }}
