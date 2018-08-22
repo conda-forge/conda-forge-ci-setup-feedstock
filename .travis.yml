@@ -18,7 +18,7 @@ env:
 before_install:
     # Fast finish the PR.
     - |
-      (cat recipe/conda_forge_ci_setup/ff_ci_pr_build.py | \
+      (curl https://raw.githubusercontent.com/conda-forge/conda-forge-ci-setup-feedstock/branch2.0/recipe/conda_forge_ci_setup/ff_ci_pr_build.py | \
           python - -v --ci "travis" "${TRAVIS_REPO_SLUG}" "${TRAVIS_BUILD_NUMBER}" "${TRAVIS_PULL_REQUEST}") || exit 1
 
     # Remove homebrew.
@@ -47,22 +47,11 @@ install:
       echo "Configuring conda."
       source /Users/travis/miniconda3/bin/activate root
 
-      conda install --yes -c conda-forge pip click conda-forge::conda-forge-ci-setup
-      # install this into our container
-      pushd recipe
-      pip install .
-      popd
-
-    - |
-      echo ""
-      echo "Configure conda-build"
+      conda install --yes --quiet conda-forge::conda-forge-ci-setup=2
       setup_conda_rc ./ ./recipe ./.ci_support/${CONFIG}.yaml
 
-    - |
-      echo ""
-      #Overriding global run_conda_forge_build_setup_osx with local copy.
+      # Overriding global run_conda_forge_build_setup_osx with local copy.
       source recipe/run_conda_forge_build_setup_osx
-      conda
 
     # compiler cleanup
     - |
