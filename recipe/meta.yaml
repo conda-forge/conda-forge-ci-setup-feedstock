@@ -1,15 +1,9 @@
 {% set name = "conda-forge-ci-setup" %}
 {% set version = "2.0.3" %}
-{% set sha256 = "09af53f9a67bf31ef5b7803114f0b7716b0719db8cb7a24eb65be0079cf2ad06" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
-
-source:
-  fn: {{ name }}-{{ version }}.tar.gz
-  url: https://github.com/CJ-Wright/{{ name }}/releases/download/{{ version }}/{{ version }}.tar.gz
-  sha256: {{ sha256 }}
 
 build:
   number: 0
@@ -19,6 +13,8 @@ build:
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
+    - cd "%RECIPE_DIR%"   # [win]
+    - cd "${RECIPE_DIR}"  # [unix]
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
     - echo "${RECIPE_DIR}"
   entry_points:
@@ -28,12 +24,14 @@ build:
     - upload_package = conda_forge_ci_setup.build_utils:upload_package
     - mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
+  skip: True  # [py2k]
 
 requirements:
   host:
-    - python >=3
+    - python
     - pip
   run:
+    - python
     - conda >=4.3
     - conda-env
     - click
