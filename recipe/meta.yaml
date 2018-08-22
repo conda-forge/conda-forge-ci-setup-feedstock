@@ -12,7 +12,8 @@ build:
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
     - cd "%RECIPE_DIR%"   # [win]
     - cd "${RECIPE_DIR}"  # [unix]
-    - python -m pip install --no-deps --ignore-installed .
+    - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+    - echo "${RECIPE_DIR}"
   entry_points:
     - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
     - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
