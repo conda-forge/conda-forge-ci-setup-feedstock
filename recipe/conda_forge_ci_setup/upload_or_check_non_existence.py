@@ -91,7 +91,18 @@ def upload_or_check(recipe_dir, owner, channel, variant):
     token = os.environ.get('BINSTAR_TOKEN')
 
     cli = get_server_api(token=token)
-    metas = conda_build.api.render(recipe_dir, variant_config_files=variant)
+
+    variant_dir, base_name = os.path.split(variant)
+    clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
+    if os.path.exists(clobber_file):
+        additional_config = {
+            'clobber_sections_file': clobber_file
+        }
+    else:
+        additional_config = {}
+
+    metas = conda_build.api.render(
+        recipe_dir, variant_config_files=variant, **additional_config)
 
     # Print the skipped distributions
     skipped_distributions = [ m for m, _, _ in metas if m.skip() ]
