@@ -123,6 +123,9 @@ def make_build_number(feedstock_root, recipe_root, config_file):
         build_numbers.add(recipe.get_value("build/number"))
     if len(build_numbers) > 1:
         raise ValueError("More than one build number found, giving up")
+    if len(build_numbers) == 0:
+        print("> conda-forge:: No build number found.  Presuming build string")
+        return
     try:
         build_number_int = int(build_numbers.pop())
 
@@ -137,11 +140,16 @@ def make_build_number(feedstock_root, recipe_root, config_file):
 
         config_dir, filename = os.path.split(config_file)
         with open(os.path.join(config_dir, "clobber_" + filename), "w") as fo:
-            safe_dump({"build": {"number": new_build_number}}, fo)
+            data = {"build": {"number": new_build_number}}
+            print("> conda-forge:: Build number clobber {} -> {}".format(
+                build_number_int, new_build_number))
+            safe_dump(data, fo)
     except ValueError:
         # This is a NON string build number
         # we have this for things like the blas mutex and a few other similar cases
-        pass
+        print("> conda-forge:: No build number clobber gererated!")
+        import traceback
+        traceback.print_exc()
 
 
 @click.command()

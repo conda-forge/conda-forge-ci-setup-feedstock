@@ -92,14 +92,15 @@ def upload_or_check(recipe_dir, owner, channel, variant):
 
     cli = get_server_api(token=token)
 
-    variant_dir, base_name = os.path.split(variant)
-    clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
-    if os.path.exists(clobber_file):
-        additional_config = {
-            'clobber_sections_file': clobber_file
-        }
-    else:
-        additional_config = {}
+    additional_config = {}
+    for v in variant:
+        variant_dir, base_name = os.path.split(v)
+        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
+        if os.path.exists(clobber_file):
+            additional_config = {
+                'clobber_sections_file': clobber_file
+            }
+            break
 
     metas = conda_build.api.render(
         recipe_dir, variant_config_files=variant, **additional_config)
