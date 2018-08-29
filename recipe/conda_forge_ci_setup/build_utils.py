@@ -125,7 +125,7 @@ def make_build_number(feedstock_root, recipe_root, config_file):
         raise ValueError("More than one build number found, giving up")
     if len(build_numbers) == 0:
         print("> conda-forge:: No build number found.  Presuming build string")
-        break
+        return
     try:
         build_number_int = int(build_numbers.pop())
 
