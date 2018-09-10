@@ -35,7 +35,8 @@ arg_config_file = click.argument(
 
 def update_global_config(feedstock_root):
     """Merge the conda-forge.yml with predefined system defaults"""
-    repo_config = safe_load(os.path.join(feedstock_root, "conda-forge.yml"))
+    with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+        repo_config = safe_load(f)
     for k1, k2 in [("channels", "sources"), ("channels", "targets")]:
         if (k1 in repo_config) and (k2 in repo_config[k1]):
             _global_config[k1][k2] = repo_config[k1][k2]

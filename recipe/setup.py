@@ -4,7 +4,7 @@ packages = ["conda_forge_ci_setup"]
 
 setup(
     name="conda_forge_ci_setup",
-    version="2.0.0",
+    version="2.0.6",
     description="conda-forge-ci-utils",
     author="conda-forge/core",
     author_email="conda-forge/core@github.com",
