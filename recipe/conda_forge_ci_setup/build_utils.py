@@ -120,14 +120,14 @@ def make_build_number(feedstock_root, recipe_root, config_file):
     )
     build_numbers = set()
     for recipe, _, _ in rendered_recipe:
-        build_numbers.add(recipe.get_value("build/number"))
+        build_numbers.add(int(recipe.get_value("build/number")))
     if len(build_numbers) > 1:
         raise ValueError("More than one build number found, giving up")
     if len(build_numbers) == 0:
         print("> conda-forge:: No build number found.  Presuming build string")
         return
     try:
-        build_number_int = int(build_numbers.pop())
+        build_number_int = build_numbers.pop()
 
         if build_number_int < 1000:
             if not use_legacy_compilers:
