@@ -12,7 +12,7 @@ export PYTHONUNBUFFERED=1
 #   way is working well enough.
 export MACOSX_DEPLOYMENT_TARGET="10.9"
 
-if [ "$CIRCLECI" == "true" || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]; then
+if [[ "$CIRCLECI" == "true" || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]]; then
     echo "Downloading sdk"
     curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX10.9.sdk.tar.xz
     tar -xf MacOSX10.9.sdk.tar.xz -C $(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/
