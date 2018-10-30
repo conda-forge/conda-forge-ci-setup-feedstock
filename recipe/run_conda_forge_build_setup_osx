@@ -6,20 +6,20 @@ export CPU_COUNT=2
 
 export PYTHONUNBUFFERED=1
 
-# TODO: this has moved to conda_build_config.yaml, but we are keep it here for a little while, until
-#   the dust settles on using conda-build 3.  If this value differs from the one in conda_build_config.yaml,
-#   things might get confusing, so make sure to keep them the same, and remove this value when the new
-#   way is working well enough.
-export MACOSX_DEPLOYMENT_TARGET="10.9"
-
-if [[ "$CIRCLECI" == "true" || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]]; then
-    echo "Downloading sdk"
-    curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX10.9.sdk.tar.xz
-    tar -xf MacOSX10.9.sdk.tar.xz -C $(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/
-    sed -i '' "s|<string>10.11</string>|<string>10.9</string>|g" $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
-fi
+# deployment target should be set by conda_build_config.yaml (default in conda-forge-pinning).
+# The default here will only be used when that is undefined,
+# which should only be recipes still using conda-build 2.
+export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
 
 export CONDA_BUILD_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk"
+
+if [[ ! -d ${CONDA_BUILD_SYSROOT} || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]]; then
+    echo "Downloading ${MACOSX_DEPLOYMENT_TARGET} sdk"
+    curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/10.13/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk.tar.xz
+    tar -xf MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
+    # set minimum sdk version to our target
+    plutil -replace MinimumSDKVersion -string ${MACOSX_DEPLOYMENT_TARGET} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+fi
 
 if [ -d "${CONDA_BUILD_SYSROOT}" ]
 then
