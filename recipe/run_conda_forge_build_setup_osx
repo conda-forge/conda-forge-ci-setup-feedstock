@@ -6,11 +6,9 @@ export CPU_COUNT=2
 
 export PYTHONUNBUFFERED=1
 
-# TODO: this has moved to conda_build_config.yaml, but we are keep it here for a little while, until
-#   the dust settles on using conda-build 3.
-#   This now only sets the value when it is undefined,
-#   which will eventually become entirely redundant.
-#   Remove this value when the new way is working well enough.
+# deployment target should be set by conda_build_config.yaml (default in conda-forge-pinning).
+# The default here will only be used when that is undefined,
+# which should only be recipes still using conda-build 2.
 export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
 
 export CONDA_BUILD_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk"
