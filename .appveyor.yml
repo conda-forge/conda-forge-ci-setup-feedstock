@@ -23,7 +23,7 @@ install:
     - cmd: |
         recipe\ff_ci_pr_build -v --ci "appveyor" "%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%" "%APPVEYOR_BUILD_NUMBER%" "%APPVEYOR_PULL_REQUEST_NUMBER%"
 
-    # Cywing's git breaks conda-build. (See https://github.com/conda-forge/conda-smithy-feedstock/pull/2.)
+    # Cygwin's git breaks conda-build. (See https://github.com/conda-forge/conda-smithy-feedstock/pull/2.)
     - cmd: rmdir C:\cygwin /s /q
 
     # Add path, activate `conda` and update conda.
@@ -32,14 +32,9 @@ install:
 
     - cmd: set PYTHONUNBUFFERED=1
 
-    # Add our channels.
-    - cmd: conda.exe config --set show_channel_urls true
-    - cmd: conda.exe config --remove channels defaults
-    - cmd: conda.exe config --add channels defaults
-    - cmd: conda.exe config --add channels conda-forge
-
     # Configure the VM.
-    - cmd: conda.exe install -n root --quiet --yes conda-forge-ci-setup=1
+    - cmd: conda.exe install -n root -c conda-forge --quiet --yes conda-forge-ci-setup=2
+    - cmd: setup_conda_rc .\ .\recipe .\.ci_support\%CONFIG%.yaml
     # Overriding global run_conda_forge_build_setup_win with local copy.
     - cmd: recipe\run_conda_forge_build_setup_win
 
@@ -49,4 +44,4 @@ build: off
 test_script:
     - conda.exe build recipe -m .ci_support\%CONFIG%.yaml --quiet
 deploy_script:
-    - cmd: recipe\upload_or_check_non_existence.py .\recipe conda-forge --channel=main -m .ci_support\%CONFIG%.yaml
+    - cmd: upload_package .\ .\recipe .ci_support\%CONFIG%.yaml
