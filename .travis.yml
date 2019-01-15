@@ -4,21 +4,23 @@
 language: generic
 
 os: osx
-osx_image: xcode6.4
+osx_image: xcode9.4
+
 
 env:
   matrix:
-    - CONFIG=osx_
+    - CONFIG=osx_python3.6
+    - CONFIG=osx_python3.7
 
   global:
     # The BINSTAR_TOKEN secure variable. This is defined canonically in conda-forge.yml.
-    - secure: "E2/YuDI+EbWnyjo6InXz0zS44Mh4n5eVOjXpkynmB/EB8DpKpkFoFrNKk3mcZZviW9fp0iqkPJjFt64Bmv/s9oijxlOVfkKzsD8KsiErMDem7WPPbtpceyswjMiO2BLM+3Qgn2/33WjMAsvkDrp+xBx2w2Oqy3Ca/SuJcTYI+G6LNCJ7YuXgUpunFRsd2v0lfC5WhaJ2mnOKXSJb6+vUfwxLH8gSESRSeXLOiYr6sAnAjO9t5WS3ec0eXtSK60Ly/fzGHazhg5szwaz+pmY3jPy0g9TQz80svFnDkujH4tScRces2W1EaxCHmRAjU29zl9dv6Q3ZuffqK5LIldafhYAY4dFMpHOP4qES9uZr0lw6P8hycaPzf4KSOSCnxJRA0SN0K0fTXTKM9V6Pz2QDCFMCvCtXHCwo9S2qQFz0PSNhL2nmK03gUtCBUPF9vPAc8/C6hyWbPBF9g31YKYw6Mkek+yDrLzlC/Lrx7QO/cuF+Zsb+ju/M3qrjHOfyfTQuwseoAYrChYp6jMo0YWAi9i0uLs6LyuCdf2ANJ36OJcK/Zzz1vntgQUoLajgXA37XlX3VHsW7+MKV4itXrX0xcRWL4E125HzhUL0rZwT+Q8SYrxFCxi4mOVJ1zsRjLneXBBhYFDV2WKJeVz5A+bd2LOCiISCE64XWC81/mPKDIvE="
+    - secure: "DGja/KGwhOuJJ6xPVm3ap7XUpcY/oloT1ekj1GgQeLLmmh8Veto/SyscM0rJZC+GuqQkufQvpa1RzbcSc11vUNybqumBXlXx8FbYl83iv0N1ihApX86lZsIU2llnwkTqKGx5ga0cdut0SN7VQwm/19CABWu6Rcs+wOVDCfjDOk88QjcuEaApu6YON2hoSoqEL7A+SOgR360Cm8iwpAtv0LtuPxLahDKUr+CIngpR9QLyNHRlHjevhOoEQlqAkDRdf00QsW/E8hNUildfP9YPab0VrBFDdMvPiIeCAi4V3FtxcMZD/Zv7cBhSGD4vMyIKHAny9oPkSy3oqFA8oJhGdcEjYuyqCS9E9xKq6dWh/v1kL3/hPtilVIfhfwX+kQS1ndghrjRvEWesbycNtc5l5KpN9QjSyTbnNhyObEmYHn6x1vPnEhm1uRBekl84nOwu0x6dkPtjQiO420dYQri2U/FRpkNfvYKhwCyUSyJhLvfttBQuWhO9pPus8Sxkz19l37EqPe8rJvkXaKk6RjxjqTmn140hDHwEL7h7GxuVxVZDqve1ibFP3jJO5wVrQ7oHWaw9JTs+PR8yZhvmjrNbVLueAqbC3I1Mz7DcghtDn+1jqD/+7T1+K1v5t3KMn/zvaw++gEd+vyMSEtZIU8dqlelnACZ9eGvkppeHih+eUvw="
 
 
 before_install:
     # Fast finish the PR.
     - |
-      (cat recipe/ff_ci_pr_build.py | \
+      (curl https://raw.githubusercontent.com/conda-forge/conda-forge-ci-setup-feedstock/branch2.0/recipe/conda_forge_ci_setup/ff_ci_pr_build.py | \
           python - -v --ci "travis" "${TRAVIS_REPO_SLUG}" "${TRAVIS_BUILD_NUMBER}" "${TRAVIS_PULL_REQUEST}") || exit 1
 
     # Remove homebrew.
@@ -38,6 +40,8 @@ install:
       echo "Installing a fresh version of Miniconda."
       MINICONDA_URL="https://repo.continuum.io/miniconda"
       MINICONDA_FILE="Miniconda3-latest-MacOSX-x86_64.sh"
+      # temporarily use an older miniconda so that we can get a build out
+      MINICONDA_FILE="Miniconda3-4.5.4-MacOSX-x86_64.sh"
       curl -L -O "${MINICONDA_URL}/${MINICONDA_FILE}"
       bash $MINICONDA_FILE -b
 
@@ -46,15 +50,19 @@ install:
       echo ""
       echo "Configuring conda."
       source /Users/travis/miniconda3/bin/activate root
-      conda config --remove channels defaults
-      conda config --add channels defaults
-      conda config --add channels conda-forge
-      conda config --set show_channel_urls true
-      conda install --yes --quiet conda-forge-ci-setup=1
+
+      conda install -n root -c conda-forge --quiet --yes conda-forge-ci-setup=2
+      setup_conda_rc ./ ./recipe ./.ci_support/${CONFIG}.yaml
+
       # Overriding global run_conda_forge_build_setup_osx with local copy.
       source recipe/run_conda_forge_build_setup_osx
 
-script:
-  - conda build ./recipe -m ./.ci_support/${CONFIG}.yaml
+    # compiler cleanup
+    - |
+      mangle_compiler ./ ./recipe ./.ci_support/${CONFIG}.yaml
 
-  - recipe/upload_or_check_non_existence.py ./recipe conda-forge --channel=main -m ./.ci_support/${CONFIG}.yaml
+script:
+  # generate the build number clobber
+  - make_build_number ./ ./recipe ./.ci_support/${CONFIG}.yaml
+  - conda build ./recipe -m ./.ci_support/${CONFIG}.yaml --clobber-file ./.ci_support/clobber_${CONFIG}.yaml
+  - upload_package ./ ./recipe ./.ci_support/${CONFIG}.yaml
