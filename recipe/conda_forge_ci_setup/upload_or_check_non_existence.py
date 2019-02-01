@@ -92,7 +92,7 @@ def upload_or_check(recipe_dir, owner, channel, variant):
 
     # Azure's tokens are filled when in PR and not empty as for the other cis
     # In pr they will have a value like '$(secret-name)'
-    if token.startswith('$('):
+    if token and token.startswith('$('):
         token = None
 
     cli = get_server_api(token=token)
