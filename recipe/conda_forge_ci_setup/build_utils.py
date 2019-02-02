@@ -105,9 +105,9 @@ def make_build_number(feedstock_root, recipe_root, config_file):
 
     """
     specific_config = safe_load(open(config_file))
-    if "build_number_decrement" not in specific_config:
-        return
     build_number_dec = int(specific_config.get("build_number_decrement", [0])[0])
+    if build_number_dec == 0:
+        return
 
     use_legacy_compilers = False
     for key in {"c", "cxx", "fortran"}:
