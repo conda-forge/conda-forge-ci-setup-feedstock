@@ -104,8 +104,9 @@ def make_build_number(feedstock_root, recipe_root, config_file):
         - {'compiler_c': 'gcc',         'build_number_decrement': 0}
 
     """
-    return
     specific_config = safe_load(open(config_file))
+    if "build_number_decrement" not in specific_config:
+        return
     build_number_dec = int(specific_config.get("build_number_decrement", [0])[0])
 
     use_legacy_compilers = False
