@@ -10,6 +10,18 @@ jobs:
   strategy:
     maxParallel: 8
     matrix:
+      linux_aarch64_python3.6:
+        CONFIG: linux_aarch64_python3.6
+        UPLOAD_PACKAGES: True
+      linux_aarch64_python3.7:
+        CONFIG: linux_aarch64_python3.7
+        UPLOAD_PACKAGES: True
+      linux_ppc64le_python3.6:
+        CONFIG: linux_ppc64le_python3.6
+        UPLOAD_PACKAGES: True
+      linux_ppc64le_python3.7:
+        CONFIG: linux_ppc64le_python3.7
+        UPLOAD_PACKAGES: True
       linux_python3.6:
         CONFIG: linux_python3.6
         UPLOAD_PACKAGES: False
