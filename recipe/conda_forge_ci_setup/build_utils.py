@@ -104,6 +104,7 @@ def make_build_number(feedstock_root, recipe_root, config_file):
         - {'compiler_c': 'gcc',         'build_number_decrement': 0}
 
     """
+    return
     specific_config = safe_load(open(config_file))
     build_number_dec = int(specific_config.get("build_number_decrement", [0])[0])
 
