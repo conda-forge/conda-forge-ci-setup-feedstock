@@ -12,6 +12,10 @@ conda config --set add_pip_as_python_dependency false
 
 export "CONDA_BLD_PATH=/home/conda/feedstock_root/build_artifacts"
 
+echo "export CONDA_BLD_PATH='${CONDA_BLD_PATH}'"         > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export CPU_COUNT='${CPU_COUNT}'"                  >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+
 conda info
 conda config --show-sources
 conda list --show-channel-urls

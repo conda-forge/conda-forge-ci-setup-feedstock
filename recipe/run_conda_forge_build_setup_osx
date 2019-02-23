@@ -1,10 +1,13 @@
 #!/bin/bash
-
 # 2 core available on Travis CI OS X workers: https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
 # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
 export CPU_COUNT=2
 
 export PYTHONUNBUFFERED=1
+
+if [ ! -z "$CONFIG" ]; then
+    export MACOSX_DEPLOYMENT_TARGET=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
+fi
 
 # deployment target should be set by conda_build_config.yaml (default in conda-forge-pinning).
 # The default here will only be used when that is undefined,
@@ -41,6 +44,11 @@ fi
 conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
+
+echo "export CONDA_BUILD_SYSROOT='${CONDA_BUILD_SYSROOT}'"                 > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export CPU_COUNT='${CPU_COUNT}'"                                    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export MACOSX_DEPLOYMENT_TARGET='${MACOSX_DEPLOYMENT_TARGET}'"      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 conda info
 conda config --show-sources
