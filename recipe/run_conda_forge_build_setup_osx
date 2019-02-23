@@ -45,6 +45,7 @@ conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
 
+mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
 echo "export CONDA_BUILD_SYSROOT='${CONDA_BUILD_SYSROOT}'"                 > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export CPU_COUNT='${CPU_COUNT}'"                                    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
