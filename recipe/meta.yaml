@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "2.1.6" %}
+{% set version = "2.1.7" %}
 
 package:
   name: {{ name|lower }}
@@ -40,6 +40,7 @@ requirements:
     - conda-build 3.*
     - vs2008_express_vc_python_patch  # [win]
     - shyaml  # [osx]
+    - jq      # [osx]
 
 test:
   commands:
