@@ -76,10 +76,10 @@ def upload_package(feedstock_root, recipe_root, config_file):
         update_global_config(feedstock_root)
         channels = _global_config["targets"]
 
-    from .upload_or_check_non_existence import upload_or_check
+    from .upload_or_check_non_existence import retry_upload_or_check
 
     for owner, channel in channels:
-        upload_or_check(recipe_root, owner, channel, [config_file])
+        retry_upload_or_check(recipe_root, owner, channel, [config_file])
 
 
 @click.command()
