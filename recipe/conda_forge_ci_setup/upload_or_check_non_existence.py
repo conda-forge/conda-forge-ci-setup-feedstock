@@ -148,6 +148,19 @@ def upload_or_check(recipe_dir, owner, channel, variant):
         return False
 
 
+def retry_upload_or_check(recipe_dir, owner, channel, variant):
+    # perform a backoff in case we fail.  THis should limit the failures from
+    # issues with the Anaconda api
+    for i in range(1, 10):
+        try:
+            res = upload_or_check(recipe_dir, owner, channel, variant)
+            return res
+        except Exception as e:
+            timeout = i ** 2
+            print("Failed to upload due to {}.  Trying again in {} seconds".format(e, timeout))
+            time.sleep(timeout)
+
+
 @click.command()
 @click.argument('recipe_dir',
                 type=click.Path(exists=True, file_okay=False, dir_okay=True),
@@ -163,17 +176,7 @@ def main(recipe_dir, owner, channel, variant):
     Upload or check consistency of a built version of a conda recipe with binstar.
     Note: The existence of the BINSTAR_TOKEN environment variable determines
     whether the upload should actually take place."""
-    
-    # perform a backoff in case we fail.  THis should limit the failures from
-    # issues with the Anaconda api
-    for i in range(1, 10):
-        try:
-            res = upload_or_check(recipe_dir, owner, channel, variant)
-            return res
-        except Exception as e:
-            timeout = i ** 2
-            print("Failed to upload due to {}.  Trying again in {} seconds".format(e, timeout))
-            time.sleep(timeout)
+    return retry_upload_or_check(recipe_dir, owner, channel, variant)
 
 
 if __name__ == '__main__':
