@@ -159,6 +159,7 @@ def retry_upload_or_check(recipe_dir, owner, channel, variant):
             timeout = i ** 2
             print("Failed to upload due to {}.  Trying again in {} seconds".format(e, timeout))
             time.sleep(timeout)
+    raise TimeoutError("Did not manage to upload package.  Failing.")
 
 
 @click.command()
