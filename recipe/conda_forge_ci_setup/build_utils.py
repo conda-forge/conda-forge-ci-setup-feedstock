@@ -55,7 +55,7 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
         channels = [c.strip() for c in first_row.split(",")]
     else:
         update_global_config(feedstock_root)
-        channels = _global_config["sources"]
+        channels = _global_config["channels"]["sources"]
 
     call(["conda", "config", "--remove", "channels", "defaults"])
     for c in reversed(channels):
@@ -72,9 +72,23 @@ def upload_package(feedstock_root, recipe_root, config_file):
     specific_config = safe_load(open(config_file))
     if "channel_targets" in specific_config:
         channels = [c.strip().split(" ") for c in specific_config["channel_targets"]]
+        source_channels = ",".join([c.strip() for c in specific_config["channel_sources"]])
     else:
         update_global_config(feedstock_root)
-        channels = _global_config["targets"]
+        channels = _global_config["channels"]["targets"]
+        source_channels = ",".join(_global_config["channels"]["sources"])
+
+    upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
+    if upload_to_conda_forge and "channel_sources" in specific_config:
+        unknown_channel = False
+        allowed_channels = ["conda-forge", "conda-forge/label/", "defaults", "c4aarch64"]
+        for source_channel in source_channels.split(","):
+            for c in allowed_channels:
+                if source_channel.startswith(c):
+                    break
+            else:
+                print("Uploading to conda-forge with source channel '{}' is not allowed".format(source_channel))
+                return
 
     from .upload_or_check_non_existence import retry_upload_or_check
 
