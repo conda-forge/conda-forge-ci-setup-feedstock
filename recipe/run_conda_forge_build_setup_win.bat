@@ -27,7 +27,7 @@ if "%CI%" == "" (
 
 type .ci_support\%CONFIG%.yaml
 
-mkdir "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+mkdir "%CONDA_PREFIX%\etc\conda\activate.d"
 
 echo set "CONDA_BLD_PATH=%CONDA_BLD_PATH%"         > "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "CPU_COUNT=%CPU_COUNT%"                  >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
