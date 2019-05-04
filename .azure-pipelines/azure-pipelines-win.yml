@@ -72,7 +72,7 @@ jobs:
     
     # Configure the VM.
     - script: |
-        run_conda_forge_build_setup
+        recipe\run_conda_forge_build_setup_win.bat
 
       displayName: conda-forge build setup
     
