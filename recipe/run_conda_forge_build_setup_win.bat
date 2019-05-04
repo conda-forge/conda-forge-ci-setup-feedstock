@@ -16,12 +16,17 @@ if "%CONDA_BLD_PATH%" == "" (
     set "CONDA_BLD_PATH=C:\\bld\\"
 )
 
-echo >> .ci_support/%CONFIG%.yaml
-echo CI: >> .ci_support/%CONFIG%.yaml
-echo - %CI% .ci_support/%CONFIG%.yaml
-echo >> .ci_support/%CONFIG%.yaml
+call conda activate base
 
-cat .ci_support/%CONFIG%.yaml
+if "%CI%" == "" (
+    echo "Not running on CI"
+) else (
+    echo        >> .ci_support\%CONFIG%.yaml
+    echo CI:    >> .ci_support\%CONFIG%.yaml
+    echo - %CI% >> .ci_support\%CONFIG%.yaml
+)
+
+type .ci_support\%CONFIG%.yaml
 
 echo set "CONDA_BLD_PATH=%CONDA_BLD_PATH%"         > "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "CPU_COUNT=%CPU_COUNT%"                  >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
