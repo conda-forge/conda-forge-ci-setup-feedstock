@@ -21,7 +21,6 @@ call conda activate base
 if "%CI%" == "" (
     echo "Not running on CI"
 ) else (
-    echo        >> .ci_support\%CONFIG%.yaml
     echo CI:    >> .ci_support\%CONFIG%.yaml
     echo - %CI% >> .ci_support\%CONFIG%.yaml
 )
