@@ -12,7 +12,7 @@ conda.exe config --set add_pip_as_python_dependency false
 call setup_x64
 
 :: Set the conda-build working directory to a smaller path
-if "%CONDA_BLD_PATH%"== "" (
+if "%CONDA_BLD_PATH%" == "" (
     set "CONDA_BLD_PATH=C:\\bld\\"
 )
 
