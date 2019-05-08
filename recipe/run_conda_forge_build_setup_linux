@@ -12,6 +12,16 @@ conda config --set add_pip_as_python_dependency false
 
 export "CONDA_BLD_PATH=/home/conda/feedstock_root/build_artifacts"
 
+if [ ! -z "$CONFIG" ]; then
+    echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
+    if [ ! -z "$CI" ]; then
+        echo "CI:" >> ${CI_SUPPORT}/${CONFIG}.yaml
+        echo "- ${CI}" >> ${CI_SUPPORT}/${CONFIG}.yaml
+        echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
+    fi
+    cat ${CI_SUPPORT}/${CONFIG}.yaml
+fi
+
 mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
 echo "export CONDA_BLD_PATH='${CONDA_BLD_PATH}'"         > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export CPU_COUNT='${CPU_COUNT}'"                  >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
