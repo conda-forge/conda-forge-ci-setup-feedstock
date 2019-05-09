@@ -12,6 +12,8 @@ conda config --set add_pip_as_python_dependency false
 
 export "CONDA_BLD_PATH=/home/conda/feedstock_root/build_artifacts"
 
+set +u
+
 if [ ! -z "$CONFIG" ]; then
     echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
     if [ ! -z "$CI" ]; then
@@ -21,6 +23,8 @@ if [ ! -z "$CONFIG" ]; then
     fi
     cat ${CI_SUPPORT}/${CONFIG}.yaml
 fi
+
+set -u
 
 mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
 echo "export CONDA_BLD_PATH='${CONDA_BLD_PATH}'"         > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
