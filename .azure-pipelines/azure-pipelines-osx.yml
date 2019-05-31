@@ -46,9 +46,8 @@ jobs:
       echo "Configuring conda."
 
       setup_conda_rc ./ ./recipe ./.ci_support/${CONFIG}.yaml
-      export CI=azure
-      # Overriding global run_conda_forge_build_setup_osx with local copy.
-      source recipe/run_conda_forge_build_setup_osx
+
+      source run_conda_forge_build_setup
       conda update --yes --quiet --override-channels -c conda-forge -c defaults --all
     env: {
       OSX_FORCE_SDK_DOWNLOAD: "1"
