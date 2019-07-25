@@ -81,7 +81,7 @@ def upload_package(feedstock_root, recipe_root, config_file):
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
         unknown_channel = False
-        allowed_channels = ["conda-forge", "conda-forge/label/", "defaults", "c4aarch64"]
+        allowed_channels = ["conda-forge", "conda-forge/label/", "defaults", "c4aarch64", "c4armv7l"]
         for source_channel in source_channels.split(","):
             for c in allowed_channels:
                 if source_channel.startswith(c):

@@ -72,8 +72,9 @@ jobs:
 
     # Configure the VM.
     - script: |
-        recipe\run_conda_forge_build_setup_win.bat
-
+        set "CI=azure"
+        # Overriding global run_conda_forge_build_setup_win with local copy.
+        recipe\run_conda_forge_build_setup_win
       displayName: conda-forge build setup
     
 
