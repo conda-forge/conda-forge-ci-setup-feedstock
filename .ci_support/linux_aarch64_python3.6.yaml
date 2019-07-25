@@ -1,7 +1,5 @@
 BUILD:
 - aarch64-conda_cos7-linux-gnu
-build_number_decrement:
-- '0'
 cdt_arch:
 - aarch64
 cdt_name:
