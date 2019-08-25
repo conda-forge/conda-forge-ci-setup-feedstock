@@ -78,6 +78,14 @@ def upload_package(feedstock_root, recipe_root, config_file):
         channels = _global_config["channels"]["targets"]
         source_channels = ",".join(_global_config["channels"]["sources"])
 
+    if "UPLOAD_ON_BRANCH" in os.environ:
+        if "GIT_BRANCH" not in os.environ:
+            print("WARNING: UPLOAD_ON_BRANCH env variable set, but GIT_BRANCH not set. Skipping check")
+        else:
+            if os.environ["UPLOAD_ON_BRANCH"] != os.environ["GIT_BRANCH"]:
+                print("The branch {} is not configured to be uploaded".format(os.environ["GIT_BRANCH"]))
+                return
+
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
         unknown_channel = False
