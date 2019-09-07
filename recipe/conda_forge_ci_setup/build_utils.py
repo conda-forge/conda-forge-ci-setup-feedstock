@@ -55,7 +55,7 @@ def fail_if_outdated_windows_ci(feedstock_root):
         if not "APPVEYOR_PULL_REQUEST_NUMBER" in os.environ:
             return
     elif "BUILD_REPOSITORY_NAME" in os.environ:
-        provider == "azure"
+        provider = "azure"
         if not os.environ["BUILD_REPOSITORY_NAME"].startswith("conda-forge/"):
             return
         if not "SYSTEM_PULLREQUEST_PULLREQUESTID" in os.environ:
@@ -66,13 +66,13 @@ def fail_if_outdated_windows_ci(feedstock_root):
     with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
         config = safe_load(f)
         if "provider" in config and "win" in config["provider"]:
-            print(config)
             provider_cfg = config["provider"]["win"]
             if provider_cfg != "azure":
                 return
             if provider == "appveyor":
                 raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
-            if provider == "azure" and os.getenv("UPLOAD_PACKAGES", "False") == "False":
+            if provider == "azure" and os.getenv("UPLOAD_PACKAGES", "False") == "False" and \
+                    os.path.exists(".appveyor.yml"):
                 raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
 
 
