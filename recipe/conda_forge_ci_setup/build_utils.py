@@ -43,12 +43,11 @@ def update_global_config(feedstock_root):
             _global_config[k1][k2] = repo_config[k1][k2]
 
 
-def fail_if_outdated_windows_ci():
+def fail_if_outdated_windows_ci(feedstock_root):
     if sys.platform != "win32":
         return
 
     provider = ""
-    print(os.environ)
     if "APPVEYOR_ACCOUNT_NAME" in os.environ:
         provider = "appveyor"
         if os.environ["APPVEYOR_ACCOUNT_NAME"] != "conda-forge":
@@ -64,7 +63,7 @@ def fail_if_outdated_windows_ci():
     else:
         return
 
-    with open(os.path.join(feedstock_root, "conda-forge.yml")):
+    with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
         config = safe_load(f)
         if "provider" in config and "win" in config["provider"]:
             provider_cfg = config["provider"]["win"]
@@ -78,7 +77,7 @@ def fail_if_outdated_windows_ci():
 @arg_config_file
 def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
-    fail_if_outdated_windows_ci()
+    fail_if_outdated_windows_ci(feedstock_root)
 
     with open(config_file) as f:
         specific_config = safe_load(f)
