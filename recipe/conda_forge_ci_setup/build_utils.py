@@ -66,8 +66,13 @@ def fail_if_outdated_windows_ci(feedstock_root):
     with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
         config = safe_load(f)
         if "provider" in config and "win" in config["provider"]:
+            print(config)
             provider_cfg = config["provider"]["win"]
-            if provider_cfg != provider:
+            if provider_cfg != "azure":
+                return
+            if provider == "appveyor":
+                raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
+            if provider == "azure" and os.getenv("UPLOAD_PACKAGES", "False") == "False":
                 raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
 
 
