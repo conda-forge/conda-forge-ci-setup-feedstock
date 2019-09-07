@@ -68,7 +68,9 @@ jobs:
     - script: set PYTHONUNBUFFERED=1
 
     # Configure the VM
-    - script: setup_conda_rc .\ .\recipe .\.ci_support\%CONFIG%.yaml
+    - script: |
+        cd recipe && python setup.py install && cd ..
+        setup_conda_rc .\ .\recipe .\.ci_support\%CONFIG%.yaml
 
     # Configure the VM.
     - script: |

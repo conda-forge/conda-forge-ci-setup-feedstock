@@ -7,6 +7,7 @@ try:
 except ImportError:
     from yaml import safe_load, safe_dump
 import os
+import sys
 import subprocess
 import click
 
@@ -42,26 +43,58 @@ def update_global_config(feedstock_root):
             _global_config[k1][k2] = repo_config[k1][k2]
 
 
+def fail_if_outdated_windows_ci():
+    if sys.platform != "win32":
+        return
+
+    provider = ""
+    if "APPVEYOR_ACCOUNT_NAME" in os.environ:
+        provider = "appveyor"
+        if os.environ["APPVEYOR_ACCOUNT_NAME"] != "conda-forge":
+            return
+        if not "APPVEYOR_PULL_REQUEST_NUMBER" in os.environ:
+            return
+    elif "BUILD_REPOSITORY_NAME" in os.environ:
+        provider == "azure"
+        if not os.environ["BUILD_REPOSITORY_NAME"].startswith("conda-forge/"):
+            return
+        if not "SYSTEM_PULLREQUEST_PULLREQUESTID" in os.environ:
+            return
+    else:
+        return
+
+    with open(os.path.join(feedstock_root, "conda-forge.yml")):
+        config = safe_load(f)
+        if "provider" in config and "win" in config["provider"]:
+            provider_cfg = config["provider"]["win"]
+            if provider_cfg != provider:
+                raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
+
+
 @click.command()
 @arg_feedstock_root
 @arg_recipe_root
 @arg_config_file
 def setup_conda_rc(feedstock_root, recipe_root, config_file):
-    specific_config = safe_load(open(config_file))
-    if "channel_sources" in specific_config:
-        # Due to rendering we may have more than one row for channel_sources
-        # if nothing gets zipped with it
-        first_row = specific_config["channel_sources"][0]  # type: str
-        channels = [c.strip() for c in first_row.split(",")]
-    else:
-        update_global_config(feedstock_root)
-        channels = _global_config["channels"]["sources"]
 
-    call(["conda", "config", "--remove", "channels", "defaults"])
-    for c in reversed(channels):
-        call(["conda", "config", "--add", "channels", c])
+    fail_if_outdated_windows_ci()
 
-    call(["conda", "config", "--set", "show_channel_urls", "true"])
+    with open(config_file) as f:
+        specific_config = safe_load(f)
+        if "channel_sources" in specific_config:
+            # Due to rendering we may have more than one row for channel_sources
+            # if nothing gets zipped with it
+            first_row = specific_config["channel_sources"][0]  # type: str
+            channels = [c.strip() for c in first_row.split(",")]
+        else:
+            update_global_config(feedstock_root)
+            channels = _global_config["channels"]["sources"]
+
+        call(["conda", "config", "--remove", "channels", "defaults"])
+        for c in reversed(channels):
+            call(["conda", "config", "--add", "channels", c])
+
+        call(["conda", "config", "--set", "show_channel_urls", "true"])
 
 
 @click.command()
