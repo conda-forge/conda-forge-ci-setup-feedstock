@@ -48,6 +48,7 @@ def fail_if_outdated_windows_ci():
         return
 
     provider = ""
+    print(os.environ)
     if "APPVEYOR_ACCOUNT_NAME" in os.environ:
         provider = "appveyor"
         if os.environ["APPVEYOR_ACCOUNT_NAME"] != "conda-forge":
