@@ -41,7 +41,6 @@ requirements:
     - vs2008_express_vc_python_patch  # [win]
     - shyaml  # [osx]
     - jq      # [osx]
-    - ruamel.yaml  # [win]
 
 test:
   commands:
