@@ -39,6 +39,13 @@ if [ ! -z "$CONFIG" ]; then
     echo "CONDA_BUILD_SYSROOT:" >> ./.ci_support/${CONFIG}.yaml
     echo "- ${CONDA_BUILD_SYSROOT}" >> ./.ci_support/${CONFIG}.yaml
     echo "" >> ./.ci_support/${CONFIG}.yaml
+
+    if [ ! -z "$CI" ]; then
+        echo "CI:" >> ./.ci_support/${CONFIG}.yaml
+        echo "- ${CI}" >> ./.ci_support/${CONFIG}.yaml
+        echo "" >> ./.ci_support/${CONFIG}.yaml
+    fi
+
     cat ./.ci_support/${CONFIG}.yaml
 fi
 

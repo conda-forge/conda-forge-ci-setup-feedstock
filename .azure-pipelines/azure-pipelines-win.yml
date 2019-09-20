@@ -6,18 +6,18 @@ jobs:
 - job: win
   pool:
     vmImage: vs2017-win2016
-  timeoutInMinutes: 240
+  timeoutInMinutes: 360
   strategy:
     maxParallel: 4
     matrix:
       win_python3.6:
         CONFIG: win_python3.6
         CONDA_BLD_PATH: D:\\bld\\
-        UPLOAD_PACKAGES: False
+        UPLOAD_PACKAGES: True
       win_python3.7:
         CONFIG: win_python3.7
         CONDA_BLD_PATH: D:\\bld\\
-        UPLOAD_PACKAGES: False
+        UPLOAD_PACKAGES: True
   steps:
     # TODO: Fast finish on azure pipelines?
     - script: |
@@ -68,14 +68,22 @@ jobs:
     - script: set PYTHONUNBUFFERED=1
 
     # Configure the VM
-    - script: setup_conda_rc .\ .\recipe .\.ci_support\%CONFIG%.yaml
-    
+    - script: |
+        cd recipe && python setup.py install && cd ..
+        setup_conda_rc .\ .\recipe .\.ci_support\%CONFIG%.yaml
+
     # Configure the VM.
     - script: |
-        run_conda_forge_build_setup
-
+        set "CI=azure"
+        # Overriding global run_conda_forge_build_setup_win with local copy.
+        recipe\run_conda_forge_build_setup_win
       displayName: conda-forge build setup
     
+
+    - script: |
+        rmdir C:\strawberry /s /q
+      continueOnError: true
+      displayName: remove strawberryperl
 
     # Special cased version setting some more things!
     - script: |
