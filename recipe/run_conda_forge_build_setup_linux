@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Don't set the number of CPUs for some CI systems
-if [ "${CI}" = "drone" ] || [ "${CI}" = "travis" ]; then
-    export CPU_COUNT=
-else
-    # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
-    # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-    export CPU_COUNT=2
-fi
-
 export PYTHONUNBUFFERED=1
 
 conda config --set show_channel_urls true
@@ -18,6 +9,15 @@ conda config --set add_pip_as_python_dependency false
 export "CONDA_BLD_PATH=/home/conda/feedstock_root/build_artifacts"
 
 set +u
+
+# Don't set the number of CPUs for some CI systems
+if [ "${CI}" = "drone" ] || [ "${CI}" = "travis" ]; then
+    export CPU_COUNT=
+else
+    # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
+    # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
+    export CPU_COUNT=2
+fi
 
 if [ ! -z "$CONFIG" ]; then
     echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
