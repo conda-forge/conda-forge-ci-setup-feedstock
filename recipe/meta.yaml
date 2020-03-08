@@ -5,8 +5,11 @@ package:
   name: {{ name|lower }}
   version: {{ version }}
 
+source:
+  git_url: {{ environ.get('FEEDSTOCK_ROOT', '..') }}
+
 build:
-  number: 0
+  number: 1
   script:
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
@@ -57,6 +60,7 @@ about:
   home: https://github.com/conda-forge/conda-forge-build-setup-feedstock
   summary: A package installed by conda-forge each time a build is run on CI. This package has side-effects to your conda config.
   license: BSD 3-clause
+  license_file: LICENSE.txt
 
 extra:
   recipe-maintainers:
