@@ -5,6 +5,9 @@ package:
   name: {{ name|lower }}
   version: {{ version }}
 
+source:
+  git_url: {{ environ.get('FEEDSTOCK_ROOT', '..') }}
+
 build:
   number: 1
   script:
