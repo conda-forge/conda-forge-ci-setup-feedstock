@@ -20,6 +20,12 @@ else
     export CPU_COUNT=2
 fi
 
+# Need strict priority for pypy as defaults is not fixed
+if [[ "$CONFIG" == *_pypy* ]]; then
+  conda config --set channel_priority strict
+fi
+
+
 if [ ! -z "$CONFIG" ]; then
     echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
     if [ ! -z "$CI" ]; then

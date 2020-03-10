@@ -53,6 +53,11 @@ conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
 
+# Need strict priority for pypy as defaults is not fixed
+if [[ "$CONFIG" == *_pypy* ]]; then
+  conda config --set channel_priority strict
+fi
+
 # CONDA_PREFIX might be unset
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
 
