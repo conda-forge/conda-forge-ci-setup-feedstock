@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "2.5.4" %}
+{% set version = "2.5.5" %}
 
 package:
   name: {{ name|lower }}
@@ -9,7 +9,7 @@ source:
   git_url: {{ environ.get('FEEDSTOCK_ROOT', '..') }}
 
 build:
-  number: 1
+  number: 0
   script:
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
