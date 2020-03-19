@@ -25,6 +25,11 @@ if "%CI%" == "" (
     echo - %CI% >> .ci_support\%CONFIG%.yaml
 )
 
+:: Remove chocolatey gfortran.
+if "%CI%" == "azure" (
+  rm "C:\ProgramData\Chocolatey\bin\gfortran.exe"
+)
+
 type .ci_support\%CONFIG%.yaml
 
 mkdir "%CONDA_PREFIX%\etc\conda\activate.d"
