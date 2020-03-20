@@ -25,10 +25,20 @@ if "%CI%" == "" (
     echo - %CI% >> .ci_support\%CONFIG%.yaml
 )
 
-:: Remove chocolatey gfortran.
-if "%CI%" == "azure" (
-  rm "C:\ProgramData\Chocolatey\bin\gfortran.exe"
-)
+:: Remove some directories from PATH
+set "PATH=%PATH:C:\ProgramData\Chocolatey\bin;=%"
+set "PATH=%PATH:C:\Program Files (x86)\sbt\bin;=%"
+set "PATH=%PATH:C:\Rust\.cargo\bin;=%"
+set "PATH=%PATH:C:\Program Files\Git\usr\bin;=%"
+set "PATH=%PATH:C:\Program Files\Git\cmd;=%"
+set "PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%"
+set "PATH=%PATH:C:\Program Files (x86)\Subversion\bin;=%"
+set "PATH=%PATH:C:\Program Files\CMake\bin;=%"
+set "PATH=%PATH:C:\Program Files\OpenSSL\bin;=%"
+set "PATH=%PATH:C:\Strawberry\c\bin;=%"
+set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
+set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
+set "PATH=%PATH:c:\tools\php;=%"
 
 type .ci_support\%CONFIG%.yaml
 
