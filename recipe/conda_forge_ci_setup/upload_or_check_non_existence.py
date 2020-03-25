@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import contextlib
 import os
+import glob
 import shutil
 import subprocess
 import click
@@ -14,6 +15,7 @@ import binstar_client.errors
 from conda_build.conda_interface import subdir as conda_subdir
 from conda_build.conda_interface import get_index
 import conda_build.api
+import conda_build.config
 
 
 @contextlib.contextmanager
@@ -120,7 +122,12 @@ def upload_or_check(recipe_dir, owner, channel, variant):
     # The list of built/not skipped distributions
     built_distributions = [(m, path)
                            for m, _, _ in metas
-                           for path in conda_build.api.get_output_file_paths(m)
+                           # TODO: flip this over to .conda when that format
+                           #  is in flight
+                           for path in glob.glob(os.path.join(
+            conda_build.config.croot,
+            'noarch' if m.noarch or m.noarch_python else m.config.host_subdir,
+            '*.tar.bz2'))
                            if not m.skip()]
 
     # These are the ones that already exist on the owner channel's
