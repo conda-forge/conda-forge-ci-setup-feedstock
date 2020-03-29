@@ -18,6 +18,16 @@ import conda_build.api
 import conda_build.config
 
 
+def split_pkg(pkg):
+    if not pkg.endswith(".tar.bz2"):
+        raise RuntimeError("Can only process packages that end in .tar.bz2")
+    pkg = pkg[:-8]
+    plat, pkg_name = pkg.split("/")
+    name_ver, build = pkg_name.rsplit('-', 1)
+    name, ver = name_ver.rsplit('-', 1)
+    return plat, name, ver, build
+
+
 @contextlib.contextmanager
 def get_temp_token(token):
     dn = tempfile.mkdtemp()
@@ -28,7 +38,7 @@ def get_temp_token(token):
     shutil.rmtree(dn)
 
 
-def built_distribution_already_exists(cli, meta, fname, owner):
+def built_distribution_already_exists(cli, name, version, fname, owner):
     """
     Checks to see whether the built recipe (aka distribution) already
     exists on the owner/user's binstar account.
@@ -39,8 +49,7 @@ def built_distribution_already_exists(cli, meta, fname, owner):
     distro_name = '{}/{}'.format(platform, basename)
 
     try:
-        dist_info = cli.distribution(owner, meta.name(), meta.version(),
-                                     distro_name)
+        dist_info = cli.distribution(owner, name, version, distro_name)
     except binstar_client.errors.NotFound:
         dist_info = {}
 
@@ -100,46 +109,25 @@ def upload_or_check(recipe_dir, owner, channel, variant):
 
     cli = get_server_api(token=token)
 
-    additional_config = {}
-    for v in variant:
-        variant_dir, base_name = os.path.split(v)
-        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
-        if os.path.exists(clobber_file):
-            additional_config = {
-                'clobber_sections_file': clobber_file
-            }
-            break
-
-    metas = conda_build.api.render(
-        recipe_dir, variant_config_files=variant, **additional_config)
-
-    # Print the skipped distributions
-    skipped_distributions = [ m for m, _, _ in metas if m.skip() ]
-    for m in skipped_distributions:
-        print("{} configuration was skipped in build/skip.".format(m.name()))
-
-
-    # The list of built/not skipped distributions
-    built_distributions = [(m, path)
-                           for m, _, _ in metas
+    # The list of built distributions
+    paths = ([os.path.join('noarch', p) for p in os.listdir(
+        os.path.join(conda_build.config.croot, 'noarch'))]
+             + [os.path.join(conda_build.config.subdir, p) for p in os.listdir(os.path.join(
+                conda_build.config.croot, conda_build.config.subdir))])
+    built_distributions = [(split_pkg(path)[1], split_pkg(path)[2], path)
                            # TODO: flip this over to .conda when that format
                            #  is in flight
-                           for path in glob.glob(os.path.join(
-            conda_build.config.croot,
-            'noarch' if m.noarch or m.noarch_python else m.config.host_subdir,
-            '*.tar.bz2'))
-                           if not m.skip()]
+                           for path in paths if path.endswith('.tar.bz2')]
 
     # These are the ones that already exist on the owner channel's
-    existing_distributions = [path for m, path in built_distributions
-                              if built_distribution_already_exists(cli, m, path, owner)]
+    existing_distributions = [path for name, version, path in built_distributions
+                              if built_distribution_already_exists(cli, name, version, path, owner)]
     for d in existing_distributions:
         print('Distribution {} already exists for {}'.format(d, owner))
 
-
     # These are the ones that are new to the owner channel's
-    new_distributions = [path for m, path in built_distributions
-                         if not built_distribution_already_exists(cli, m, path, owner)]
+    new_distributions = [path for name, version, path in built_distributions
+                         if not built_distribution_already_exists(cli, name, version, path, owner)]
 
     # This is the actual fix where we create the token file once and reuse it for all uploads
     if token:
