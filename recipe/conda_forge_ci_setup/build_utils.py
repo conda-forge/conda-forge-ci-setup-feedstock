@@ -135,7 +135,7 @@ def upload_package(feedstock_root, recipe_root, config_file):
                 print("Uploading to conda-forge with source channel '{}' is not allowed".format(source_channel))
                 return
 
-    upload_script_path = os.path.join(recipe_dir, 'conda_forge_ci_setup', 'upload_or_check_non_existence.py')
+    upload_script_path = os.path.join(recipe_root, 'conda_forge_ci_setup', 'upload_or_check_non_existence.py')
     if not os.path.exists(upload_script_path):
         upload_script_path = os.path.join(os.path.dirname(__file__), 'upload_or_check_non_existence.py')
 
