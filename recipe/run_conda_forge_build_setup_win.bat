@@ -29,7 +29,6 @@ if "%CI%" == "" (
 set "PATH=%PATH:C:\ProgramData\Chocolatey\bin;=%"
 set "PATH=%PATH:C:\Program Files (x86)\sbt\bin;=%"
 set "PATH=%PATH:C:\Rust\.cargo\bin;=%"
-set "PATH=%PATH:C:\Program Files\Git\usr\bin;=%"
 set "PATH=%PATH:C:\Program Files\Git\cmd;=%"
 set "PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%"
 set "PATH=%PATH:C:\Program Files (x86)\Subversion\bin;=%"
