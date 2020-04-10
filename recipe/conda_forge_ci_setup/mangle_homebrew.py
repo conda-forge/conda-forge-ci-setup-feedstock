@@ -37,13 +37,10 @@ def main():
     potential_dirs = os.listdir("/usr/local")
     for _pth in potential_dirs:
         pth = os.path.join("/usr/local", _pth)
-        if (
-            os.path.exists(pth)
-            and os.path.isdir(pth)
-            and _pth not in excluded_dirs
-        ):
-            mangled_pth = os.path.join(mangled_dir, _pth)
-            _try_move_file_or_dir(pth, mangled_pth)
+        if _pth in excluded_dirs:
+            continue
+        mangled_pth = os.path.join(mangled_dir, _pth)
+        _try_move_file_or_dir(pth, mangled_pth)
 
 
 if __name__ == "__main__":
