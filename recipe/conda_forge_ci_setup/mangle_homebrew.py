@@ -7,7 +7,6 @@ import tempfile
 import contextlib
 
 
-MANGLE_STR = 'h' + uuid.uuid4().hex[0:6]
 HOMEBREW_UNINSTALL_URL = \
     "https://raw.githubusercontent.com/Homebrew/install/master/uninstall"
 
@@ -22,12 +21,13 @@ def pushd(new_dir):
         os.chdir(previous_dir)
 
 
-def _mangele_path(pth):
+def _mangele_path(pth, new_dir):
     """mangle a path by adding a random string to the front and the back of the
-    filename"""
+    filename and moving it to a new dir"""
+    mangle_str = 'h' + uuid.uuid4().hex[0:6]
     parts = os.path.split(pth)
-    new_parts = [parts[0], parts[1]]
-    new_parts[1] = MANGLE_STR + "_" + parts[1] + "_" + MANGLE_STR
+    new_parts = [new_dir, parts[1]]
+    new_parts[1] = mangle_str + "_" + parts[1] + "_" + mangle_str
     return os.path.join(*new_parts)
 
 
@@ -58,6 +58,10 @@ def main():
             except Exception:
                 pass
 
+    # make the mangled path
+    mangled_dir = "/opt/homebrew_%s" % uuid.uuid4().hex
+    os.makedirs(mangled_dir, exist_ok=True)
+
     # now go through the lines and move the files to a mangled path
     # if that fails, then remove them, else pass
     for line in proc_out.splitlines():
@@ -81,7 +85,7 @@ def main():
 
             # and then remove
             if len(p) > 0 and os.path.exists(p) and os.path.isfile(p):
-                mangled_p = _mangele_path(p)
+                mangled_p = _mangele_path(p, mangled_dir)
                 try:
                     shutil.move(p, mangled_p)
                     print("MOVED %s -> %s" % (p, mangled_p))
