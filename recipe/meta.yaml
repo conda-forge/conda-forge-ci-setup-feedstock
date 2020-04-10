@@ -55,7 +55,7 @@ test:
     - setup_conda_rc --help
     - upload_package --help
     - make_build_number --help
-    - test -f ${PREFIX}/bin/mangle_homebrew
+    - mangle_homebrew --help
 
 
 about:

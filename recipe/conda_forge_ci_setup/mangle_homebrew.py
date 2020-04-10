@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 import os
 import shutil
+import click
 
 
+@click.command()
 def main():
+    """Mangle homebrew paths for OSX"""
     # make the mangled path
     mangled_dir = "/usr/local/conda_mangled"
     os.makedirs(mangled_dir, exist_ok=True)
@@ -22,7 +25,3 @@ def main():
         mangled_pth = os.path.join(mangled_dir, _pth)
         shutil.move(pth, mangled_pth)
         print("MOVED %s -> %s" % (pth, mangled_pth), flush=True)
-
-
-if __name__ == "__main__":
-    main()
