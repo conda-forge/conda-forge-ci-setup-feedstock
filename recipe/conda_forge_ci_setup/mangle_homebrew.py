@@ -1,36 +1,8 @@
 #!/usr/bin/env python
 import os
-import subprocess
 import shutil
 import uuid
-import tempfile
-import contextlib
 import sys
-
-
-HOMEBREW_UNINSTALL_URL = \
-    "https://raw.githubusercontent.com/Homebrew/install/master/uninstall"
-
-KNOWN_PATHS = [
-    "/usr/local/Caskroom",
-    "/usr/local/Cellar",
-    "/usr/local/lib/gcc",
-    "/usr/local/lib/perl5",
-    "/usr/local/lib/perl6",
-    "/usr/local/lib/perl7",
-    "/usr/local/include/c++",
-    "/usr/local/Frameworks/Python.framework",
-]
-
-# https://stackoverflow.com/questions/6194499/pushd-through-os-system
-@contextlib.contextmanager
-def pushd(new_dir):
-    previous_dir = os.getcwd()
-    os.chdir(new_dir)
-    try:
-        yield
-    finally:
-        os.chdir(previous_dir)
 
 
 def _mangele_path(pth, new_dir):
@@ -73,28 +45,6 @@ def main():
         if os.path.exists(pth) and os.path.isdir(pth) and _pth not in ["bin"]:
             mangled_pth = _mangele_path(pth, mangled_dir)
             _try_move_file_or_dir(pth, mangled_pth)
-
-    # now we let homebrew do the rest
-    # with tempfile.TemporaryDirectory() as tmpdir:
-    #     with pushd(tmpdir):
-    #         # get the homebrew uninstall script
-    #         subprocess.run(
-    #             [
-    #                 "curl",
-    #                 "-fsSL",
-    #                 HOMEBREW_UNINSTALL_URL,
-    #                 "-o",
-    #                 "uninstall_homebrew",
-    #             ],
-    #             check=True,
-    #         )
-    #         subprocess.run(["chmod", "+x", "uninstall_homebrew"], check=True)
-    #
-    #         # run it in dry run to get everything it would remove
-    #         subprocess.run(
-    #             ["./uninstall_homebrew", "-f"],
-    #             check=True,
-    #         )
 
 
 if __name__ == "__main__":
