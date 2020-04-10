@@ -66,33 +66,34 @@ def main():
     mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
     os.makedirs(mangled_dir, exist_ok=True)
 
-    # we move some things we know about
-    for pth in KNOWN_PATHS:
-        if os.path.exists(pth):
+    # move all of the stuff except miniconda
+    potential_dirs = os.listdir("/usr/local")
+    for pth in potential_dirs:
+        if os.path.exists(pth) and os.path.isdir(pth) and pth not in ["bin"]:
             mangled_pth = _mangele_path(pth, mangled_dir)
             _try_move_file_or_dir(pth, mangled_pth)
 
     # now we let homebrew do the rest
-    with tempfile.TemporaryDirectory() as tmpdir:
-        with pushd(tmpdir):
-            # get the homebrew uninstall script
-            subprocess.run(
-                [
-                    "curl",
-                    "-fsSL",
-                    HOMEBREW_UNINSTALL_URL,
-                    "-o",
-                    "uninstall_homebrew",
-                ],
-                check=True,
-            )
-            subprocess.run(["chmod", "+x", "uninstall_homebrew"], check=True)
-
-            # run it in dry run to get everything it would remove
-            subprocess.run(
-                ["./uninstall_homebrew", "-f"],
-                check=True,
-            )
+    # with tempfile.TemporaryDirectory() as tmpdir:
+    #     with pushd(tmpdir):
+    #         # get the homebrew uninstall script
+    #         subprocess.run(
+    #             [
+    #                 "curl",
+    #                 "-fsSL",
+    #                 HOMEBREW_UNINSTALL_URL,
+    #                 "-o",
+    #                 "uninstall_homebrew",
+    #             ],
+    #             check=True,
+    #         )
+    #         subprocess.run(["chmod", "+x", "uninstall_homebrew"], check=True)
+    #
+    #         # run it in dry run to get everything it would remove
+    #         subprocess.run(
+    #             ["./uninstall_homebrew", "-f"],
+    #             check=True,
+    #         )
 
 
 if __name__ == "__main__":
