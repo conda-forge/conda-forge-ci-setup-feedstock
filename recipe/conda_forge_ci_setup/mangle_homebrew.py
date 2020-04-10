@@ -21,7 +21,7 @@ def main():
             continue
         mangled_pth = os.path.join(mangled_dir, _pth)
         shutil.move(pth, mangled_pth)
-        print("MOVED %s -> %s" % (pth, mangled_pth))
+        print("MOVED %s -> %s" % (pth, mangled_pth), flush=True)
 
 
 if __name__ == "__main__":
