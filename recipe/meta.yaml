@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "2.8.2" %}
+{% set version = "2.8.3" %}
 
 package:
   name: {{ name|lower }}
@@ -27,6 +27,7 @@ build:
     - upload_package = conda_forge_ci_setup.build_utils:upload_package
     - mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
+    - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
   skip: True  # [py2k]
 
 requirements:
@@ -54,6 +55,7 @@ test:
     - setup_conda_rc --help
     - upload_package --help
     - make_build_number --help
+    - mangle_homebrew --help
 
 
 about:
