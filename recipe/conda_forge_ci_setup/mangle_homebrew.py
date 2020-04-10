@@ -91,3 +91,7 @@ def main():
                         print("REMOVED %s " % p)
                     except Exception as e:
                         print("ERROR moving or removing %s: %s" % (p, repr(e)))
+
+
+if __name__ == "__main__":
+    main()
