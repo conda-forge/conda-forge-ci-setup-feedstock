@@ -13,7 +13,6 @@ HOMEBREW_UNINSTALL_URL = \
 KNOWN_PATHS = [
     "/usr/local/Caskroom",
     "/usr/local/Cellar",
-    "/usr/local/Homebrew",
     "/usr/local/lib/gcc",
     "/usr/local/lib/perl5",
     "/usr/local/lib/perl6",
@@ -88,45 +87,10 @@ def main():
             subprocess.run(["chmod", "+x", "uninstall_homebrew"], check=True)
 
             # run it in dry run to get everything it would remove
-            proc_out = subprocess.check_output(
+            subprocess.run(
                 ["./uninstall_homebrew", "-f"],
-                stderr=subprocess.STDOUT
+                check=True,
             )
-
-            try:
-                proc_out = proc_out.decode("utf-8")
-            except Exception:
-                pass
-
-    # # now go through the lines and move the files to a mangled path
-    # # if that fails, then remove them, else pass
-    # # tests if they exist since some might be gone above
-    # for line in proc_out.splitlines():
-    #     # this block handles links and gets both parts
-    #     if "->" in line:
-    #         parts = line.split("->")
-    #     else:
-    #         parts = [line]
-    #
-    #     for p in parts:
-    #         # ignore homebrew printing stuff
-    #         if p.startswith("==>"):
-    #             continue
-    #
-    #         # sometimes it does this
-    #         if p.startswith("Would delete:"):
-    #             p = p[len("Would delete:"):]
-    #
-    #         if p.startswith("Would delete "):
-    #             p = p[len("Would delete "):]
-    #
-    #         # finally do some cleanup
-    #         p = p.strip()
-    #
-    #         # and then remove
-    #         if len(p) > 0 and os.path.exists(p) and os.path.isfile(p):
-    #             mangled_p = _mangele_path(p, mangled_dir)
-    #             _try_move_file_or_dir(p, mangled_p)
 
 
 if __name__ == "__main__":
