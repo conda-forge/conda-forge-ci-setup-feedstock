@@ -68,8 +68,9 @@ def main():
 
     # move all of the stuff except miniconda
     potential_dirs = os.listdir("/usr/local")
-    for pth in potential_dirs:
-        if os.path.exists(pth) and os.path.isdir(pth) and pth not in ["bin"]:
+    for _pth in potential_dirs:
+        pth = os.path.join("/usr", "local", _pth)
+        if os.path.exists(pth) and os.path.isdir(pth) and _pth not in ["bin"]:
             mangled_pth = _mangele_path(pth, mangled_dir)
             _try_move_file_or_dir(pth, mangled_pth)
 
