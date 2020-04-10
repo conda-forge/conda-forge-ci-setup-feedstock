@@ -89,7 +89,7 @@ def main():
 
             # run it in dry run to get everything it would remove
             proc_out = subprocess.check_output(
-                ["./uninstall_homebrew", "-fq"],
+                ["./uninstall_homebrew", "-f"],
                 stderr=subprocess.STDOUT
             )
 
