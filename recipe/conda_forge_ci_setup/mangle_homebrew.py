@@ -29,7 +29,6 @@ def main():
 
     excluded_dirs = [
         "conda_mangled",
-        "bin",
         "miniconda",
     ]
 
