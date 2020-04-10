@@ -5,6 +5,7 @@ import shutil
 import uuid
 import tempfile
 import contextlib
+import sys
 
 
 HOMEBREW_UNINSTALL_URL = \
@@ -57,6 +58,7 @@ def _try_move_file_or_dir(p, mangled_p):
                 print("REMOVED DIR %s " % p)
             except Exception as e:
                 print("ERROR moving or removing DIR %s: %s" % (p, repr(e)))
+    sys.stdout.flush()
 
 
 def main():
