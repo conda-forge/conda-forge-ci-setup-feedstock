@@ -114,7 +114,7 @@ def upload_or_check(recipe_dir, owner, channel, variant):
         os.path.join(conda_build.config.croot, 'noarch'))]
              + [os.path.join(conda_build.config.subdir, p) for p in os.listdir(os.path.join(
                 conda_build.config.croot, conda_build.config.subdir))])
-    built_distributions = [(split_pkg(path)[1], split_pkg(path)[2], path)
+    built_distributions = [(split_pkg(path)[1], split_pkg(path)[2], os.path.join(conda_build.config.croot, path))
                            # TODO: flip this over to .conda when that format
                            #  is in flight
                            for path in paths if path.endswith('.tar.bz2')]
