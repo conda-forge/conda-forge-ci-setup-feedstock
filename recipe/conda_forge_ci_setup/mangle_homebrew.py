@@ -38,11 +38,20 @@ def main():
     mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
     os.makedirs(mangled_dir, exist_ok=True)
 
+    excluded_dirs = [
+        mangled_dir,
+        "bin",
+    ]
+
     # move all of the stuff except miniconda
     potential_dirs = os.listdir("/usr/local")
     for _pth in potential_dirs:
         pth = os.path.join("/usr", "local", _pth)
-        if os.path.exists(pth) and os.path.isdir(pth) and _pth not in ["bin"]:
+        if (
+            os.path.exists(pth)
+            and os.path.isdir(pth)
+            and _pth not in excluded_dirs
+        ):
             mangled_pth = _mangele_path(pth, mangled_dir)
             _try_move_file_or_dir(pth, mangled_pth)
 
