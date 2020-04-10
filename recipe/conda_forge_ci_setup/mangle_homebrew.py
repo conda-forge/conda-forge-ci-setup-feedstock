@@ -61,6 +61,17 @@ def _try_move_file_or_dir(p, mangled_p):
 
 
 def main():
+    # make the mangled path
+    mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
+    os.makedirs(mangled_dir, exist_ok=True)
+
+    # we move some things we know about
+    for pth in KNOWN_PATHS:
+        if os.path.exists(pth):
+            mangled_pth = _mangele_path(pth, mangled_dir)
+            _try_move_file_or_dir(pth, mangled_pth)
+
+    # now we let homebrew do the rest
     with tempfile.TemporaryDirectory() as tmpdir:
         with pushd(tmpdir):
             # get the homebrew uninstall script
@@ -78,7 +89,7 @@ def main():
 
             # run it in dry run to get everything it would remove
             proc_out = subprocess.check_output(
-                ["./uninstall_homebrew", "--dry-run"],
+                ["./uninstall_homebrew", "-fq"],
                 stderr=subprocess.STDOUT
             )
 
@@ -87,45 +98,35 @@ def main():
             except Exception:
                 pass
 
-    # make the mangled path
-    mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
-    os.makedirs(mangled_dir, exist_ok=True)
-
-    # we move some things we know about
-    for pth in KNOWN_PATHS:
-        if os.path.exists(pth):
-            mangled_pth = _mangele_path(pth, mangled_dir)
-            _try_move_file_or_dir(pth, mangled_pth)
-
-    # now go through the lines and move the files to a mangled path
-    # if that fails, then remove them, else pass
-    # tests if they exist since some might be gone above
-    for line in proc_out.splitlines():
-        # this block handles links and gets both parts
-        if "->" in line:
-            parts = line.split("->")
-        else:
-            parts = [line]
-
-        for p in parts:
-            # ignore homebrew printing stuff
-            if p.startswith("==>"):
-                continue
-
-            # sometimes it does this
-            if p.startswith("Would delete:"):
-                p = p[len("Would delete:"):]
-
-            if p.startswith("Would delete "):
-                p = p[len("Would delete "):]
-
-            # finally do some cleanup
-            p = p.strip()
-
-            # and then remove
-            if len(p) > 0 and os.path.exists(p) and os.path.isfile(p):
-                mangled_p = _mangele_path(p, mangled_dir)
-                _try_move_file_or_dir(p, mangled_p)
+    # # now go through the lines and move the files to a mangled path
+    # # if that fails, then remove them, else pass
+    # # tests if they exist since some might be gone above
+    # for line in proc_out.splitlines():
+    #     # this block handles links and gets both parts
+    #     if "->" in line:
+    #         parts = line.split("->")
+    #     else:
+    #         parts = [line]
+    #
+    #     for p in parts:
+    #         # ignore homebrew printing stuff
+    #         if p.startswith("==>"):
+    #             continue
+    #
+    #         # sometimes it does this
+    #         if p.startswith("Would delete:"):
+    #             p = p[len("Would delete:"):]
+    #
+    #         if p.startswith("Would delete "):
+    #             p = p[len("Would delete "):]
+    #
+    #         # finally do some cleanup
+    #         p = p.strip()
+    #
+    #         # and then remove
+    #         if len(p) > 0 and os.path.exists(p) and os.path.isfile(p):
+    #             mangled_p = _mangele_path(p, mangled_dir)
+    #             _try_move_file_or_dir(p, mangled_p)
 
 
 if __name__ == "__main__":
