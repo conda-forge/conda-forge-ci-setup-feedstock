@@ -113,8 +113,11 @@ def main():
                 continue
 
             # sometimes it does this
-            if p.startswith("Would delete"):
-                p = p[len("Would delete"):]
+            if p.startswith("Would delete:"):
+                p = p[len("Would delete:"):]
+
+            if p.startswith("Would delete "):
+                p = p[len("Would delete "):]
 
             # finally do some cleanup
             p = p.strip()
