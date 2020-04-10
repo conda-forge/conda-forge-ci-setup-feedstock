@@ -43,28 +43,21 @@ def _mangele_path(pth, new_dir):
     return os.path.join(*new_parts)
 
 
-def _try_move_file(p, mangled_p):
+def _try_move_file_or_dir(p, mangled_p):
     try:
         shutil.move(p, mangled_p)
-        print("MOVED %s -> %s" % (p, mangled_p))
+        print("MOVED FILE/DIR %s -> %s" % (p, mangled_p))
     except shutil.Error:
         try:
             os.remove(p)
-            print("REMOVED %s " % p)
+            print("REMOVED FILE %s " % p)
         except Exception as e:
-            print("ERROR moving or removing %s: %s" % (p, repr(e)))
-
-
-def _try_move_dir(p, mangled_p):
-    try:
-        shutil.move(p, mangled_p)
-        print("MOVED %s -> %s" % (p, mangled_p))
-    except shutil.Error:
-        try:
-            shutil.rmtree(p, ignore_errors=True)
-            print("REMOVED %s " % p)
-        except Exception as e:
-            print("ERROR moving or removing %s: %s" % (p, repr(e)))
+            print("ERROR moving or removing FILE %s: %s" % (p, repr(e)))
+            try:
+                shutil.rmtree(p, ignore_errors=True)
+                print("REMOVED DIR %s " % p)
+            except Exception as e:
+                print("ERROR moving or removing DIR %s: %s" % (p, repr(e)))
 
 
 def main():
@@ -102,7 +95,7 @@ def main():
     for pth in KNOWN_PATHS:
         if os.path.exists(pth):
             mangled_pth = _mangele_path(pth, mangled_dir)
-            _try_move_dir(pth, mangled_pth)
+            _try_move_file_or_dir(pth, mangled_pth)
 
     # now go through the lines and move the files to a mangled path
     # if that fails, then remove them, else pass
@@ -129,7 +122,7 @@ def main():
             # and then remove
             if len(p) > 0 and os.path.exists(p) and os.path.isfile(p):
                 mangled_p = _mangele_path(p, mangled_dir)
-                _try_move_file(p, mangled_p)
+                _try_move_file_or_dir(p, mangled_p)
 
 
 if __name__ == "__main__":
