@@ -18,6 +18,7 @@ setup(
             "upload_package = conda_forge_ci_setup.build_utils:upload_package",
             "mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler",
             "make_build_number = conda_forge_ci_setup.build_utils:make_build_number",
+            "mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main",
         ]
     },
 )
