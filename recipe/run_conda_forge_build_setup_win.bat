@@ -41,7 +41,7 @@ set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
 
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
-set "PATH=%PATH:ostedtoolcache;=%"
+set "PATH=%PATH:ostedtoolcache=%"
 
 type .ci_support\%CONFIG%.yaml
 
