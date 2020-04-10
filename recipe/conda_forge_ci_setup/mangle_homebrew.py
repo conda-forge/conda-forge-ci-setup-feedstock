@@ -37,7 +37,6 @@ def main():
     potential_dirs = os.listdir("/usr/local")
     for _pth in potential_dirs:
         pth = os.path.join("/usr/local", _pth)
-        print("pth:", pth, flush=True)
         if (
             os.path.exists(pth)
             and os.path.isdir(pth)
