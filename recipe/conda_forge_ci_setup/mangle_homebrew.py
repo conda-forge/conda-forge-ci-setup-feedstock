@@ -1,18 +1,7 @@
 #!/usr/bin/env python
 import os
 import shutil
-import uuid
 import sys
-
-
-def _mangele_path(pth, new_dir):
-    """mangle a path by adding a random string to the front and the back of the
-    filename and moving it to a new dir"""
-    mangle_str = 'h' + uuid.uuid4().hex[0:6]
-    parts = os.path.split(pth)
-    new_parts = [new_dir, parts[1]]
-    new_parts[1] = mangle_str + "_" + parts[1] + "_" + mangle_str
-    return os.path.join(*new_parts)
 
 
 def _try_move_file_or_dir(p, mangled_p):
@@ -35,11 +24,11 @@ def _try_move_file_or_dir(p, mangled_p):
 
 def main():
     # make the mangled path
-    mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
+    mangled_dir = "/usr/local/conda_mangled"
     os.makedirs(mangled_dir, exist_ok=True)
 
     excluded_dirs = [
-        os.path.basename(mangled_dir),
+        "conda_mangled",
         "bin",
         "miniconda",
     ]
@@ -47,14 +36,14 @@ def main():
     # move all of the stuff except miniconda
     potential_dirs = os.listdir("/usr/local")
     for _pth in potential_dirs:
-        pth = os.path.join("/usr", "local", _pth)
+        pth = os.path.join("/usr/local", _pth)
         print("pth:", pth, flush=True)
         if (
             os.path.exists(pth)
             and os.path.isdir(pth)
             and _pth not in excluded_dirs
         ):
-            mangled_pth = _mangele_path(pth, mangled_dir)
+            mangled_pth = os.path.join(mangled_dir, _pth)
             _try_move_file_or_dir(pth, mangled_pth)
 
 
