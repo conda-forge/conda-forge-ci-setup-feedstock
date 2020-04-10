@@ -27,8 +27,8 @@ fi
 
 
 if [ ! -z "$CONFIG" ]; then
-    echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
     if [ ! -z "$CI" ]; then
+        echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
         echo "CI:" >> ${CI_SUPPORT}/${CONFIG}.yaml
         echo "- ${CI}" >> ${CI_SUPPORT}/${CONFIG}.yaml
         echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
