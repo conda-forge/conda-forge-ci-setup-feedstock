@@ -59,7 +59,7 @@ def main():
                 pass
 
     # make the mangled path
-    mangled_dir = "/opt/homebrew_%s" % uuid.uuid4().hex
+    mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
     os.makedirs(mangled_dir, exist_ok=True)
 
     # now go through the lines and move the files to a mangled path
