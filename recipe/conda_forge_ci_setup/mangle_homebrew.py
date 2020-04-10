@@ -39,7 +39,7 @@ def main():
     os.makedirs(mangled_dir, exist_ok=True)
 
     excluded_dirs = [
-        mangled_dir,
+        os.path.basename(mangled_dir),
         "bin",
         "miniconda",
     ]
