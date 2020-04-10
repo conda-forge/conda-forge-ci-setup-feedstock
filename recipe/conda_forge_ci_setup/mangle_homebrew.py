@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import shutil
-import sys
+
 
 def main():
     # make the mangled path
@@ -20,7 +20,9 @@ def main():
         if _pth in excluded_dirs:
             continue
         mangled_pth = os.path.join(mangled_dir, _pth)
-        shutil.move(p, mangled_pth)
+        shutil.move(pth, mangled_pth)
+        print("MOVED %s -> %s" % (pth, mangled_pth))
+
 
 if __name__ == "__main__":
     main()
