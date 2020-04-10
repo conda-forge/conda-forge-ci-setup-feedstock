@@ -41,6 +41,7 @@ def main():
     excluded_dirs = [
         mangled_dir,
         "bin",
+        "miniconda",
     ]
 
     # move all of the stuff except miniconda
