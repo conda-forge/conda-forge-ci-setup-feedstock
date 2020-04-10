@@ -100,8 +100,9 @@ def main():
 
     # we move some things we know about
     for pth in KNOWN_PATHS:
-        mangled_pth = _mangele_path(pth, mangled_dir)
-        _try_move_dir(pth, mangled_pth)
+        if os.path.exists(pth):
+            mangled_pth = _mangele_path(pth, mangled_dir)
+            _try_move_dir(pth, mangled_pth)
 
     # now go through the lines and move the files to a mangled path
     # if that fails, then remove them, else pass
