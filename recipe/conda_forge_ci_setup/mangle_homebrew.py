@@ -10,6 +10,18 @@ import contextlib
 HOMEBREW_UNINSTALL_URL = \
     "https://raw.githubusercontent.com/Homebrew/install/master/uninstall"
 
+KNOWN_PATHS = [
+    "/usr/local/Caskroom",
+    "/usr/local/Cellar",
+    "/usr/local/Homebrew",
+    "/usr/local/lib/gcc",
+    "/usr/local/lib/perl5",
+    "/usr/local/lib/perl6",
+    "/usr/local/lib/perl7",
+    "/usr/local/include/c++",
+    "/usr/local/Frameworks/Python.framework",
+]
+
 # https://stackoverflow.com/questions/6194499/pushd-through-os-system
 @contextlib.contextmanager
 def pushd(new_dir):
@@ -29,6 +41,30 @@ def _mangele_path(pth, new_dir):
     new_parts = [new_dir, parts[1]]
     new_parts[1] = mangle_str + "_" + parts[1] + "_" + mangle_str
     return os.path.join(*new_parts)
+
+
+def _try_move_file(p, mangled_p):
+    try:
+        shutil.move(p, mangled_p)
+        print("MOVED %s -> %s" % (p, mangled_p))
+    except shutil.Error:
+        try:
+            os.remove(p)
+            print("REMOVED %s " % p)
+        except Exception as e:
+            print("ERROR moving or removing %s: %s" % (p, repr(e)))
+
+
+def _try_move_dir(p, mangled_p):
+    try:
+        shutil.move(p, mangled_p)
+        print("MOVED %s -> %s" % (p, mangled_p))
+    except shutil.Error:
+        try:
+            shutil.rmtree(p, ignore_errors=True)
+            print("REMOVED %s " % p)
+        except Exception as e:
+            print("ERROR moving or removing %s: %s" % (p, repr(e)))
 
 
 def main():
@@ -62,8 +98,14 @@ def main():
     mangled_dir = "/usr/local/mangled_homebrew_files_%s" % uuid.uuid4().hex
     os.makedirs(mangled_dir, exist_ok=True)
 
+    # we move some things we know about
+    for pth in KNOWN_PATHS:
+        mangled_pth = _mangele_path(pth, mangled_dir)
+        _try_move_dir(pth, mangled_pth)
+
     # now go through the lines and move the files to a mangled path
     # if that fails, then remove them, else pass
+    # tests if they exist since some might be gone above
     for line in proc_out.splitlines():
         # this block handles links and gets both parts
         if "->" in line:
@@ -86,15 +128,7 @@ def main():
             # and then remove
             if len(p) > 0 and os.path.exists(p) and os.path.isfile(p):
                 mangled_p = _mangele_path(p, mangled_dir)
-                try:
-                    shutil.move(p, mangled_p)
-                    print("MOVED %s -> %s" % (p, mangled_p))
-                except shutil.Error:
-                    try:
-                        os.remove(p)
-                        print("REMOVED %s " % p)
-                    except Exception as e:
-                        print("ERROR moving or removing %s: %s" % (p, repr(e)))
+                _try_move_file(p, mangled_p)
 
 
 if __name__ == "__main__":
