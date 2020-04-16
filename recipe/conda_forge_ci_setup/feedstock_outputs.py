@@ -33,7 +33,7 @@ def request_copy(dists, channel):
 
     if "FEEDSTOCK_TOKEN" not in os.environ:
         print(
-            "ERROR you must have defined a FEEDSTOCK token in order to "
+            "ERROR you must have defined a FEEDSTOCK_TOKEN in order to "
             "perform output copies to the production channels!"
         )
 
