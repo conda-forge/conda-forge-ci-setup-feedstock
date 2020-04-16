@@ -139,10 +139,10 @@ def upload_or_check(recipe_dir, owner, channel, variant):
                 upload(token_fn, path, owner, channel)
                 print('Uploaded {}'.format(path))
 
-        if _should_validate():
-            return request_copy([b[2] for b in built_distributions], channel)
-        else:
-            return True
+            if _should_validate():
+                return request_copy([b[2] for b in built_distributions], channel)
+            else:
+                return True
     else:
         for path in new_distributions:
             print("Distribution {} is new for {}, but no upload is taking place "
