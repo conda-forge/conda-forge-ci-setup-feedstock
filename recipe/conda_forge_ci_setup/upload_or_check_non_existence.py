@@ -18,7 +18,10 @@ import conda_build.api
 import conda_build.config
 
 
-from .feedstock_outputs import _should_validate, request_copy
+from conda_forge_ci_setup.feedstock_outputs import (
+    _should_validate,
+    request_copy,
+)
 
 
 def split_pkg(pkg):
