@@ -13,12 +13,13 @@ setup(
     entry_points={
         "console_scripts": [
             "ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main",
-            "upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main",
+            "upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main",  # noqa
             "setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc",
             "upload_package = conda_forge_ci_setup.build_utils:upload_package",
-            "mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler",
-            "make_build_number = conda_forge_ci_setup.build_utils:make_build_number",
+            "mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler",  # noqa
+            "make_build_number = conda_forge_ci_setup.build_utils:make_build_number",  # noqa
             "mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main",
+            "validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main",  # noqa
         ]
     },
 )

@@ -18,6 +18,9 @@ import conda_build.api
 import conda_build.config
 
 
+from .feedstock_outputs import _should_validate, request_copy
+
+
 def split_pkg(pkg):
     if not pkg.endswith(".tar.bz2"):
         raise RuntimeError("Can only process packages that end in .tar.bz2")
@@ -135,7 +138,11 @@ def upload_or_check(recipe_dir, owner, channel, variant):
             for path in new_distributions:
                 upload(token_fn, path, owner, channel)
                 print('Uploaded {}'.format(path))
-        return True
+
+        if _should_validate():
+            return request_copy([b[2] for b in built_distributions], channel)
+        else:
+            return True
     else:
         for path in new_distributions:
             print("Distribution {} is new for {}, but no upload is taking place "

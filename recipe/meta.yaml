@@ -28,6 +28,7 @@ build:
     - mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
+    - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
   skip: True  # [py2k]
 
 requirements:
@@ -45,6 +46,8 @@ requirements:
     - vs2008_express_vc_python_patch  # [win]
     - shyaml  # [osx]
     - jq      # [osx]
+    - requests
+    - ruamel.yaml
 
 test:
   commands:
@@ -56,6 +59,7 @@ test:
     - upload_package --help
     - make_build_number --help
     - mangle_homebrew --help
+    - validate_recipe_outputs --help
 
 
 about:
