@@ -60,7 +60,7 @@ jobs:
 
     - task: CondaEnvironment@1
       inputs:
-        packageSpecs: 'python=3.6 conda-build conda conda-forge::conda-forge-ci-setup=2' # Optional
+        packageSpecs: 'python=3.6 conda-build conda conda-forge::conda-forge-ci-setup=3' # Optional
         installOptions: "-c conda-forge"
         updateConda: true
       displayName: Install conda-build and activate environment
@@ -68,7 +68,11 @@ jobs:
     - script: set PYTHONUNBUFFERED=1
 
     # Configure the VM
-    - script: setup_conda_rc .\ ".\recipe" .\.ci_support\%CONFIG%.yaml
+    - script: |
+        call activate base
+        setup_conda_rc .\ ".\recipe" .\.ci_support\%CONFIG%.yaml
+        conda.exe uninstall --quiet --yes --force conda-forge-ci-setup
+        pip install --no-deps -e ".\recipe\."
 
     # Configure the VM.
     - script: |
