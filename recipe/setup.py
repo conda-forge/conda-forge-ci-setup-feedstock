@@ -1,6 +1,6 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-packages = ["conda_forge_ci_setup"]
+packages = find_packages()
 
 setup(
     name="conda_forge_ci_setup",
