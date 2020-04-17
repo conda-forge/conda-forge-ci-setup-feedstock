@@ -47,6 +47,7 @@ requirements:
     - shyaml  # [osx]
     - jq      # [osx]
     - requests
+    - ruamel_yaml
 
 test:
   commands:
