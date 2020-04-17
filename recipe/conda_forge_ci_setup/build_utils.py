@@ -1,40 +1,16 @@
-#!/usr/bin/env python
+import os
+import sys
+import subprocess
 
-# This file was generated automatically from conda-smithy. To update this configuration,
-# update the conda-forge.yml and/or the recipe/meta.yaml.
 try:
     from ruamel_yaml import safe_load, safe_dump
 except ImportError:
     from yaml import safe_load, safe_dump
-import os
-import sys
-import subprocess
+
 import click
 
-
-def _import_feedstock_outputs_functions(recipe_root):
-    # block of code to import the feedstock_outputs module
-    feedstock_outputs_path = os.path.join(
-        recipe_root,
-        'conda_forge_ci_setup',
-        'feedstock_outputs.py',
-    )
-    if not os.path.exists(feedstock_outputs_path):
-        feedstock_outputs_path = os.path.join(
-            os.path.dirname(__file__),
-            'feedstock_outputs.py',
-        )
-
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        'feedstock_outputs', feedstock_outputs_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-
-    return mod._should_validate, mod.STAGING
-
-
-_should_validate, STAGING = _import_feedstock_outputs_functions()
+from .feedstock_outputs import _should_validate, STAGING
+from .upload_or_check_non_existence import retry_upload_or_check
 
 if _should_validate():
     TARGET_OWNER = STAGING
@@ -178,20 +154,8 @@ def upload_package(feedstock_root, recipe_root, config_file):
                     "is not allowed" % (TARGET_OWNER, source_channel))
                 return
 
-    upload_script_path = os.path.join(
-        recipe_root, 'conda_forge_ci_setup', 'upload_or_check_non_existence.py')
-    if not os.path.exists(upload_script_path):
-        upload_script_path = os.path.join(
-            os.path.dirname(__file__), 'upload_or_check_non_existence.py')
-
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        'upload_or_check_non_existence', upload_script_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-
     for owner, channel in channels:
-        mod.retry_upload_or_check(recipe_root, owner, channel, [config_file])
+        retry_upload_or_check(recipe_root, owner, channel, [config_file])
 
 
 @click.command()
