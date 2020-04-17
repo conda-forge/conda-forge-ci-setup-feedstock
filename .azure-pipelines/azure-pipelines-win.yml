@@ -68,15 +68,13 @@ jobs:
     - script: set PYTHONUNBUFFERED=1
       displayName: Set PYTHONUNBUFFERED
 
-    - script: set "RECIPE_ROOT=."
-      displayName: Set RECIPE_ROOT
-
     # Configure the VM
     - script: |
         call activate base
         setup_conda_rc .\ ".\recipe" .\.ci_support\%CONFIG%.yaml
+        set RECIPE_ROOT=.
         conda.exe uninstall --quiet --yes --force conda-forge-ci-setup
-        pip install --no-deps -e "%RECIPE_ROOT%\."
+        pip install --no-deps "%RECIPE_ROOT%\."
       displayName: conda-forge CI setup
 
     # Configure the VM.

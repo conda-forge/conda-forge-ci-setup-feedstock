@@ -32,7 +32,7 @@ jobs:
       source activate base
       conda install -n base -c conda-forge --quiet --yes conda-forge-ci-setup=2 conda-build
       conda uninstall --quiet --yes --force conda-forge-ci-setup
-      pip install --no-deps -e ${RECIPE_ROOT}/.
+      RECIPE_ROOT=. && pip install --no-deps ${RECIPE_ROOT}/.
     displayName: 'Add conda-forge-ci-setup=3'
 
   - script: |

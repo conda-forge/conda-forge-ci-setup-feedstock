@@ -22,7 +22,7 @@ CONDARC
 conda install --yes --quiet conda-forge-ci-setup=2 conda-build -c conda-forge
 
 conda uninstall --quiet --yes --force conda-forge-ci-setup
-pip install --no-deps -e ${RECIPE_ROOT}/.
+pip install --no-deps ${RECIPE_ROOT}/.
 
 # set up the condarc
 setup_conda_rc "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
