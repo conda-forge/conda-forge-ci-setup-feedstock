@@ -70,10 +70,13 @@ def request_copy(dists, channel):
 
 
 def _should_validate():
-    with open("conda-forge.yml", "r") as fp:
-        cfg = safe_load(fp)
+    if os.path.exists("conda-forge.yml"):
+        with open("conda-forge.yml", "r") as fp:
+            cfg = safe_load(fp)
 
-    return cfg.get("conda_forge_output_validation", False)
+        return cfg.get("conda_forge_output_validation", False)
+    else:
+        return False
 
 
 @click.command()
