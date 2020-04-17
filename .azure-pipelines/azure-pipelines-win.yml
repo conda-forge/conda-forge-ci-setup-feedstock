@@ -79,11 +79,6 @@ jobs:
       displayName: conda-forge build setup
     
 
-    - script: |
-        rmdir C:\strawberry /s /q
-      continueOnError: true
-      displayName: remove strawberryperl
-
     # Special cased version setting some more things!
     - script: |
         call activate base
@@ -101,6 +96,10 @@ jobs:
       env:
         PYTHONUNBUFFERED: 1
       condition: not(contains(variables['CONFIG'], 'vs2008'))
+    - script: |
+        call activate base
+        validate_recipe_outputs
+      displayName: Validate Recipe Outputs
 
     - script: |
         set "GIT_BRANCH=%BUILD_SOURCEBRANCHNAME%"
