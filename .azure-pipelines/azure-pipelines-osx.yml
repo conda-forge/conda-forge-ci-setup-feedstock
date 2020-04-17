@@ -21,7 +21,7 @@ jobs:
   # TODO: Fast finish on azure pipelines?
   - script: |
       echo "Fast Finish"
-
+      
 
   - bash: |
       echo "##vso[task.prependpath]$CONDA/bin"
@@ -32,8 +32,8 @@ jobs:
       source activate base
       conda install -n base -c conda-forge --quiet --yes conda-forge-ci-setup=2 conda-build
       conda uninstall --quiet --yes --force conda-forge-ci-setup
-      RECIPE_ROOT=. && pip install --no-deps ${RECIPE_ROOT}/.
-    displayName: 'Add conda-forge-ci-setup=3'
+      RECIPE_ROOT=recipe && pip install --no-deps ${RECIPE_ROOT}/.
+    displayName: 'Add conda-forge-ci-setup=2'
 
   - script: |
       echo "Mangling homebrew from Azure to avoid conflicts."

@@ -22,7 +22,7 @@ jobs:
     # TODO: Fast finish on azure pipelines?
     - script: |
         ECHO ON
-
+        
 
     - script: |
         choco install vcpython27 -fdv -y --debug
@@ -72,7 +72,7 @@ jobs:
     - script: |
         call activate base
         setup_conda_rc .\ ".\recipe" .\.ci_support\%CONFIG%.yaml
-        set RECIPE_ROOT=.
+        set "RECIPE_ROOT=.\recipe"
         conda.exe uninstall --quiet --yes --force conda-forge-ci-setup
         pip install --no-deps "%RECIPE_ROOT%\."
       displayName: conda-forge CI setup
@@ -84,7 +84,7 @@ jobs:
         # Overriding global run_conda_forge_build_setup_win with local copy.
         recipe\run_conda_forge_build_setup_win
       displayName: conda-forge build setup
-
+    
 
     # Special cased version setting some more things!
     - script: |
