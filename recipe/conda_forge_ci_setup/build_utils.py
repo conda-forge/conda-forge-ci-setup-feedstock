@@ -9,8 +9,23 @@ except ImportError:
 
 import click
 
-from .feedstock_outputs import _should_validate, STAGING
-from .upload_or_check_non_existence import retry_upload_or_check
+
+from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
+
+if False:
+    from .feedstock_outputs import _should_validate, STAGING
+else:
+    STAGING = "cf-staging"
+
+    def _should_validate():
+        if os.path.exists("conda-forge.yml"):
+            with open("conda-forge.yml", "r") as fp:
+                cfg = safe_load(fp)
+
+            return cfg.get("conda_forge_output_validation", False)
+        else:
+            return False
+
 
 if _should_validate():
     TARGET_OWNER = STAGING
