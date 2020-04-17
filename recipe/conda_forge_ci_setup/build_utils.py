@@ -11,8 +11,6 @@ import sys
 import subprocess
 import click
 
-from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
-
 call = subprocess.check_call
 
 
@@ -136,8 +134,17 @@ def upload_package(feedstock_root, recipe_root, config_file):
                 print("Uploading to conda-forge with source channel '{}' is not allowed".format(source_channel))
                 return
 
+    upload_script_path = os.path.join(recipe_root, 'conda_forge_ci_setup', 'upload_or_check_non_existence.py')
+    if not os.path.exists(upload_script_path):
+        upload_script_path = os.path.join(os.path.dirname(__file__), 'upload_or_check_non_existence.py')
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('upload_or_check_non_existence', upload_script_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
     for owner, channel in channels:
-        retry_upload_or_check(recipe_root, owner, channel, [config_file])
+        mod.retry_upload_or_check(recipe_root, owner, channel, [config_file])
 
 
 @click.command()

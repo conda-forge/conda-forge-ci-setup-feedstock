@@ -16,10 +16,27 @@ from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
 
-from conda_forge_ci_setup.feedstock_outputs import (
-    _should_validate,
-    request_copy,
-)
+
+def _import_feedstock_outputs_functions(recipe_root):
+    # block of code to import the feedstock_outputs module
+    feedstock_outputs_path = os.path.join(
+        recipe_root,
+        'conda_forge_ci_setup',
+        'upload_or_check_non_existence.py',
+    )
+    if not os.path.exists(feedstock_outputs_path):
+        feedstock_outputs_path = os.path.join(
+            os.path.dirname(__file__),
+            'feedstock_outputs.py',
+        )
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'feedstock_outputs', feedstock_outputs_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    return mod._should_validate, mod.request_copy
 
 
 def split_pkg(pkg):
@@ -151,6 +168,11 @@ def upload_or_check(recipe_dir, owner, channel, variant):
     # This is the actual fix where we create the token file once and reuse it
     # for all uploads
     if token:
+        (
+            _should_validate,
+            request_copy
+        ) = _import_feedstock_outputs_functions(recipe_dir)
+
         with get_temp_token(cli.token) as token_fn:
             for path in new_distributions:
                 upload(token_fn, path, owner, channel)
