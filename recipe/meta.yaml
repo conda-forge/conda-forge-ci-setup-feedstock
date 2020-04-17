@@ -49,6 +49,7 @@ requirements:
     - requests
     - ruamel_yaml
     - pip
+    - pyyaml
 
 test:
   commands:
