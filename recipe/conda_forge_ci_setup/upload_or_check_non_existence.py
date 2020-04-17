@@ -98,6 +98,18 @@ def upload(token_fn, path, owner, channels):
                           env=os.environ)
 
 
+def delete_dist(token_fn, path, owner, channels):
+    path = os.path.relpath(conda_build.config.croot, path)
+    _, name, ver, _ = split_pkg(path)
+    subprocess.check_call(
+        [
+            'anaconda', '--quiet', '-t', token_fn,
+            'remove', '-f', "%s/%s/%s/%s" % (owner, name, ver, path),
+        ],
+        env=os.environ
+    )
+
+
 def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='main'):
     """
     Determine whether a distribution exists on a specific channel.
@@ -179,7 +191,14 @@ def upload_or_check(recipe_dir, owner, channel, variant):
                 print('Uploaded {}'.format(path))
 
             if _should_validate():
-                return request_copy([b[2] for b in built_distributions], channel)
+                for path in existing_distributions:
+                    delete_dist(token_fn, path, owner, channel)
+                    upload(token_fn, path, owner, channel)
+                    print("Deleted and then re-uploaded {}.".format(path))
+
+                return request_copy([
+                    os.path.relpath(conda_build.config.croot, b[2])
+                    for b in built_distributions], channel)
             else:
                 return True
     else:

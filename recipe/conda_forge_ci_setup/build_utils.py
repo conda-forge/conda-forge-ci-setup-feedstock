@@ -12,13 +12,41 @@ import subprocess
 import click
 
 
-call = subprocess.check_call
+def _import_feedstock_outputs_functions(recipe_root):
+    # block of code to import the feedstock_outputs module
+    feedstock_outputs_path = os.path.join(
+        recipe_root,
+        'conda_forge_ci_setup',
+        'feedstock_outputs.py',
+    )
+    if not os.path.exists(feedstock_outputs_path):
+        feedstock_outputs_path = os.path.join(
+            os.path.dirname(__file__),
+            'feedstock_outputs.py',
+        )
 
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'feedstock_outputs', feedstock_outputs_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    return mod._should_validate, mod.STAGING
+
+
+_should_validate, STAGING = _import_feedstock_outputs_functions()
+
+if _should_validate():
+    TARGET_OWNER = STAGING
+else:
+    TARGET_OWNER = "conda-forge"
+
+call = subprocess.check_call
 
 _global_config = {
     "channels": {
         "sources": ["conda-forge", "defaults"],
-        "targets": [["conda-forge", "main"]],
+        "targets": [[TARGET_OWNER, "main"]],
     }
 }
 
@@ -51,13 +79,13 @@ def fail_if_outdated_windows_ci(feedstock_root):
         provider = "appveyor"
         if os.environ["APPVEYOR_ACCOUNT_NAME"] != "conda-forge":
             return
-        if not "APPVEYOR_PULL_REQUEST_NUMBER" in os.environ:
+        if "APPVEYOR_PULL_REQUEST_NUMBER" not in os.environ:
             return
     elif "BUILD_REPOSITORY_NAME" in os.environ:
         provider = "azure"
         if not os.environ["BUILD_REPOSITORY_NAME"].startswith("conda-forge/"):
             return
-        if not "SYSTEM_PULLREQUEST_PULLREQUESTID" in os.environ:
+        if "SYSTEM_PULLREQUEST_PULLREQUESTID" not in os.environ:
             return
     else:
         return
@@ -69,10 +97,17 @@ def fail_if_outdated_windows_ci(feedstock_root):
             if provider_cfg != "azure":
                 return
             if provider == "appveyor":
-                raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
-            if provider == "azure" and (os.getenv("UPLOAD_PACKAGES", "False") == "False" or \
-                    os.path.exists(".appveyor.yml")):
-                raise RuntimeError("This PR needs a rerender to switch from appveyor to azure")
+                raise RuntimeError(
+                    "This PR needs a rerender to switch from appveyor to azure")
+            if (
+                provider == "azure"
+                and (
+                    os.getenv("UPLOAD_PACKAGES", "False") == "False"
+                    or os.path.exists(".appveyor.yml")
+                )
+            ):
+                raise RuntimeError(
+                    "This PR needs a rerender to switch from appveyor to azure")
 
 
 @click.command()
@@ -109,7 +144,8 @@ def upload_package(feedstock_root, recipe_root, config_file):
     specific_config = safe_load(open(config_file))
     if "channel_targets" in specific_config:
         channels = [c.strip().split(" ") for c in specific_config["channel_targets"]]
-        source_channels = ",".join([c.strip() for c in specific_config["channel_sources"]])
+        source_channels = ",".join(
+            [c.strip() for c in specific_config["channel_sources"]])
     else:
         update_global_config(feedstock_root)
         channels = _global_config["channels"]["targets"]
@@ -117,30 +153,40 @@ def upload_package(feedstock_root, recipe_root, config_file):
 
     if "UPLOAD_ON_BRANCH" in os.environ:
         if "GIT_BRANCH" not in os.environ:
-            print("WARNING: UPLOAD_ON_BRANCH env variable set, but GIT_BRANCH not set. Skipping check")
+            print(
+                "WARNING: UPLOAD_ON_BRANCH env variable set, "
+                "but GIT_BRANCH not set. Skipping check")
         else:
             if os.environ["UPLOAD_ON_BRANCH"] != os.environ["GIT_BRANCH"]:
-                print("The branch {} is not configured to be uploaded".format(os.environ["GIT_BRANCH"]))
+                print(
+                    "The branch {} is not configured to be "
+                    "uploaded".format(os.environ["GIT_BRANCH"]))
                 return
 
-    upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
+    upload_to_conda_forge = any(owner == TARGET_OWNER for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
-        unknown_channel = False
-        allowed_channels = ["conda-forge", "conda-forge/label/", "defaults", "c4aarch64", "c4armv7l"]
+        allowed_channels = [
+            "conda-forge", "conda-forge/label/", "defaults", "c4aarch64",
+            "c4armv7l"]
         for source_channel in source_channels.split(","):
             for c in allowed_channels:
                 if source_channel.startswith(c):
                     break
             else:
-                print("Uploading to conda-forge with source channel '{}' is not allowed".format(source_channel))
+                print(
+                    "Uploading to %s with source channel '%s' "
+                    "is not allowed" % (TARGET_OWNER, source_channel))
                 return
 
-    upload_script_path = os.path.join(recipe_root, 'conda_forge_ci_setup', 'upload_or_check_non_existence.py')
+    upload_script_path = os.path.join(
+        recipe_root, 'conda_forge_ci_setup', 'upload_or_check_non_existence.py')
     if not os.path.exists(upload_script_path):
-        upload_script_path = os.path.join(os.path.dirname(__file__), 'upload_or_check_non_existence.py')
+        upload_script_path = os.path.join(
+            os.path.dirname(__file__), 'upload_or_check_non_existence.py')
 
     import importlib.util
-    spec = importlib.util.spec_from_file_location('upload_or_check_non_existence', upload_script_path)
+    spec = importlib.util.spec_from_file_location(
+        'upload_or_check_non_existence', upload_script_path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 

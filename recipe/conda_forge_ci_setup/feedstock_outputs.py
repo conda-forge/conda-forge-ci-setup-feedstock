@@ -9,6 +9,7 @@ import click
 import ruamel.yaml
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
+STAGING = "cf-staging"
 
 
 def _compute_md5sum(pth):
