@@ -22,7 +22,7 @@ def _import_feedstock_outputs_functions(recipe_root):
     feedstock_outputs_path = os.path.join(
         recipe_root,
         'conda_forge_ci_setup',
-        'upload_or_check_non_existence.py',
+        'feedstock_outputs.py',
     )
     if not os.path.exists(feedstock_outputs_path):
         feedstock_outputs_path = os.path.join(
