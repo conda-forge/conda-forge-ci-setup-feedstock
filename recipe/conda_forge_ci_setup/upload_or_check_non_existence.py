@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import contextlib
 import os
-import glob
 import shutil
 import subprocess
 import click
@@ -16,6 +15,28 @@ from conda_build.conda_interface import subdir as conda_subdir
 from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
+
+
+def _import_feedstock_outputs_functions(recipe_root):
+    # block of code to import the feedstock_outputs module
+    feedstock_outputs_path = os.path.join(
+        recipe_root,
+        'conda_forge_ci_setup',
+        'feedstock_outputs.py',
+    )
+    if not os.path.exists(feedstock_outputs_path):
+        feedstock_outputs_path = os.path.join(
+            os.path.dirname(__file__),
+            'feedstock_outputs.py',
+        )
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'feedstock_outputs', feedstock_outputs_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    return mod._should_validate, mod.request_copy
 
 
 def split_pkg(pkg):
@@ -58,14 +79,14 @@ def built_distribution_already_exists(cli, name, version, fname, owner):
     # this will depend on fstat information such as modification date (because
     # distributions are tar files). Therefore we can only assume that the distribution
     # just built, and the one on anaconda.org are the same.
-#    if exists:
-#        md5_on_binstar = dist_info.get('md5')
-#        with open(fname, 'rb') as fh:
-#            md5_of_build = hashlib.md5(fh.read()).hexdigest()
-#
-#        if md5_on_binstar != md5_of_build:
-#            raise ValueError('This build ({}), and the build already on binstar '
-#                             '({}) are different.'.format(md5_of_build, md5_on_binstar))
+    # if exists:
+    #     md5_on_binstar = dist_info.get('md5')
+    #     with open(fname, 'rb') as fh:
+    #        md5_of_build = hashlib.md5(fh.read()).hexdigest()
+    #
+    #     if md5_on_binstar != md5_of_build:
+    #        raise ValueError('This build ({}), and the build already on binstar '
+    #                         '({}) are different.'.format(md5_of_build, md5_on_binstar))  # noqa
     return exists
 
 
@@ -110,35 +131,61 @@ def upload_or_check(recipe_dir, owner, channel, variant):
     cli = get_server_api(token=token)
 
     # The list of built distributions
-    paths = ([os.path.join('noarch', p) for p in os.listdir(
-        os.path.join(conda_build.config.croot, 'noarch'))]
-             + [os.path.join(conda_build.config.subdir, p) for p in os.listdir(os.path.join(
-                conda_build.config.croot, conda_build.config.subdir))])
-    built_distributions = [(split_pkg(path)[1], split_pkg(path)[2], os.path.join(conda_build.config.croot, path))
-                           # TODO: flip this over to .conda when that format
-                           #  is in flight
-                           for path in paths if path.endswith('.tar.bz2')]
+    paths = (
+        [
+            os.path.join('noarch', p)
+            for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))
+        ]
+        + [
+            os.path.join(conda_build.config.subdir, p)
+            for p in os.listdir(
+                os.path.join(conda_build.config.croot, conda_build.config.subdir))
+        ]
+    )
+    built_distributions = [
+        (
+            split_pkg(path)[1],
+            split_pkg(path)[2],
+            os.path.join(conda_build.config.croot, path)
+        )
+        # TODO: flip this over to .conda when that format
+        #  is in flight
+        for path in paths if path.endswith('.tar.bz2')
+    ]
 
     # These are the ones that already exist on the owner channel's
-    existing_distributions = [path for name, version, path in built_distributions
-                              if built_distribution_already_exists(cli, name, version, path, owner)]
+    existing_distributions = [
+        path for name, version, path in built_distributions
+        if built_distribution_already_exists(cli, name, version, path, owner)]
     for d in existing_distributions:
         print('Distribution {} already exists for {}'.format(d, owner))
 
     # These are the ones that are new to the owner channel's
-    new_distributions = [path for name, version, path in built_distributions
-                         if not built_distribution_already_exists(cli, name, version, path, owner)]
+    new_distributions = [
+        path for name, version, path in built_distributions
+        if not built_distribution_already_exists(cli, name, version, path, owner)]
 
-    # This is the actual fix where we create the token file once and reuse it for all uploads
+    # This is the actual fix where we create the token file once and reuse it
+    # for all uploads
     if token:
+        (
+            _should_validate,
+            request_copy
+        ) = _import_feedstock_outputs_functions(recipe_dir)
+
         with get_temp_token(cli.token) as token_fn:
             for path in new_distributions:
                 upload(token_fn, path, owner, channel)
                 print('Uploaded {}'.format(path))
-        return True
+
+            if _should_validate():
+                return request_copy([b[2] for b in built_distributions], channel)
+            else:
+                return True
     else:
         for path in new_distributions:
-            print("Distribution {} is new for {}, but no upload is taking place "
+            print(
+                "Distribution {} is new for {}, but no upload is taking place "
                 "because the BINSTAR_TOKEN is missing.".format(path, owner))
         return False
 
@@ -152,7 +199,9 @@ def retry_upload_or_check(recipe_dir, owner, channel, variant):
             return res
         except Exception as e:
             timeout = i ** 2
-            print("Failed to upload due to {}.  Trying again in {} seconds".format(e, timeout))
+            print(
+                "Failed to upload due to {}.  Trying again in {} seconds".format(
+                    e, timeout))
             time.sleep(timeout)
     raise TimeoutError("Did not manage to upload package.  Failing.")
 
