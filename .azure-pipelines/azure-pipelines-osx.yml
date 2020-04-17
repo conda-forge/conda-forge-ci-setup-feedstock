@@ -21,7 +21,7 @@ jobs:
   # TODO: Fast finish on azure pipelines?
   - script: |
       echo "Fast Finish"
-      
+
 
   - bash: |
       echo "##vso[task.prependpath]$CONDA/bin"
@@ -32,7 +32,7 @@ jobs:
       source activate base
       echo "Configuring conda."
 
-      conda install -c conda-forge --quiet --yes conda-forge-ci-setup=2 conda-build
+      conda install -c conda-forge --quiet --yes conda-forge-ci-setup=2 conda-build pip
 
       setup_conda_rc ./ "./recipe" ./.ci_support/${CONFIG}.yaml
 

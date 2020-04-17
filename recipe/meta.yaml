@@ -48,6 +48,7 @@ requirements:
     - jq      # [osx]
     - requests
     - ruamel_yaml
+    - pip
 
 test:
   commands:
