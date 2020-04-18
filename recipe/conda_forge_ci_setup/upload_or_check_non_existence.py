@@ -8,6 +8,7 @@ import subprocess
 import click
 import tempfile
 import time
+import functools
 
 from binstar_client.utils import get_server_api
 import binstar_client.errors
@@ -19,6 +20,7 @@ import conda_build.config
 if False:
     from .feedstock_outputs import _should_validate, request_copy
 else:
+    # remove this else block once version 3 of this package is live
     import hashlib
     import json
 
@@ -33,6 +35,7 @@ else:
     VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
     STAGING = "cf-staging"
 
+    @functools.lru_cache(maxsize=1)
     def _compute_md5sum(pth):
         h = hashlib.md5()
 

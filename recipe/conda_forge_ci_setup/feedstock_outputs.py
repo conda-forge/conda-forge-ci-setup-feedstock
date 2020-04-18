@@ -2,6 +2,7 @@ import os
 import sys
 import hashlib
 import json
+import functools
 
 import conda_build
 import requests
@@ -69,6 +70,7 @@ def request_copy(dists, channel):
     return r.status_code == 200
 
 
+@functools.lru_cache(maxsize=1)
 def _should_validate():
     if os.path.exists("conda-forge.yml"):
         with open("conda-forge.yml", "r") as fp:

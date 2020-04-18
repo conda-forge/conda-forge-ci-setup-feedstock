@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import functools
 
 try:
     from ruamel_yaml import safe_load, safe_dump
@@ -15,8 +16,10 @@ from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_c
 if False:
     from .feedstock_outputs import _should_validate, STAGING
 else:
+    # remove this else block once version 3 of this package is live
     STAGING = "cf-staging"
 
+    @functools.lru_cache(maxsize=1)
     def _should_validate():
         if os.path.exists("conda-forge.yml"):
             with open("conda-forge.yml", "r") as fp:
@@ -27,17 +30,12 @@ else:
             return False
 
 
-if _should_validate():
-    TARGET_OWNER = STAGING
-else:
-    TARGET_OWNER = "conda-forge"
-
 call = subprocess.check_call
 
 _global_config = {
     "channels": {
         "sources": ["conda-forge", "defaults"],
-        "targets": [[TARGET_OWNER, "main"]],
+        "targets": [["conda-forge", "main"]],
     }
 }
 
@@ -154,7 +152,7 @@ def upload_package(feedstock_root, recipe_root, config_file):
                     "uploaded".format(os.environ["GIT_BRANCH"]))
                 return
 
-    upload_to_conda_forge = any(owner == TARGET_OWNER for owner, _ in channels)
+    upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
         allowed_channels = [
             "conda-forge", "conda-forge/label/", "defaults", "c4aarch64",
@@ -166,11 +164,14 @@ def upload_package(feedstock_root, recipe_root, config_file):
             else:
                 print(
                     "Uploading to %s with source channel '%s' "
-                    "is not allowed" % (TARGET_OWNER, source_channel))
+                    "is not allowed" % ("conda-forge", source_channel))
                 return
 
     for owner, channel in channels:
-        retry_upload_or_check(recipe_root, owner, channel, [config_file])
+        if _should_validate() and owner == "conda-forge" and channel == "main":
+            retry_upload_or_check(recipe_root, STAGING, channel, [config_file])
+        else:
+            retry_upload_or_check(recipe_root, owner, channel, [config_file])
 
 
 @click.command()
