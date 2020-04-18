@@ -71,9 +71,8 @@ jobs:
     # Configure the VM
     - script: |
         call activate base
-        set "RECIPE_ROOT=.\recipe"
         conda.exe uninstall --quiet --yes --force conda-forge-ci-setup
-        pip install --no-deps "%RECIPE_ROOT%\."
+        pip install --no-deps ".\recipe\."
         setup_conda_rc .\ ".\recipe" .\.ci_support\%CONFIG%.yaml
       displayName: conda-forge CI setup
 

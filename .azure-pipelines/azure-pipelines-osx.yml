@@ -35,7 +35,7 @@ jobs:
       conda install -c conda-forge --quiet --yes conda-forge-ci-setup=2 conda-build pip
       conda update --yes --quiet --override-channels -c conda-forge -c defaults --all
       conda uninstall --quiet --yes --force conda-forge-ci-setup
-      RECIPE_ROOT=recipe && pip install --no-deps ${RECIPE_ROOT}/.
+      pip install --no-deps recipe/.
 
       setup_conda_rc ./ "./recipe" ./.ci_support/${CONFIG}.yaml
       export CI=azure
