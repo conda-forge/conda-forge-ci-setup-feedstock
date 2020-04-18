@@ -8,7 +8,6 @@ import subprocess
 import click
 import tempfile
 import time
-import functools
 
 from binstar_client.utils import get_server_api
 import binstar_client.errors
@@ -17,84 +16,7 @@ from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
 
-if False:
-    from .feedstock_outputs import _should_validate, request_copy
-else:
-    # remove this else block once version 3 of this package is live
-    import hashlib
-    import json
-
-    import conda_build
-    import requests
-
-    try:
-        from ruamel_yaml import safe_load
-    except ImportError:
-        from yaml import safe_load
-
-    VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
-    STAGING = "cf-staging"
-
-    def _compute_md5sum(pth):
-        h = hashlib.md5()
-
-        with open(pth, 'rb') as fp:
-            chunk = 0
-            while chunk != b'':
-                chunk = fp.read(1024)
-                h.update(chunk)
-
-        return h.hexdigest()
-
-    def request_copy(dists, channel):
-        checksums = {}
-        for dist in dists:
-            pth, distname = dist.split(os.path.sep, 1)
-            checksums[dist] = _compute_md5sum(dist)
-
-        feedstock = os.path.basename(os.getcwd())
-
-        if "FEEDSTOCK_TOKEN" not in os.environ:
-            print(
-                "ERROR you must have defined a FEEDSTOCK_TOKEN in order to "
-                "perform output copies to the production channels!"
-            )
-
-        headers = {"FEEDSTOCK_TOKEN": os.environ["FEEDSTOCK_TOKEN"]}
-        json_data = {
-            "feedstock": feedstock,
-            "outputs": checksums,
-            "channel": channel,
-        }
-        r = requests.post(
-            "%s/feedstock-outputs/copy" % VALIDATION_ENDPOINT,
-            headers=headers,
-            json=json_data,
-        )
-
-        try:
-            results = r.json()
-        except Exception as e:
-            print(
-                "ERROR getting output validation information "
-                "from the webservice:",
-                repr(e)
-            )
-            results = {}
-
-        print("copy results:\n%s" % json.dumps(results, indent=2))
-
-        return r.status_code == 200
-
-    @functools.lru_cache(maxsize=1)
-    def _should_validate():
-        if os.path.exists("conda-forge.yml"):
-            with open("conda-forge.yml", "r") as fp:
-                cfg = safe_load(fp)
-
-            return cfg.get("conda_forge_output_validation", False)
-        else:
-            return False
+from .feedstock_outputs import _should_validate, request_copy
 
 
 def split_pkg(pkg):

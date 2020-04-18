@@ -1,7 +1,6 @@
 import os
 import sys
 import subprocess
-import functools
 
 try:
     from ruamel_yaml import safe_load, safe_dump
@@ -13,21 +12,7 @@ import click
 
 from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
 
-if False:
-    from .feedstock_outputs import _should_validate, STAGING
-else:
-    # remove this else block once version 3 of this package is live
-    STAGING = "cf-staging"
-
-    @functools.lru_cache(maxsize=1)
-    def _should_validate():
-        if os.path.exists("conda-forge.yml"):
-            with open("conda-forge.yml", "r") as fp:
-                cfg = safe_load(fp)
-
-            return cfg.get("conda_forge_output_validation", False)
-        else:
-            return False
+from .feedstock_outputs import _should_validate, STAGING
 
 
 call = subprocess.check_call
@@ -168,7 +153,7 @@ def upload_package(feedstock_root, recipe_root, config_file):
                 return
 
     for owner, channel in channels:
-        if _should_validate() and owner == "conda-forge" and channel == "main":
+        if _should_validate() and owner == "conda-forge":
             retry_upload_or_check(recipe_root, STAGING, channel, [config_file])
         else:
             retry_upload_or_check(recipe_root, owner, channel, [config_file])

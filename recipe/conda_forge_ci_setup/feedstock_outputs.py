@@ -32,7 +32,6 @@ def _compute_md5sum(pth):
 def request_copy(dists, channel):
     checksums = {}
     for dist in dists:
-        pth, distname = dist.split(os.path.sep, 1)
         checksums[dist] = _compute_md5sum(dist)
 
     feedstock = os.path.basename(os.getcwd())
