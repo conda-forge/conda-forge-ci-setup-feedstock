@@ -35,7 +35,6 @@ else:
     VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
     STAGING = "cf-staging"
 
-    @functools.lru_cache(maxsize=1)
     def _compute_md5sum(pth):
         h = hashlib.md5()
 
@@ -87,6 +86,7 @@ else:
 
         return r.status_code == 200
 
+    @functools.lru_cache(maxsize=1)
     def _should_validate():
         if os.path.exists("conda-forge.yml"):
             with open("conda-forge.yml", "r") as fp:
