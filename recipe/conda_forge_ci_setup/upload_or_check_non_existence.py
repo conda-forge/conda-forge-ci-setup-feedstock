@@ -169,7 +169,7 @@ def upload_or_check(recipe_dir, owner, channel, variant):
                 for name, version, path in built_distributions:
                     if not built_distribution_already_exists(cli, name, version, path, owner):
                         upload(token_fn, path, owner, channel)
-                     else:
+                    else:
                         print('Distribution {} already exists for {}'.format(path, owner))
                 return True
     else:
