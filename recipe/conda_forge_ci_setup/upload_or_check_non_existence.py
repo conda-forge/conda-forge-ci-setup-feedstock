@@ -145,36 +145,32 @@ def upload_or_check(recipe_dir, owner, channel, variant):
         for path in paths if path.endswith('.tar.bz2')
     ]
 
-    # These are the ones that already exist on the owner channel's
-    existing_distributions = [
-        path for name, version, path in built_distributions
-        if built_distribution_already_exists(cli, name, version, path, owner)]
-    for d in existing_distributions:
-        print('Distribution {} already exists for {}'.format(d, owner))
-
-    # These are the ones that are new to the owner channel's
-    new_distributions = [
-        path for name, version, path in built_distributions
-        if not built_distribution_already_exists(cli, name, version, path, owner)]
-
     # This is the actual fix where we create the token file once and reuse it
     # for all uploads
     if token:
         with get_temp_token(cli.token) as token_fn:
-            for path in new_distributions:
-                upload(token_fn, path, owner, channel)
-                print('Uploaded {}'.format(path))
-
             if _should_validate():
-                for path in existing_distributions:
-                    delete_dist(token_fn, path, owner, channel)
-                    upload(token_fn, path, owner, channel)
-                    print("Deleted and then re-uploaded {}.".format(path))
+                for name, version, path in built_distributions:
+                    for i in range(0, 60, 10):
+                        sleep(i)
+                        if not built_distribution_already_exists(cli, name, version, path, owner):
+                            upload(token_fn, path, owner, channel)
+                            break
+                    else:
+                        print("WARNING: Distribution {} already existed in {} for a while.".format(path, owner))
+                        print("         Deleting and re-uploading.")
+                        delete_dist(token_fn, path, owner, channel)
+                        upload(token_fn, path, owner, channel)
 
                 return request_copy([
-                    os.path.relpath(conda_build.config.croot, b[2])
-                    for b in built_distributions], channel)
+                    os.path.relpath(conda_build.config.croot, path)
+                    for _, _, path in built_distributions], channel)
             else:
+                for name, version, path in built_distributions:
+                    if not built_distribution_already_exists(cli, name, version, path, owner):
+                        upload(token_fn, path, owner, channel)
+                     else:
+                        print('Distribution {} already exists for {}'.format(path, owner))
                 return True
     else:
         for path in new_distributions:
