@@ -151,8 +151,8 @@ def upload_or_check(recipe_dir, owner, channel, variant):
         with get_temp_token(cli.token) as token_fn:
             if _should_validate():
                 for name, version, path in built_distributions:
-                    for i in range(0, 30):
-                        sleep(i*10)
+                    for i in range(0, 15):
+                        sleep(i*15)
                         if not built_distribution_already_exists(cli, name, version, path, owner):
                             upload(token_fn, path, owner, channel)
                             break
