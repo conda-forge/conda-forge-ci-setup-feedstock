@@ -173,10 +173,13 @@ def upload_or_check(recipe_dir, owner, channel, variant):
                         print('Distribution {} already exists for {}'.format(path, owner))
                 return True
     else:
-        for path in new_distributions:
-            print(
-                "Distribution {} is new for {}, but no upload is taking place "
-                "because the BINSTAR_TOKEN is missing.".format(path, owner))
+        for name, version, path in built_distributions:
+            if not built_distribution_already_exists(cli, name, version, path, owner):
+                print(
+                    "Distribution {} is new for {}, but no upload is taking place "
+                    "because the BINSTAR_TOKEN is missing.".format(path, owner))
+            else:
+                print('Distribution {} already exists for {}'.format(path, owner))
         return False
 
 
