@@ -16,27 +16,7 @@ from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
 
-
-def _import_feedstock_outputs_functions(recipe_root):
-    # block of code to import the feedstock_outputs module
-    feedstock_outputs_path = os.path.join(
-        recipe_root,
-        'conda_forge_ci_setup',
-        'feedstock_outputs.py',
-    )
-    if not os.path.exists(feedstock_outputs_path):
-        feedstock_outputs_path = os.path.join(
-            os.path.dirname(__file__),
-            'feedstock_outputs.py',
-        )
-
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        'feedstock_outputs', feedstock_outputs_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-
-    return mod._should_validate, mod.request_copy
+from .feedstock_outputs import _should_validate, request_copy
 
 
 def split_pkg(pkg):
@@ -98,6 +78,18 @@ def upload(token_fn, path, owner, channels):
                           env=os.environ)
 
 
+def delete_dist(token_fn, path, owner, channels):
+    path = os.path.relpath(conda_build.config.croot, path)
+    _, name, ver, _ = split_pkg(path)
+    subprocess.check_call(
+        [
+            'anaconda', '--quiet', '-t', token_fn,
+            'remove', '-f', "%s/%s/%s/%s" % (owner, name, ver, path),
+        ],
+        env=os.environ
+    )
+
+
 def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='main'):
     """
     Determine whether a distribution exists on a specific channel.
@@ -153,40 +145,41 @@ def upload_or_check(recipe_dir, owner, channel, variant):
         for path in paths if path.endswith('.tar.bz2')
     ]
 
-    # These are the ones that already exist on the owner channel's
-    existing_distributions = [
-        path for name, version, path in built_distributions
-        if built_distribution_already_exists(cli, name, version, path, owner)]
-    for d in existing_distributions:
-        print('Distribution {} already exists for {}'.format(d, owner))
-
-    # These are the ones that are new to the owner channel's
-    new_distributions = [
-        path for name, version, path in built_distributions
-        if not built_distribution_already_exists(cli, name, version, path, owner)]
-
     # This is the actual fix where we create the token file once and reuse it
     # for all uploads
     if token:
-        (
-            _should_validate,
-            request_copy
-        ) = _import_feedstock_outputs_functions(recipe_dir)
-
         with get_temp_token(cli.token) as token_fn:
-            for path in new_distributions:
-                upload(token_fn, path, owner, channel)
-                print('Uploaded {}'.format(path))
-
             if _should_validate():
-                return request_copy([b[2] for b in built_distributions], channel)
+                for name, version, path in built_distributions:
+                    for i in range(0, 15):
+                        sleep(i*15)
+                        if not built_distribution_already_exists(cli, name, version, path, owner):
+                            upload(token_fn, path, owner, channel)
+                            break
+                    else:
+                        print("WARNING: Distribution {} already existed in {} for a while.".format(path, owner))
+                        print("         Deleting and re-uploading.")
+                        delete_dist(token_fn, path, owner, channel)
+                        upload(token_fn, path, owner, channel)
+
+                return request_copy([
+                    os.path.relpath(conda_build.config.croot, path)
+                    for _, _, path in built_distributions], channel)
             else:
+                for name, version, path in built_distributions:
+                    if not built_distribution_already_exists(cli, name, version, path, owner):
+                        upload(token_fn, path, owner, channel)
+                    else:
+                        print('Distribution {} already exists for {}'.format(path, owner))
                 return True
     else:
-        for path in new_distributions:
-            print(
-                "Distribution {} is new for {}, but no upload is taking place "
-                "because the BINSTAR_TOKEN is missing.".format(path, owner))
+        for name, version, path in built_distributions:
+            if not built_distribution_already_exists(cli, name, version, path, owner):
+                print(
+                    "Distribution {} is new for {}, but no upload is taking place "
+                    "because the BINSTAR_TOKEN is missing.".format(path, owner))
+            else:
+                print('Distribution {} already exists for {}'.format(path, owner))
         return False
 
 

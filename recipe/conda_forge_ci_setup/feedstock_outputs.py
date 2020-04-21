@@ -2,13 +2,19 @@ import os
 import sys
 import hashlib
 import json
+import functools
 
 import conda_build
 import requests
 import click
-import ruamel.yaml
+
+try:
+    from ruamel_yaml import safe_load
+except ImportError:
+    from yaml import safe_load
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
+STAGING = "cf-staging"
 
 
 def _compute_md5sum(pth):
@@ -26,7 +32,6 @@ def _compute_md5sum(pth):
 def request_copy(dists, channel):
     checksums = {}
     for dist in dists:
-        pth, distname = dist.split(os.path.sep, 1)
         checksums[dist] = _compute_md5sum(dist)
 
     feedstock = os.path.basename(os.getcwd())
@@ -64,12 +69,15 @@ def request_copy(dists, channel):
     return r.status_code == 200
 
 
+@functools.lru_cache(maxsize=1)
 def _should_validate():
-    yaml = ruamel.yaml.YAML()
-    with open("conda-forge.yml", "r") as fp:
-        cfg = yaml.load(fp)
+    if os.path.exists("conda-forge.yml"):
+        with open("conda-forge.yml", "r") as fp:
+            cfg = safe_load(fp)
 
-    return cfg.get("conda_forge_output_validation", False)
+        return cfg.get("conda_forge_output_validation", False)
+    else:
+        return False
 
 
 @click.command()
