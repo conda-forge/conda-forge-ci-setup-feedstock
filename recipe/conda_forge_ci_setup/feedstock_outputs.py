@@ -13,8 +13,8 @@ VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
 
 
-def _unix_path(path):
-    return "/".join(os.path.split(path))
+def _unix_dist_path(path):
+    return "/".join(path.split(os.sep)[-2:])
 
 
 def _compute_md5sum(pth):
@@ -32,7 +32,7 @@ def _compute_md5sum(pth):
 def request_copy(feedstock, dists, channel):
     checksums = {}
     for path in dists:
-        dist = _unix_path(os.path.relpath(conda_build.config.croot, path))
+        dist = _unix_dist_path(path)
         checksums[dist] = _compute_md5sum(path)
 
     if "FEEDSTOCK_TOKEN" not in os.environ:
@@ -84,7 +84,7 @@ def main(feedstock_name):
             for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
         ])
     built_distributions = [
-        _unix_path(path) for path in paths if path.endswith('.tar.bz2')
+        _unix_dist_path(path) for path in paths if path.endswith('.tar.bz2')
     ]
 
     print("validating outputs:\n%s" % pprint.pformat(built_distributions))
