@@ -12,7 +12,7 @@ import click
 
 from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
 
-from .feedstock_outputs import _should_validate, STAGING
+from .feedstock_outputs import STAGING
 
 
 call = subprocess.check_call
@@ -111,10 +111,12 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
 
 @click.command()
+@click.argument("feedstock_name", type=str)
 @arg_feedstock_root
 @arg_recipe_root
 @arg_config_file
-def upload_package(feedstock_root, recipe_root, config_file):
+@click.option("--validate", is_flag=True)
+def upload_package(feedstock_name, feedstock_root, recipe_root, config_file, validate):
     specific_config = safe_load(open(config_file))
     if "channel_targets" in specific_config:
         channels = [c.strip().split(" ") for c in specific_config["channel_targets"]]
@@ -153,10 +155,14 @@ def upload_package(feedstock_root, recipe_root, config_file):
                 return
 
     for owner, channel in channels:
-        if _should_validate() and owner == "conda-forge":
-            retry_upload_or_check(recipe_root, STAGING, channel, [config_file])
+        if validate and owner == "conda-forge":
+            retry_upload_or_check(
+                feedstock_name, recipe_root, STAGING, channel,
+                [config_file], validate=True)
         else:
-            retry_upload_or_check(recipe_root, owner, channel, [config_file])
+            retry_upload_or_check(
+                feedstock_name, recipe_root, owner, channel,
+                [config_file], validate=False)
 
 
 @click.command()

@@ -16,7 +16,7 @@ from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
 
-from .feedstock_outputs import _should_validate, request_copy
+from .feedstock_outputs import request_copy
 
 
 def split_pkg(pkg):
@@ -112,7 +112,7 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
     return on_channel
 
 
-def upload_or_check(recipe_dir, owner, channel, variant):
+def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=False):
     token = os.environ.get('BINSTAR_TOKEN')
 
     # Azure's tokens are filled when in PR and not empty as for the other cis
@@ -149,28 +149,38 @@ def upload_or_check(recipe_dir, owner, channel, variant):
     # for all uploads
     if token:
         with get_temp_token(cli.token) as token_fn:
-            if _should_validate():
+            if validate:
                 for name, version, path in built_distributions:
                     for i in range(0, 15):
-                        sleep(i*15)
-                        if not built_distribution_already_exists(cli, name, version, path, owner):
+                        time.sleep(i*15)
+                        if not built_distribution_already_exists(
+                            cli, name, version, path, owner
+                        ):
                             upload(token_fn, path, owner, channel)
                             break
                     else:
-                        print("WARNING: Distribution {} already existed in {} for a while.".format(path, owner))
+                        print(
+                            "WARNING: Distribution {} already existed in "
+                            "{} for a while.".format(path, owner)
+                        )
                         print("         Deleting and re-uploading.")
                         delete_dist(token_fn, path, owner, channel)
                         upload(token_fn, path, owner, channel)
 
-                return request_copy([
-                    os.path.relpath(conda_build.config.croot, path)
-                    for _, _, path in built_distributions], channel)
+                return request_copy(
+                    feedstock,
+                    [path for _, _, path in built_distributions],
+                    channel,
+                )
             else:
                 for name, version, path in built_distributions:
-                    if not built_distribution_already_exists(cli, name, version, path, owner):
+                    if not built_distribution_already_exists(
+                        cli, name, version, path, owner
+                    ):
                         upload(token_fn, path, owner, channel)
                     else:
-                        print('Distribution {} already exists for {}'.format(path, owner))
+                        print(
+                            'Distribution {} already exists for {}'.format(path, owner))
                 return True
     else:
         for name, version, path in built_distributions:
@@ -183,12 +193,16 @@ def upload_or_check(recipe_dir, owner, channel, variant):
         return False
 
 
-def retry_upload_or_check(recipe_dir, owner, channel, variant):
+def retry_upload_or_check(
+    feedstock, recipe_dir, owner, channel, variant, validate=False
+):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
     for i in range(1, 10):
         try:
-            res = upload_or_check(recipe_dir, owner, channel, variant)
+            res = upload_or_check(
+                feedstock, recipe_dir, owner, channel, variant, validate=validate
+            )
             return res
         except Exception as e:
             timeout = i ** 2
@@ -214,7 +228,7 @@ def main(recipe_dir, owner, channel, variant):
     Upload or check consistency of a built version of a conda recipe with binstar.
     Note: The existence of the BINSTAR_TOKEN environment variable determines
     whether the upload should actually take place."""
-    return retry_upload_or_check(recipe_dir, owner, channel, variant)
+    return retry_upload_or_check(None, recipe_dir, owner, channel, variant)
 
 
 if __name__ == '__main__':
