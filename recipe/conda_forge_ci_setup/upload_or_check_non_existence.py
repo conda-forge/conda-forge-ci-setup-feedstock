@@ -162,7 +162,7 @@ def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=Fal
                             print(
                                 "Distribution {} already exists on {}. "
                                 "Waiting another {} seconds to "
-                                "try again.".format(path, owner, (i+1) * 15))
+                                "try uploading again.".format(path, owner, (i+1) * 15))
                     else:
                         print(
                             "WARNING: Distribution {} already existed in "
