@@ -158,12 +158,17 @@ def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=Fal
                         ):
                             upload(token_fn, path, owner, channel)
                             break
+                        else:
+                            print(
+                                "Distribution {} already exists on {}. "
+                                "Waiting another {} seconds to "
+                                "try again.".format(path, owner, (i+1) * 15))
                     else:
                         print(
                             "WARNING: Distribution {} already existed in "
-                            "{} for a while.".format(path, owner)
+                            "{} for a while. Deleting and "
+                            "re-uploading.".format(path, owner)
                         )
-                        print("         Deleting and re-uploading.")
                         delete_dist(token_fn, path, owner, channel)
                         upload(token_fn, path, owner, channel)
 
@@ -211,7 +216,7 @@ def retry_upload_or_check(
         except Exception as e:
             timeout = i ** 2
             print(
-                "Failed to upload due to {}.  Trying again in {} seconds".format(
+                "Failed to upload due to {}. Trying again in {} seconds".format(
                     e, timeout))
             time.sleep(timeout)
     raise TimeoutError("Did not manage to upload package.  Failing.")
