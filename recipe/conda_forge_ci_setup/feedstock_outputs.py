@@ -35,7 +35,7 @@ def request_copy(feedstock, dists, channel):
         dist = _unix_dist_path(path)
         checksums[dist] = _compute_md5sum(path)
 
-    if "FEEDSTOCK_TOKEN" not in os.environ:
+    if "FEEDSTOCK_TOKEN" not in os.environ or os.environ["FEEDSTOCK_TOKEN"] is None:
         print(
             "ERROR you must have defined a FEEDSTOCK_TOKEN in order to "
             "perform output copies to the production channels!"
