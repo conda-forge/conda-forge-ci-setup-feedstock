@@ -2,19 +2,19 @@ import os
 import sys
 import hashlib
 import json
-import functools
+import pprint
 
 import conda_build
+import conda_build.config
 import requests
 import click
 
-try:
-    from ruamel_yaml import safe_load
-except ImportError:
-    from yaml import safe_load
-
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
+
+
+def _unix_dist_path(path):
+    return "/".join(path.split(os.sep)[-2:])
 
 
 def _compute_md5sum(pth):
@@ -29,18 +29,18 @@ def _compute_md5sum(pth):
     return h.hexdigest()
 
 
-def request_copy(dists, channel):
+def request_copy(feedstock, dists, channel):
     checksums = {}
-    for dist in dists:
-        checksums[dist] = _compute_md5sum(dist)
+    for path in dists:
+        dist = _unix_dist_path(path)
+        checksums[dist] = _compute_md5sum(path)
 
-    feedstock = os.path.basename(os.getcwd())
-
-    if "FEEDSTOCK_TOKEN" not in os.environ:
+    if "FEEDSTOCK_TOKEN" not in os.environ or os.environ["FEEDSTOCK_TOKEN"] is None:
         print(
             "ERROR you must have defined a FEEDSTOCK_TOKEN in order to "
             "perform output copies to the production channels!"
         )
+        return False
 
     headers = {"FEEDSTOCK_TOKEN": os.environ["FEEDSTOCK_TOKEN"]}
     json_data = {
@@ -69,25 +69,10 @@ def request_copy(dists, channel):
     return r.status_code == 200
 
 
-@functools.lru_cache(maxsize=1)
-def _should_validate():
-    if os.path.exists("conda-forge.yml"):
-        with open("conda-forge.yml", "r") as fp:
-            cfg = safe_load(fp)
-
-        return cfg.get("conda_forge_output_validation", False)
-    else:
-        return False
-
-
 @click.command()
-def main():
+@click.argument("feedstock_name", type=str)
+def main(feedstock_name):
     """Validate the feedstock outputs."""
-
-    if not _should_validate():
-        sys.exit(0)
-
-    feedstock = os.path.basename(os.getcwd())
 
     paths = (
         [
@@ -98,12 +83,16 @@ def main():
             os.path.join(conda_build.config.subdir, p)
             for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
         ])
-    built_distributions = [path for path in paths if path.endswith('.tar.bz2')]
+    built_distributions = [
+        _unix_dist_path(path) for path in paths if path.endswith('.tar.bz2')
+    ]
+
+    print("validating outputs:\n%s" % pprint.pformat(built_distributions))
 
     r = requests.post(
         "%s/feedstock-outputs/validate" % VALIDATION_ENDPOINT,
         json={
-            "feedstock": feedstock,
+            "feedstock": feedstock_name,
             "outputs": built_distributions,
         },
     )

@@ -32,7 +32,7 @@ jobs:
       source activate base
       echo "Configuring conda."
 
-      conda install -c conda-forge --quiet --yes conda-forge-ci-setup=2 conda-build pip
+      conda install -c conda-forge --quiet --yes conda-forge-ci-setup=3 conda-build pip
       conda update --yes --quiet --override-channels -c conda-forge -c defaults --all
       conda uninstall --quiet --yes --force conda-forge-ci-setup
       pip install --no-deps recipe/.
@@ -45,7 +45,7 @@ jobs:
     env: {
       OSX_FORCE_SDK_DOWNLOAD: "1"
     }
-    displayName: 'Configure conda, conda-build, and add conda-forge-ci-setup=2'
+    displayName: 'Configure conda, conda-build, and add conda-forge-ci-setup=3'
 
   - script: |
       echo "Mangling homebrew from Azure to avoid conflicts."
@@ -72,7 +72,7 @@ jobs:
   - script: |
       source activate base
       export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
-      upload_package ./ "./recipe" ./.ci_support/${CONFIG}.yaml
+      upload_package "conda-forge-ci-setup-feedstock" ./ "./recipe" ./.ci_support/${CONFIG}.yaml
     displayName: Upload package
     env:
       BINSTAR_TOKEN: $(BINSTAR_TOKEN)
