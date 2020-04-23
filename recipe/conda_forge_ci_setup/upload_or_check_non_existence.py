@@ -79,7 +79,8 @@ def upload(token_fn, path, owner, channels):
 
 
 def delete_dist(token_fn, path, owner, channels):
-    path = os.path.relpath(conda_build.config.croot, path)
+    parts = path.split(os.sep)
+    path = os.path.join(parts[-2], parts[-1])
     _, name, ver, _ = split_pkg(path)
     subprocess.check_call(
         [
