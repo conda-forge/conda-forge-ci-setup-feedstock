@@ -85,7 +85,7 @@ def delete_dist(token_fn, path, owner, channels):
     subprocess.check_call(
         [
             'anaconda', '--quiet', '-t', token_fn,
-            'remove', '-f', '"%s/%s/%s/%s/%s"' % (
+            'remove', '-f', '%s/%s/%s/%s/%s' % (
                 owner, name, ver, parts[-2], parts[-1]),
         ],
         env=os.environ
