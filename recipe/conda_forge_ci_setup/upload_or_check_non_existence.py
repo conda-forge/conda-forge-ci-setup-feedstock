@@ -151,7 +151,7 @@ def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=Fal
         with get_temp_token(cli.token) as token_fn:
             if validate:
                 for name, version, path in built_distributions:
-                    for i in range(0, 15):
+                    for i in range(0, 5):
                         time.sleep(i*15)
                         if not built_distribution_already_exists(
                             cli, name, version, path, owner
@@ -167,11 +167,15 @@ def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=Fal
                         delete_dist(token_fn, path, owner, channel)
                         upload(token_fn, path, owner, channel)
 
-                return request_copy(
+                if not request_copy(
                     feedstock,
                     [path for _, _, path in built_distributions],
                     channel,
-                )
+                ):
+                    raise RuntimeError(
+                        "copy from staging to production channel failed")
+                else:
+                    return True
             else:
                 for name, version, path in built_distributions:
                     if not built_distribution_already_exists(
