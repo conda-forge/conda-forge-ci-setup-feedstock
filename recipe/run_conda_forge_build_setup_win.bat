@@ -40,12 +40,13 @@ set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
 
-dir C:\Windows\System32\
-:: On some systems (e.g. azure), there are libcrypto.dll & libssl.dll under
-:: C:\Windows\System32, which should not be there (no vendor dlls in windows folder).
-:: They would be found before the openssl libs of the conda environment, so we delete them.
-DEL C:\Windows\System32\libcrypto.dll || (Echo Ignoring failure to delete C:\Windows\System32\libcrypto.dll)
-DEL C:\Windows\System32\libssl.dll || (Echo Ignoring failure to delete C:\Windows\System32\libssl.dll)
+if "%CI%" == "azure" (
+    :: On azure, there are libcrypto*.dll & libssl*.dll under
+    :: C:\Windows\System32, which should not be there (no vendor dlls in windows folder).
+    :: They would be found before the openssl libs of the conda environment, so we delete them.
+    DEL C:\Windows\System32\libcrypto-1_1-x64.dll || (Echo Ignoring failure to delete C:\Windows\System32\libcrypto-1_1-x64.dll)
+    DEL C:\Windows\System32\libssl-1_1-x64.dll || (Echo Ignoring failure to delete C:\Windows\System32\libssl-1_1-x64.dll)
+)
 
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
 set "PATH=%PATH:ostedtoolcache=%"
