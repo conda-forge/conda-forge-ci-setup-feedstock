@@ -115,7 +115,10 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
 
 
 def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=False):
-    token = os.environ.get('BINSTAR_TOKEN')
+    if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
+        token = os.environ["STAGING_BINSTAR_TOKEN"]
+    else:
+        token = os.environ.get('BINSTAR_TOKEN')
 
     # Azure's tokens are filled when in PR and not empty as for the other cis
     # In pr they will have a value like '$(secret-name)'
