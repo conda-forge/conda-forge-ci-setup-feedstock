@@ -40,10 +40,10 @@ set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
 
+:: On azure, there are libcrypto*.dll & libssl*.dll under
+:: C:\Windows\System32, which should not be there (no vendor dlls in windows folder).
+:: They would be found before the openssl libs of the conda environment, so we delete them.
 if defined CI (
-    :: On azure, there are libcrypto*.dll & libssl*.dll under
-    :: C:\Windows\System32, which should not be there (no vendor dlls in windows folder).
-    :: They would be found before the openssl libs of the conda environment, so we delete them.
     DEL C:\Windows\System32\libcrypto-1_1-x64.dll || (Echo Ignoring failure to delete C:\Windows\System32\libcrypto-1_1-x64.dll)
     DEL C:\Windows\System32\libssl-1_1-x64.dll || (Echo Ignoring failure to delete C:\Windows\System32\libssl-1_1-x64.dll)
 )
