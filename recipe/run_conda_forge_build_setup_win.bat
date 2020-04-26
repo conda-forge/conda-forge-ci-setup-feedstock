@@ -40,6 +40,7 @@ set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
 
+dir C:\Windows\System32\
 :: On some systems (e.g. azure), there are libcrypto.dll & libssl.dll under
 :: C:\Windows\System32, which should not be there (no vendor dlls in windows folder).
 :: They would be found before the openssl libs of the conda environment, so we delete them.
