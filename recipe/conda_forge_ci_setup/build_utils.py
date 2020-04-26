@@ -111,12 +111,15 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
 
 @click.command()
-@click.argument("feedstock_name", type=str)
 @arg_feedstock_root
 @arg_recipe_root
 @arg_config_file
 @click.option("--validate", is_flag=True)
-def upload_package(feedstock_name, feedstock_root, recipe_root, config_file, validate):
+@click.option("--feedstock-name", type=str, default=None)
+def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock_name):
+    if feedstock_name is None and validate:
+        raise RuntimeError("You must supply the --feedstock-name option if validating!")
+
     specific_config = safe_load(open(config_file))
     if "channel_targets" in specific_config:
         channels = [c.strip().split(" ") for c in specific_config["channel_targets"]]

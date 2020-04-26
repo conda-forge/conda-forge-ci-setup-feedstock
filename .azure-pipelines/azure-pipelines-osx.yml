@@ -20,60 +20,10 @@ jobs:
   steps:
   # TODO: Fast finish on azure pipelines?
   - script: |
-      echo "Fast Finish"
-      
-
-  - bash: |
-      echo "##vso[task.prependpath]$CONDA/bin"
-      sudo chown -R $USER $CONDA
-    displayName: Add conda to PATH
-
-  - script: |
-      source activate base
-      echo "Configuring conda."
-
-      conda install -c conda-forge --quiet --yes conda-forge-ci-setup=3 conda-build pip
-      conda update --yes --quiet --override-channels -c conda-forge -c defaults --all
-      conda uninstall --quiet --yes --force conda-forge-ci-setup
-      pip install --no-deps recipe/.
-
-      setup_conda_rc ./ "./recipe" ./.ci_support/${CONFIG}.yaml
       export CI=azure
-      # Overriding global run_conda_forge_build_setup_osx with local copy.
-      source recipe/run_conda_forge_build_setup_osx
-
-    env: {
-      OSX_FORCE_SDK_DOWNLOAD: "1"
-    }
-    displayName: 'Configure conda, conda-build, and add conda-forge-ci-setup=3'
-
-  - script: |
-      echo "Mangling homebrew from Azure to avoid conflicts."
-      source activate base
-      /usr/bin/sudo mangle_homebrew
-      /usr/bin/sudo -k
-    displayName: Mangle homebrew
-
-  - script: |
-      source activate base
-      mangle_compiler ./ "./recipe" ./.ci_support/${CONFIG}.yaml
-    displayName: Mangle compiler
-
-  - script: |
-      source activate base
-      make_build_number ./ "./recipe" ./.ci_support/${CONFIG}.yaml
-    displayName: Generate build number clobber file
-
-  - script: |
-      source activate base
-      conda build "./recipe" -m ./.ci_support/${CONFIG}.yaml --clobber-file ./.ci_support/clobber_${CONFIG}.yaml
-    displayName: Build recipe
-
-  - script: |
-      source activate base
+      export OSX_FORCE_SDK_DOWNLOAD="1"
       export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
-      upload_package "conda-forge-ci-setup-feedstock" ./ "./recipe" ./.ci_support/${CONFIG}.yaml
-    displayName: Upload package
+      ./.scripts/run_osx_build.sh
+    displayName: Run OSX build
     env:
       BINSTAR_TOKEN: $(BINSTAR_TOKEN)
-    condition: and(succeeded(), not(eq(variables['UPLOAD_PACKAGES'], 'False')))
