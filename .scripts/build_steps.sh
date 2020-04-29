@@ -23,7 +23,8 @@ conda install --yes --quiet conda-forge-ci-setup=2 conda-build pip -c conda-forg
 
 conda uninstall --quiet --yes --force conda-forge-ci-setup
 pushd $(mktemp -d)
-pip install --no-deps ${RECIPE_ROOT}/.
+cp -r ${RECIPE_ROOT}/. .
+pip install --no-deps .
 popd
 
 # set up the condarc
