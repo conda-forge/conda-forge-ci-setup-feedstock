@@ -25,8 +25,6 @@ if "%CI%" == "" (
     echo - %CI% >> .ci_support\%CONFIG%.yaml
 )
 
-python -c "import os;print(os.environ['PATH'])"
-
 :: Remove some directories from PATH
 set "PATH=%PATH:C:\ProgramData\Chocolatey\bin;=%"
 set "PATH=%PATH:C:\Program Files (x86)\sbt\bin;=%"
@@ -41,8 +39,6 @@ set "PATH=%PATH:C:\Strawberry\c\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
-
-python -c "import os;print(os.environ['PATH'])"
 
 :: On azure, there are libcrypto*.dll & libssl*.dll under
 :: C:\Windows\System32, which should not be there (no vendor dlls in windows folder).
