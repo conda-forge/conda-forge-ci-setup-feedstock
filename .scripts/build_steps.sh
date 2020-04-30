@@ -22,9 +22,7 @@ CONDARC
 conda install --yes --quiet conda-forge-ci-setup=2 conda-build pip -c conda-forge
 
 conda uninstall --quiet --yes --force conda-forge-ci-setup
-pushd $(mktemp -d)
-python ${RECIPE_ROOT}/setup.py install --single-version-externally-managed --record record.txt
-popd
+pip install --no-deps ${RECIPE_ROOT}/.
 
 # set up the condarc
 setup_conda_rc "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
