@@ -166,7 +166,7 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         text=True,
         cwd=feedstock_root,
     ).stdout.strip()
-    print("found git SHA %s for this build!" % git_sha)
+    print("Found git SHA %s for this build!" % git_sha)
 
     for owner, channel in channels:
         if validate and owner == "conda-forge":
