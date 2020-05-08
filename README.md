@@ -15,7 +15,35 @@ Current build status
 ====================
 
 
-<table>
+<table><tr>
+    <td>CircleCI</td>
+    <td>
+      <a href="https://circleci.com/gh/conda-forge/conda-forge-ci-setup-feedstock">
+        <img alt="OSX" src="https://img.shields.io/circleci/project/github/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=OSX">
+      </a>
+    </td>
+  </tr><tr>
+    <td>Travis</td>
+    <td>
+      <a href="https://travis-ci.com/conda-forge/conda-forge-ci-setup-feedstock">
+        <img alt="macOS" src="https://img.shields.io/travis/com/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=macOS">
+      </a>
+    </td>
+  </tr><tr>
+    <td>Drone</td>
+    <td>
+      <a href="https://cloud.drone.io/conda-forge/conda-forge-ci-setup-feedstock">
+        <img alt="linux" src="https://img.shields.io/drone/build/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=Linux">
+      </a>
+    </td>
+  </tr><tr>
+    <td>Appveyor</td>
+    <td>
+      <a href="https://ci.appveyor.com/project/conda-forge/conda-forge-ci-setup-feedstock/branch/master">
+        <img alt="windows" src="https://img.shields.io/appveyor/ci/conda-forge/conda-forge-ci-setup-feedstock/master.svg?label=Windows">
+      </a>
+    </td>
+  </tr>
     
   <tr>
     <td>Azure</td>
