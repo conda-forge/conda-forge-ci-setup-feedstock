@@ -50,6 +50,7 @@ requirements:
     - ruamel_yaml
     - pip
     - pyyaml
+    - git
 
 test:
   commands:

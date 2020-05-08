@@ -42,7 +42,7 @@ install:
 
     # Configure the VM.
     # Tell conda we want an updated version of conda-forge-ci-setup and conda-build
-    - cmd: conda.exe install -n root -c conda-forge --quiet --yes conda-forge-ci-setup=3 conda-build pip
+    - cmd: conda.exe install -n root -c conda-forge --quiet --yes conda-forge-ci-setup=3 conda-build pip git
     - cmd: conda.exe uninstall --quiet --yes --force conda-forge-ci-setup
     - cmd: pip install --no-deps .\recipe\.
     - cmd: setup_conda_rc .\ .\recipe .\.ci_support\%CONFIG%.yaml
