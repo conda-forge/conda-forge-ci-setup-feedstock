@@ -163,9 +163,8 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         check=True,
         stdout=subprocess.PIPE,
         shell=True,
-        text=True,
         cwd=feedstock_root,
-    ).stdout.strip()
+    ).stdout.decode("utf-8").strip()
     if len(git_sha) == 0:
         git_sha = None
         print("Did not find git SHA for this build!")
