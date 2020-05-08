@@ -10,6 +10,6 @@ max_r_ver: '35'
 provider:
   linux_aarch64: native
   linux_ppc64le: azure
-  win: appveyor
+  win: azure
   osx: circle
   linux: travis
