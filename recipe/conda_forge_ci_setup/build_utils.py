@@ -161,12 +161,16 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
     git_sha = subprocess.run(
         "git rev-parse HEAD",
         check=True,
-        capture_output=True,
+        stdout=subprocess.PIPE,
         shell=True,
         text=True,
         cwd=feedstock_root,
     ).stdout.strip()
-    print("Found git SHA %s for this build!" % git_sha)
+    if len(git_sha) == 0:
+        git_sha = None
+        print("Did not find git SHA for this build!")
+    else:
+        print("Found git SHA %s for this build!" % git_sha)
 
     for owner, channel in channels:
         if validate and owner == "conda-forge":
