@@ -114,7 +114,9 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
     return on_channel
 
 
-def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=False):
+def upload_or_check(
+    feedstock, recipe_dir, owner, channel, variant, validate=False, git_sha=None
+):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
         print("Using STAGING_BINSTAR_TOKEN for anaconda.org uploads to %s." % owner)
@@ -183,6 +185,7 @@ def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=Fal
                     feedstock,
                     [path for _, _, path in built_distributions],
                     channel,
+                    git_sha=git_sha,
                 ):
                     raise RuntimeError(
                         "copy from staging to production channel failed")
@@ -210,14 +213,16 @@ def upload_or_check(feedstock, recipe_dir, owner, channel, variant, validate=Fal
 
 
 def retry_upload_or_check(
-    feedstock, recipe_dir, owner, channel, variant, validate=False
+    feedstock, recipe_dir, owner, channel, variant, validate=False, git_sha=None,
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
-    for i in range(1, 10):
+    n_try = 10
+    for i in range(1, n_try):
         try:
             res = upload_or_check(
-                feedstock, recipe_dir, owner, channel, variant, validate=validate
+                feedstock, recipe_dir, owner, channel, variant,
+                validate=validate, git_sha=git_sha if i == n_try-1 else None,
             )
             return res
         except Exception as e:

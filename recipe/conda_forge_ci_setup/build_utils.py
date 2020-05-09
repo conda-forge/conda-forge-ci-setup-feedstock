@@ -157,11 +157,25 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
                     "is not allowed" % ("conda-forge", source_channel))
                 return
 
+    # get the git sha of the current commit
+    git_sha = subprocess.run(
+        "git rev-parse HEAD",
+        check=True,
+        stdout=subprocess.PIPE,
+        shell=True,
+        cwd=feedstock_root,
+    ).stdout.decode("utf-8").strip()
+    if len(git_sha) == 0:
+        git_sha = None
+        print("Did not find git SHA for this build!")
+    else:
+        print("Found git SHA %s for this build!" % git_sha)
+
     for owner, channel in channels:
         if validate and owner == "conda-forge":
             retry_upload_or_check(
                 feedstock_name, recipe_root, STAGING, channel,
-                [config_file], validate=True)
+                [config_file], validate=True, git_sha=git_sha)
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
