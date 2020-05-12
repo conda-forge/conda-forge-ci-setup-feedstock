@@ -227,7 +227,8 @@ def retry_upload_or_check(
             )
             return res
         except Exception as e:
-            timeout = i ** 2
+            # exponential backoff, wait at least 10 seconds
+            timeout = max(1.75 ** i, 10)
             print(
                 "Failed to upload due to {}. Trying again in {} seconds".format(
                     e, timeout))
