@@ -206,7 +206,8 @@ def upload_or_check(
             if not built_distribution_already_exists(cli, name, version, path, owner):
                 print(
                     "Distribution {} is new for {}, but no upload is taking place "
-                    "because the BINSTAR_TOKEN is missing.".format(path, owner))
+                    "because the BINSTAR_TOKEN/STAGING_BINSTAR_TOKEN "
+                    "is missing or empty.".format(path, owner))
             else:
                 print('Distribution {} already exists for {}'.format(path, owner))
         return False
