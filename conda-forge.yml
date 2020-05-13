@@ -13,4 +13,4 @@ provider:
   win: azure
   osx: circle
   linux: travis
-conda_forge_output_validation: true
+conda_forge_output_validation: false
