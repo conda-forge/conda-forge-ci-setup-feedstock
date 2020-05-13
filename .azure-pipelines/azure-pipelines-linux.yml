@@ -8,6 +8,14 @@ jobs:
     vmImage: ubuntu-16.04
   strategy:
     matrix:
+      linux_aarch64_python3.6.____cpython:
+        CONFIG: linux_aarch64_python3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-aarch64
+      linux_aarch64_python3.7.____cpython:
+        CONFIG: linux_aarch64_python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-aarch64
       linux_ppc64le_python3.6.____cpython:
         CONFIG: linux_ppc64le_python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -16,6 +24,14 @@ jobs:
         CONFIG: linux_ppc64le_python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-ppc64le
+      linux_python3.6.____cpython:
+        CONFIG: linux_python3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-comp7
+      linux_python3.7.____cpython:
+        CONFIG: linux_python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-comp7
     maxParallel: 8
   timeoutInMinutes: 360
 
@@ -35,3 +51,5 @@ jobs:
     displayName: Run docker build
     env:
       BINSTAR_TOKEN: $(BINSTAR_TOKEN)
+      FEEDSTOCK_TOKEN: $(FEEDSTOCK_TOKEN)
+      STAGING_BINSTAR_TOKEN: $(STAGING_BINSTAR_TOKEN)

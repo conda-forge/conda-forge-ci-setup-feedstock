@@ -1,16 +1,19 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.0.7" %}
+{% set version = "3.0.8" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  git_url: {{ environ.get('FEEDSTOCK_ROOT', '..') }}
+  path: .
 
 build:
   number: 0
   script:
+    - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
+    - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]
+    - COPY "%RECIPE_DIR%\\..\\LICENSE.txt" "%RECIPE_DIR%\\LICENSE.txt"                       # [win]
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
@@ -73,4 +76,4 @@ about:
 
 extra:
   recipe-maintainers:
-    - conda-forge/Core
+    - conda-forge/core

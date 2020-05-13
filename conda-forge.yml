@@ -8,9 +8,9 @@ compiler_stack: comp7
 max_py_ver: '37'
 max_r_ver: '35'
 provider:
-  linux_aarch64: native
+  linux_aarch64: azure
   linux_ppc64le: azure
   win: azure
-  osx: circle
-  linux: travis
-conda_forge_output_validation: false
+  osx: azure
+  linux: azure
+conda_forge_output_validation: true
