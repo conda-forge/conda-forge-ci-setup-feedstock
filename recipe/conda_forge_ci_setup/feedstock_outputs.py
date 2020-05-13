@@ -158,6 +158,7 @@ def main(feedstock_name):
     results = is_valid_feedstock_output(feedstock_name, built_distributions)
 
     print("validation results:\n%s" % json.dumps(results, indent=2))
+    print("NOTE: Any outputs marked as False are not allowed for this feedstock.")
 
     if not all(v for v in results.values()):
         sys.exit(1)
