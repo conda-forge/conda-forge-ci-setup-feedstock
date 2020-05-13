@@ -10,11 +10,19 @@ import conda_build.config
 import requests
 import click
 
-from .upload_or_check_non_existence import split_pkg
-
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
 OUTPUTS_REPO = "https://${GH_TOKEN}@github.com/conda-forge/feedstock-outputs.git"
+
+
+def split_pkg(pkg):
+    if not pkg.endswith(".tar.bz2"):
+        raise RuntimeError("Can only process packages that end in .tar.bz2")
+    pkg = pkg[:-8]
+    plat, pkg_name = pkg.split(os.path.sep)
+    name_ver, build = pkg_name.rsplit('-', 1)
+    name, ver = name_ver.rsplit('-', 1)
+    return plat, name, ver, build
 
 
 def _unix_dist_path(path):
