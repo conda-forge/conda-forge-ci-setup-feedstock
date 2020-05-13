@@ -12,7 +12,7 @@ import click
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
-OUTPUTS_REPO = "https://${GH_TOKEN}@github.com/conda-forge/feedstock-outputs.git"
+OUTPUTS_REPO = "https://github.com/conda-forge/feedstock-outputs.git"
 
 
 def split_pkg(pkg):
