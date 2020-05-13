@@ -151,9 +151,7 @@ def main(feedstock_name):
             os.path.join(conda_build.config.subdir, p)
             for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
         ])
-    built_distributions = [
-        _unix_dist_path(path) for path in paths if path.endswith('.tar.bz2')
-    ]
+    built_distributions = [path for path in paths if path.endswith('.tar.bz2')]
 
     results = is_valid_feedstock_output(feedstock_name, built_distributions)
 
