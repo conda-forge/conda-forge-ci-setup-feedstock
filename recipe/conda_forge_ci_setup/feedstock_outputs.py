@@ -2,15 +2,19 @@ import os
 import sys
 import hashlib
 import json
-import pprint
+import tempfile
+import subprocess
 
 import conda_build
 import conda_build.config
 import requests
 import click
 
+from .upload_or_check_non_existence import split_pkg
+
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
+OUTPUTS_REPO = "https://${GH_TOKEN}@github.com/conda-forge/feedstock-outputs.git"
 
 
 def _unix_dist_path(path):
@@ -71,6 +75,60 @@ def request_copy(feedstock, dists, channel, git_sha=None):
     return r.status_code == 200
 
 
+def is_valid_feedstock_output(project, outputs):
+    """Test if feedstock outputs are valid (i.e., the outputs are allowed for that
+    feedstock). Optionally register them if they do not exist.
+
+    Parameters
+    ----------
+    project : str
+        The GitHub repo.
+    outputs : list of str
+        A list of ouputs top validate. The list entries should be the
+        full names with the platform directory, version/build info, and file extension
+        (e.g., `noarch/blah-fa31b0-2020.04.13.15.54.07-py_0.tar.bz2`).
+
+    Returns
+    -------
+    valid : dict
+        A dict keyed on output name with True if it is valid and False
+        otherwise.
+    """
+    if project.endswith("-feedstock"):
+        feedstock = project[:-len("-feedstock")]
+    else:
+        feedstock = project
+
+    valid = {o: False for o in outputs}
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo_path = os.path.join(tmpdir, "feedstock-outputs")
+
+        subprocess.run(
+            ["git", "clone", "--depth=1", OUTPUTS_REPO, repo_path],
+            check=True,
+        )
+
+        for dist in outputs:
+            try:
+                _, o, _, _ = split_pkg(dist)
+            except RuntimeError:
+                continue
+
+            pth = os.path.join(repo_path, "outputs", o + ".json")
+
+            if not os.path.exists(pth):
+                # no output exists and we can add it
+                valid[dist] = True
+            else:
+                # make sure feedstock is ok
+                with open(pth, "r") as fp:
+                    data = json.load(fp)
+                valid[dist] = feedstock in data["feedstocks"]
+
+    return valid
+
+
 @click.command()
 @click.argument("feedstock_name", type=str)
 def main(feedstock_name):
@@ -89,34 +147,9 @@ def main(feedstock_name):
         _unix_dist_path(path) for path in paths if path.endswith('.tar.bz2')
     ]
 
-    print("validating outputs:\n%s" % pprint.pformat(built_distributions))
-
-    r = requests.post(
-        "%s/feedstock-outputs/validate" % VALIDATION_ENDPOINT,
-        json={
-            "feedstock": feedstock_name,
-            "outputs": built_distributions,
-        },
-    )
-
-    if r.status_code != 200:
-        print(
-            "ERROR: output validation failed - your recipe/feedstock is "
-            "producing outputs that are already used by another "
-            "recipe/feedstock!"
-        )
-
-    try:
-        results = r.json()
-    except Exception as e:
-        print(
-            "ERROR getting output validation information "
-            "from the webservice:",
-            repr(e)
-        )
-        results = {}
+    results = is_valid_feedstock_output(feedstock_name, built_distributions)
 
     print("validation results:\n%s" % json.dumps(results, indent=2))
 
-    if r.status_code != 200:
+    if not all(v for v in results.values):
         sys.exit(1)
