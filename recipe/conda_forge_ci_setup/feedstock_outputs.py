@@ -159,5 +159,5 @@ def main(feedstock_name):
 
     print("validation results:\n%s" % json.dumps(results, indent=2))
 
-    if not all(v for v in results.values):
+    if not all(v for v in results.values()):
         sys.exit(1)
