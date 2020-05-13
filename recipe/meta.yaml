@@ -11,6 +11,8 @@ source:
 build:
   number: 0
   script:
+    - cp {{ os.environ('FEEDSTOCK_ROOT') }}/LICENSE.txt {{ os.environ('FEEDSTOCK_ROOT') }}/recipe/LICENSE.txt            # [unix]
+    - COPY "{{ os.environ('FEEDSTOCK_ROOT') }}\\LICENSE.txt" "{{ os.environ('FEEDSTOCK_ROOT') }}\\recipe\\LICENSE.txt"   # [win]
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
