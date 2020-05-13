@@ -6,18 +6,19 @@ jobs:
 - job: linux
   pool:
     vmImage: ubuntu-16.04
-  timeoutInMinutes: 360
   strategy:
-    maxParallel: 8
     matrix:
       linux_ppc64le_python3.6.____cpython:
         CONFIG: linux_ppc64le_python3.6.____cpython
-        UPLOAD_PACKAGES: True
+        UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-ppc64le
       linux_ppc64le_python3.7.____cpython:
         CONFIG: linux_ppc64le_python3.7.____cpython
-        UPLOAD_PACKAGES: True
+        UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-ppc64le
+    maxParallel: 8
+  timeoutInMinutes: 360
+
   steps:
   # configure qemu binfmt-misc running.  This allows us to run docker containers
   # embedded qemu-static

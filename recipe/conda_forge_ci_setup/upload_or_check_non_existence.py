@@ -206,7 +206,8 @@ def upload_or_check(
             if not built_distribution_already_exists(cli, name, version, path, owner):
                 print(
                     "Distribution {} is new for {}, but no upload is taking place "
-                    "because the BINSTAR_TOKEN is missing.".format(path, owner))
+                    "because the BINSTAR_TOKEN/STAGING_BINSTAR_TOKEN "
+                    "is missing or empty.".format(path, owner))
             else:
                 print('Distribution {} already exists for {}'.format(path, owner))
         return False
@@ -226,7 +227,8 @@ def retry_upload_or_check(
             )
             return res
         except Exception as e:
-            timeout = i ** 2
+            # exponential backoff, wait at least 10 seconds
+            timeout = max(1.75 ** i, 10)
             print(
                 "Failed to upload due to {}. Trying again in {} seconds".format(
                     e, timeout))
