@@ -4,6 +4,7 @@ import hashlib
 import json
 import tempfile
 import subprocess
+import shutil
 
 import conda_build
 import conda_build.config
@@ -109,7 +110,9 @@ def is_valid_feedstock_output(project, outputs):
 
     valid = {o: False for o in outputs}
 
-    with tempfile.TemporaryDirectory() as tmpdir:
+    tmpdir = None
+    try:
+        tmpdir = tempfile.mkdtemp('_recipe')
         repo_path = os.path.join(tmpdir, "feedstock-outputs")
 
         subprocess.run(
@@ -133,6 +136,14 @@ def is_valid_feedstock_output(project, outputs):
                 with open(pth, "r") as fp:
                     data = json.load(fp)
                 valid[dist] = feedstock in data["feedstocks"]
+    finally:
+        if tmpdir is not None:
+            # windows builds on azure sometimes fail when trying to remove
+            # tmpdirs, so we try and if it fails just move on
+            try:
+                shutil.rmtree(tmpdir)
+            except Exception:
+                pass
 
     return valid
 
