@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.0.8" %}
+{% set version = "3.0.9" %}
 
 package:
   name: {{ name|lower }}
@@ -53,7 +53,8 @@ requirements:
     - ruamel_yaml
     - pip
     - pyyaml
-    - git
+    - m2-git  # [win]
+    - git     # [unix]
 
 test:
   commands:
