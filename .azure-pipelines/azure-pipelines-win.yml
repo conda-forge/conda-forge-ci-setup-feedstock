@@ -93,7 +93,7 @@ jobs:
 
     - script: |
         call activate base
-        Get-Command git
+        where git
         conda.exe build "recipe" -m .ci_support\%CONFIG%.yaml
       displayName: Build recipe
       env:
