@@ -25,6 +25,26 @@ if [[ "$CONFIG" == *_pypy* ]]; then
   conda config --set channel_priority strict
 fi
 
+# the upstream image nvidia/cuda:9.2-devel-centos6 (on which linux-anvil-cuda:9.2 is based)
+# does not contain libcuda.so; it should be installed in ${CUDA_HOME}/compat-${CUDA_VER},
+# however cuda-compat-${CUDA_VER}.x86_64.rpm is only packaged for 10.x; we abuse
+# cuda-compat-10.0 for this, since the actual dependency containing libcuda for 9.2
+# (xorg-x11-drv-nvidia-libs) pulls in a huge amount of dependencies;
+# this cannot be fixed in the conda-forge linux-anvil-cuda images for licensing reasons
+# (cannot add cuda-package in our image layers), so we add it here for CI purposes only.
+if [[ ! -z "$CUDA_HOME" && -d /usr/local/cuda-9.2 ]]; then
+  # note: $CUDA_HOME is just a symlink to /usr/local/cuda-${CUDA_VER}
+
+  # register cuda-repo with installer, cf.
+  # https://developer.download.nvidia.com/compute/cuda/repos/rhel6/x86_64/
+  curl -O https://developer.download.nvidia.com/compute/cuda/repos/rhel6/x86_64/cuda-repo-rhel6-9.2.148-1.x86_64.rpm
+  sudo yum localinstall -y cuda-repo-*.rpm
+  rm cuda-repo-*.rpm
+  # install latest cuda-compat-10-0
+  sudo yum install -y cuda-compat-10-0.x86_64 ;
+  # note: this path is added to ldconfig in linux-anvil-cuda:9.2
+  if [[ ! -f "/usr/local/cuda-10.0/compat/libcuda.so" ]]; then exit 1; fi
+fi
 
 if [ ! -z "$CONFIG" ]; then
     if [ ! -z "$CI" ]; then

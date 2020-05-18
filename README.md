@@ -43,6 +43,76 @@ Current build status
                 </a>
               </td>
             </tr><tr>
+              <td>linux_cuda_compiler_version10.0python3.6.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.0python3.6.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version10.0python3.7.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.0python3.7.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version10.1python3.6.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.1python3.6.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version10.1python3.7.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.1python3.7.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version10.2python3.6.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.2python3.6.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version10.2python3.7.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.2python3.7.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version9.2python3.6.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version9.2python3.6.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_version9.2python3.7.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version9.2python3.7.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_versionNonepython3.6.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_versionNonepython3.6.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_cuda_compiler_versionNonepython3.7.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_versionNonepython3.7.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
               <td>linux_ppc64le_python3.6.____cpython</td>
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
@@ -54,20 +124,6 @@ Current build status
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
                   <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_ppc64le_python3.7.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_python3.6.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_python3.6.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_python3.7.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5375&branchName=master">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/conda-forge-ci-setup-feedstock?branchName=master&jobName=linux&configuration=linux_python3.7.____cpython" alt="variant">
                 </a>
               </td>
             </tr><tr>

@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.0.9" %}
+{% set version = "3.0.10" %}
 
 package:
   name: {{ name|lower }}
@@ -57,6 +57,9 @@ requirements:
     - git     # [unix]
 
 test:
+  # ensure that all variants of cuda_compiler_version are tested
+  requires:                                    # [linux and cuda_compiler_version not in (undefined, "None")]
+    - cudatoolkit {{ cuda_compiler_version }}  # [linux and cuda_compiler_version not in (undefined, "None")]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
