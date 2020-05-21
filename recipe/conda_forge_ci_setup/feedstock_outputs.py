@@ -16,6 +16,14 @@ STAGING = "cf-staging"
 OUTPUTS_REPO = "https://github.com/conda-forge/feedstock-outputs.git"
 
 
+def _get_sharded_path(output):
+    chars = [c for c in output if c.isalnum()]
+    while len(chars) < 3:
+        chars.append("z")
+
+    return os.path.join("outputs", chars[0], chars[1], chars[2], output + ".json")
+
+
 def split_pkg(pkg):
     if not pkg.endswith(".tar.bz2"):
         raise RuntimeError("Can only process packages that end in .tar.bz2")
@@ -126,7 +134,8 @@ def is_valid_feedstock_output(project, outputs):
             except RuntimeError:
                 continue
 
-            pth = os.path.join(repo_path, "outputs", o + ".json")
+            opth = _get_sharded_path(o)
+            pth = os.path.join(repo_path, opth)
 
             if not os.path.exists(pth):
                 # no output exists and we can add it
