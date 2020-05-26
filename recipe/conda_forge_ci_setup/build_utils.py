@@ -130,6 +130,8 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         channels = _global_config["channels"]["targets"]
         source_channels = ",".join(_global_config["channels"]["sources"])
 
+    private_upload = specific_config.get("private_upload", False)
+
     if "UPLOAD_ON_BRANCH" in os.environ:
         if "GIT_BRANCH" not in os.environ:
             print(
@@ -175,11 +177,12 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         if validate and owner == "conda-forge":
             retry_upload_or_check(
                 feedstock_name, recipe_root, STAGING, channel,
-                [config_file], validate=True, git_sha=git_sha)
+                [config_file], validate=True, git_sha=git_sha,
+                private_upload=private_upload)
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
-                [config_file], validate=False)
+                [config_file], validate=False, private_upload=private_upload)
 
 
 @click.command()

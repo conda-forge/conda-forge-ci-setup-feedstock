@@ -86,12 +86,13 @@ def built_distribution_already_exists(cli, name, version, fname, owner):
     return exists
 
 
-def upload(token_fn, path, owner, channels):
-    subprocess.check_call(['anaconda', '--quiet', '-t', token_fn,
-                           'upload', path,
-                           '--user={}'.format(owner),
-                           '--channel={}'.format(channels)],
-                          env=os.environ)
+def upload(token_fn, path, owner, channels, private_upload=False):
+    cmd = ['anaconda', '--quiet', '-t', token_fn,
+           'upload', path, '--user={}'.format(owner),
+           '--channel={}'.format(channels)]
+    if private_upload:
+        cmd.append("--private")
+    subprocess.check_call(cmd,  env=os.environ)
 
 
 def delete_dist(token_fn, path, owner, channels):
@@ -131,7 +132,14 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
 
 
 def upload_or_check(
-    feedstock, recipe_dir, owner, channel, variant, validate=False, git_sha=None
+    feedstock,
+    recipe_dir,
+    owner,
+    channel,
+    variant,
+    validate=False,
+    git_sha=None,
+    private_upload=False,
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -184,7 +192,7 @@ def upload_or_check(
                         if not built_distribution_already_exists(
                             cli, name, version, path, owner
                         ):
-                            upload(token_fn, path, owner, channel)
+                            upload(token_fn, path, owner, channel, private_upload)
                             break
                         else:
                             print(
@@ -198,7 +206,7 @@ def upload_or_check(
                             "re-uploading.".format(path, owner)
                         )
                         delete_dist(token_fn, path, owner, channel)
-                        upload(token_fn, path, owner, channel)
+                        upload(token_fn, path, owner, channel, private_upload)
 
                 if not request_copy(
                     feedstock,
@@ -215,7 +223,7 @@ def upload_or_check(
                     if not built_distribution_already_exists(
                         cli, name, version, path, owner
                     ):
-                        upload(token_fn, path, owner, channel)
+                        upload(token_fn, path, owner, channel, private_upload)
                     else:
                         print(
                             'Distribution {} already exists for {}'.format(path, owner))
@@ -233,7 +241,14 @@ def upload_or_check(
 
 
 def retry_upload_or_check(
-    feedstock, recipe_dir, owner, channel, variant, validate=False, git_sha=None,
+    feedstock,
+    recipe_dir,
+    owner,
+    channel,
+    variant,
+    validate=False,
+    git_sha=None,
+    private_upload=False,
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
@@ -243,6 +258,7 @@ def retry_upload_or_check(
             res = upload_or_check(
                 feedstock, recipe_dir, owner, channel, variant,
                 validate=validate, git_sha=git_sha if i == n_try-1 else None,
+                private_upload=private_upload
             )
             return res
         except Exception as e:
