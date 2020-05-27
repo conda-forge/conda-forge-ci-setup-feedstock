@@ -115,8 +115,9 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 @arg_recipe_root
 @arg_config_file
 @click.option("--validate", is_flag=True)
+@click.option("--private", is_flag=True)
 @click.option("--feedstock-name", type=str, default=None)
-def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock_name):
+def upload_package(feedstock_root, recipe_root, config_file, validate, private, feedstock_name):
     if feedstock_name is None and validate:
         raise RuntimeError("You must supply the --feedstock-name option if validating!")
 
@@ -129,8 +130,6 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         update_global_config(feedstock_root)
         channels = _global_config["channels"]["targets"]
         source_channels = ",".join(_global_config["channels"]["sources"])
-
-    private_upload = specific_config.get("private_upload", False)
 
     if "UPLOAD_ON_BRANCH" in os.environ:
         if "GIT_BRANCH" not in os.environ:
@@ -181,7 +180,7 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
-                [config_file], validate=False, private_upload=private_upload)
+                [config_file], validate=False, private_upload=private)
 
 
 @click.command()
