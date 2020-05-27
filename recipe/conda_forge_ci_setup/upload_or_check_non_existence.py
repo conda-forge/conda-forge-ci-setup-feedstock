@@ -19,6 +19,32 @@ import conda_build.config
 from .feedstock_outputs import request_copy, split_pkg
 
 
+def get_built_distribution_names(recipe_dir, variant):
+    additional_config = {}
+    for v in variant:
+        variant_dir, base_name = os.path.split(v)
+        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
+        if os.path.exists(clobber_file):
+            additional_config = {
+                'clobber_sections_file': clobber_file
+            }
+            break
+
+    metas = conda_build.api.render(
+        recipe_dir,
+        variant_config_files=variant,
+        finalize=False,
+        bypass_env_check=True,
+        **additional_config)
+
+    # Print the skipped distributions
+    skipped_distributions = [m for m, _, _ in metas if m.skip()]
+    for m in skipped_distributions:
+        print("{} configuration was skipped in build/skip.".format(m.name()))
+
+    return set([m.name() for m, _, _ in metas if not m.skip()])
+
+
 @contextlib.contextmanager
 def get_temp_token(token):
     dn = tempfile.mkdtemp()
@@ -121,6 +147,8 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
+    allowed_dist_names = get_built_distribution_names(recipe_dir, variant)
+
     # The list of built distributions
     paths = (
         [
@@ -142,6 +170,7 @@ def upload_or_check(
         # TODO: flip this over to .conda when that format
         #  is in flight
         for path in paths if path.endswith('.tar.bz2')
+        if split_pkg(path)[1] in allowed_dist_names
     ]
 
     # This is the actual fix where we create the token file once and reuse it
