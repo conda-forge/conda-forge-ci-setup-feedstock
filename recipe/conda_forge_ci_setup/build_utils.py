@@ -177,8 +177,7 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, feedstock
         if validate and owner == "conda-forge":
             retry_upload_or_check(
                 feedstock_name, recipe_root, STAGING, channel,
-                [config_file], validate=True, git_sha=git_sha,
-                private_upload=private_upload)
+                [config_file], validate=True, git_sha=git_sha)
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
