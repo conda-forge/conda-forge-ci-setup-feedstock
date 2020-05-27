@@ -170,7 +170,7 @@ def upload_or_check(
         # TODO: flip this over to .conda when that format
         #  is in flight
         for path in paths if path.endswith('.tar.bz2')
-        if split_pkg(path[1]) in allowed_dist_names
+        if split_pkg(path)[1] in allowed_dist_names
     ]
 
     # This is the actual fix where we create the token file once and reuse it
