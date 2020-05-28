@@ -105,7 +105,6 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
         call(["conda", "config", "--remove", "channels", "defaults"])
         for c in reversed(channels):
-            c = os.path.expandvars(c)
             call(["conda", "config", "--add", "channels", c])
 
         call(["conda", "config", "--set", "show_channel_urls", "true"])
