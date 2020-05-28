@@ -192,7 +192,7 @@ def upload_or_check(
                         if not built_distribution_already_exists(
                             cli, name, version, path, owner
                         ):
-                            upload(token_fn, path, owner, channel, private_upload)
+                            upload(token_fn, path, owner, channel)
                             break
                         else:
                             print(
@@ -206,7 +206,7 @@ def upload_or_check(
                             "re-uploading.".format(path, owner)
                         )
                         delete_dist(token_fn, path, owner, channel)
-                        upload(token_fn, path, owner, channel, private_upload)
+                        upload(token_fn, path, owner, channel)
 
                 if not request_copy(
                     feedstock,
@@ -223,7 +223,7 @@ def upload_or_check(
                     if not built_distribution_already_exists(
                         cli, name, version, path, owner
                     ):
-                        upload(token_fn, path, owner, channel, private_upload)
+                        upload(token_fn, path, owner, channel, private_upload=private_upload)
                     else:
                         print(
                             'Distribution {} already exists for {}'.format(path, owner))
