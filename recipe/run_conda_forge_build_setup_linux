@@ -20,6 +20,11 @@ else
     export CPU_COUNT=2
 fi
 
+# Remove GHC install on Azure
+if [ "${CI}" = "azure" ]; then
+    rm -rf /opt/ghc
+fi
+
 # Need strict priority for pypy as defaults is not fixed
 if [[ "$CONFIG" == *_pypy* ]]; then
   conda config --set channel_priority strict
