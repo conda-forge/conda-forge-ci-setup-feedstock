@@ -15,6 +15,10 @@ fi
 # which should only be recipes still using conda-build 2.
 export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
 
+if [ -f .ci_support/${CONFIG}.yaml ]; then
+   export WITH_LATEST_OSX_SDK=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value WITH_LATEST_OSX_SDK.0 0)
+fi
+
 if [[ "$WITH_LATEST_OSX_SDK" == "1" ]]; then
     # Typically, we want to build with the lastest SDK, even though the deployment target may be older.
     # See: https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html#//apple_ref/doc/uid/10000163i-CH1-SW1
