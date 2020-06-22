@@ -6,10 +6,6 @@ export CPU_COUNT=2
 
 export PYTHONUNBUFFERED=1
 
-# Typically, we want to build with the lastest SDK, even though the deployment target may be older.
-# See: https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html#//apple_ref/doc/uid/10000163i-CH1-SW1
-export MACOSX_SDK_VERSION=${MACOSX_SDK_VERSION:-10.15}
-
 if [ -f .ci_support/${CONFIG}.yaml ]; then
    export MACOSX_DEPLOYMENT_TARGET=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
 fi
@@ -18,6 +14,14 @@ fi
 # The default here will only be used when that is undefined,
 # which should only be recipes still using conda-build 2.
 export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
+
+if [[ "$WITH_LATEST_OSX_SDK" == "1" ]]; then
+    # Typically, we want to build with the lastest SDK, even though the deployment target may be older.
+    # See: https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html#//apple_ref/doc/uid/10000163i-CH1-SW1
+    export MACOSX_SDK_VERSION=10.15
+else
+    export MACOSX_SDK_VERSION=$MACOSX_DEPLOYMENT_TARGET
+fi
 
 export CONDA_BUILD_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_SDK_VERSION}.sdk"
 
