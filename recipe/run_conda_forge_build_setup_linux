@@ -70,6 +70,8 @@ if [ -n "${CPU_COUNT}" ]; then
 fi
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
+lscpu
+
 conda info
 conda config --show-sources
 conda list --show-channel-urls
