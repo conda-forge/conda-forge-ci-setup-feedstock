@@ -16,12 +16,20 @@ jobs:
         CONFIG: linux_aarch64_python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-aarch64
+      linux_aarch64_python3.8.____cpython:
+        CONFIG: linux_aarch64_python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-aarch64
       linux_cuda_compiler_version10.0python3.6.____cpython:
         CONFIG: linux_cuda_compiler_version10.0python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.0
       linux_cuda_compiler_version10.0python3.7.____cpython:
         CONFIG: linux_cuda_compiler_version10.0python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.0
+      linux_cuda_compiler_version10.0python3.8.____cpython:
+        CONFIG: linux_cuda_compiler_version10.0python3.8.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.0
       linux_cuda_compiler_version10.1python3.6.____cpython:
@@ -32,12 +40,20 @@ jobs:
         CONFIG: linux_cuda_compiler_version10.1python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.1
+      linux_cuda_compiler_version10.1python3.8.____cpython:
+        CONFIG: linux_cuda_compiler_version10.1python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.1
       linux_cuda_compiler_version10.2python3.6.____cpython:
         CONFIG: linux_cuda_compiler_version10.2python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.2
       linux_cuda_compiler_version10.2python3.7.____cpython:
         CONFIG: linux_cuda_compiler_version10.2python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.2
+      linux_cuda_compiler_version10.2python3.8.____cpython:
+        CONFIG: linux_cuda_compiler_version10.2python3.8.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.2
       linux_cuda_compiler_version9.2python3.6.____cpython:
@@ -48,12 +64,20 @@ jobs:
         CONFIG: linux_cuda_compiler_version9.2python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:9.2
+      linux_cuda_compiler_version9.2python3.8.____cpython:
+        CONFIG: linux_cuda_compiler_version9.2python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:9.2
       linux_cuda_compiler_versionNonepython3.6.____cpython:
         CONFIG: linux_cuda_compiler_versionNonepython3.6.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-comp7
       linux_cuda_compiler_versionNonepython3.7.____cpython:
         CONFIG: linux_cuda_compiler_versionNonepython3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-comp7
+      linux_cuda_compiler_versionNonepython3.8.____cpython:
+        CONFIG: linux_cuda_compiler_versionNonepython3.8.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-comp7
       linux_ppc64le_python3.6.____cpython:
@@ -64,10 +88,19 @@ jobs:
         CONFIG: linux_ppc64le_python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-ppc64le
+      linux_ppc64le_python3.8.____cpython:
+        CONFIG: linux_ppc64le_python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-ppc64le
     maxParallel: 8
   timeoutInMinutes: 360
 
   steps:
+  - script: |
+         rm -rf /opt/ghc
+         df -h
+    displayName: Manage disk space
+
   # configure qemu binfmt-misc running.  This allows us to run docker containers
   # embedded qemu-static
   - script: |
@@ -79,6 +112,7 @@ jobs:
   - script: |
         export CI=azure
         export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
         .scripts/run_docker_build.sh
     displayName: Run docker build
     env:
