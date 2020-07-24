@@ -47,7 +47,7 @@ requirements:
     - anaconda-client
     - conda-build 3.*
     - vs2008_express_vc_python_patch  # [win]
-    - shyaml  # [osx]
+    - shyaml  # [unix]
     - jq      # [osx]
     - requests
     - ruamel_yaml
