@@ -20,10 +20,10 @@ else
     export CPU_COUNT=2
 fi
 
-# Need strict priority for pypy as defaults is not fixed
-if [[ "$CONFIG" == *_pypy* ]]; then
-  conda config --set channel_priority strict
-fi
+# Need strict priority for
+# - pypy as defaults is not fixed
+# - cos7 as defaults is not fixed
+conda config --set channel_priority strict
 
 # the upstream image nvidia/cuda:9.2-devel-centos6 (on which linux-anvil-cuda:9.2 is based)
 # does not contain libcuda.so; it should be installed in ${CUDA_HOME}/compat-${CUDA_VER},
