@@ -54,7 +54,9 @@ conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
 
 # Need strict priority for pypy as defaults is not fixed
-if [[ "$CONFIG" == *_pypy* ]]; then
+# but ppl can turn this off
+cfg_channel_priority=$(grep ${FEEDSTOCK_ROOT}/conda-forge.yml "build_channel_priority:")
+if [[ ${cfg_channel_priority} == *build_channel_priority: strict* ]] || [[ -z ${cfg_channel_priority} ]]; then
   conda config --set channel_priority strict
 fi
 

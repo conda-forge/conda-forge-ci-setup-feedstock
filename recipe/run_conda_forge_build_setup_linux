@@ -23,7 +23,11 @@ fi
 # Need strict priority for
 # - pypy as defaults is not fixed
 # - cos7 as defaults is not fixed
-conda config --set channel_priority strict
+# but ppl can turn this off
+cfg_channel_priority=$(grep ${FEEDSTOCK_ROOT}/conda-forge.yml "build_channel_priority:")
+if [[ ${cfg_channel_priority} == *build_channel_priority: strict* ]] || [[ -z ${cfg_channel_priority} ]]; then
+  conda config --set channel_priority strict
+fi
 
 # the upstream image nvidia/cuda:9.2-devel-centos6 (on which linux-anvil-cuda:9.2 is based)
 # does not contain libcuda.so; it should be installed in ${CUDA_HOME}/compat-${CUDA_VER},
