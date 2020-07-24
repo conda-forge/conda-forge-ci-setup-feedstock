@@ -66,9 +66,8 @@ conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
 
 # Need strict priority for pypy as defaults is not fixed
-if [[ "$CONFIG" == *_pypy* ]]; then
-  conda config --set channel_priority strict
-fi
+# but ppl can turn this off
+conda config --set channel_priority $(cat ${FEEDSTOCK_ROOT}/conda-forge.yml | shyaml get-value channel_priority strict)
 
 # CONDA_PREFIX might be unset
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
