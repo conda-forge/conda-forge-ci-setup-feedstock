@@ -24,7 +24,7 @@ fi
 # - pypy as defaults is not fixed
 # - cos7 as defaults is not fixed
 # but ppl can turn this off
-cfg_channel_priority=$(grep ${FEEDSTOCK_ROOT}/conda-forge.yml "channel_priority:")
+cfg_channel_priority=$(grep "channel_priority:" ${FEEDSTOCK_ROOT}/conda-forge.yml )
 if [[ ${cfg_channel_priority} == *channel_priority: strict* ]] || [[ -z ${cfg_channel_priority} ]]; then
   conda config --set channel_priority strict
 fi
