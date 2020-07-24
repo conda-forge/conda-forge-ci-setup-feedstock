@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.0.14" %}
+{% set version = "3.1.0" %}
 
 package:
   name: {{ name|lower }}
@@ -47,7 +47,7 @@ requirements:
     - anaconda-client
     - conda-build 3.*
     - vs2008_express_vc_python_patch  # [win]
-    - shyaml  # [osx]
+    - shyaml  # [unix]
     - jq      # [osx]
     - requests
     - ruamel_yaml
