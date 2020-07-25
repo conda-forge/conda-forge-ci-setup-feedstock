@@ -50,7 +50,7 @@ requirements:
     - conda-build 3.*
     - vs2008_express_vc_python_patch  # [win]
     - shyaml  # [unix]
-    - jq      # [osx]
+    - jq
     - requests
     - ruamel_yaml
     - pip
