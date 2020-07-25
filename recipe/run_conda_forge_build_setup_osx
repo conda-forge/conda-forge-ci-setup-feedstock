@@ -22,9 +22,9 @@ echo "export CPU_COUNT='${CPU_COUNT}'"                                    >> "${
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
-
-source ./cross_compile_support.sh
-source ./download_osx_sdk.sh
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${SCRIPT_DIR}/cross_compile_support.sh
+source ${SCRIPT_DIR}/download_osx_sdk.sh
 
 # set minimum sdk version to our target
 plutil -replace MinimumSDKVersion -string ${MACOSX_SDK_VERSION} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
