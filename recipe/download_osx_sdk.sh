@@ -1,11 +1,11 @@
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-   export MACOSX_DEPLOYMENT_TARGET=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
+   export MACOSX_DEPLOYMENT_TARGET=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
 fi
 
 export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-   export WITH_LATEST_OSX_SDK=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value WITH_LATEST_OSX_SDK.0 0)
+   export WITH_LATEST_OSX_SDK=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value WITH_LATEST_OSX_SDK.0 0)
 fi
 
 if [[ "$WITH_LATEST_OSX_SDK" == "1" ]]; then
