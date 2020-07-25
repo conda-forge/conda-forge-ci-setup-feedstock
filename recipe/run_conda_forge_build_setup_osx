@@ -23,6 +23,7 @@ echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${
 
 OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CI_SUPPORT=$PWD/.ci_support
 source ${SCRIPT_DIR}/cross_compile_support.sh
 source ${SCRIPT_DIR}/download_osx_sdk.sh
 
@@ -32,11 +33,11 @@ plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-se
 
 if [ ! -z "$CONFIG" ]; then
     if [ ! -z "$CI" ]; then
-        echo "CI:" >> ./.ci_support/${CONFIG}.yaml
-        echo "- ${CI}" >> ./.ci_support/${CONFIG}.yaml
-        echo "" >> ./.ci_support/${CONFIG}.yaml
+        echo "CI:" >> ${CI_SUPPORT}/${CONFIG}.yaml
+        echo "- ${CI}" >> ${CI_SUPPORT}/${CONFIG}.yaml
+        echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
     fi
-    cat ./.ci_support/${CONFIG}.yaml
+    cat ${CI_SUPPORT}/${CONFIG}.yaml
 fi
 
 conda info

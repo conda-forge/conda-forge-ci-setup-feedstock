@@ -1,10 +1,10 @@
-if [ -f .ci_support/${CONFIG}.yaml ]; then
+if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
    export MACOSX_DEPLOYMENT_TARGET=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
 fi
 
 export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
 
-if [ -f .ci_support/${CONFIG}.yaml ]; then
+if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
    export WITH_LATEST_OSX_SDK=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value WITH_LATEST_OSX_SDK.0 0)
 fi
 
@@ -25,10 +25,10 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]]; then
 fi
 
 if [ ! -z "$CONFIG" ]; then
-   echo "" >> ./.ci_support/${CONFIG}.yaml
-   echo "CONDA_BUILD_SYSROOT:" >> ./.ci_support/${CONFIG}.yaml
-   echo "- ${CONDA_BUILD_SYSROOT}" >> ./.ci_support/${CONFIG}.yaml
-   echo "" >> ./.ci_support/${CONFIG}.yaml
+   echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
+   echo "CONDA_BUILD_SYSROOT:" >> ${CI_SUPPORT}/${CONFIG}.yaml
+   echo "- ${CONDA_BUILD_SYSROOT}" >> ${CI_SUPPORT}/${CONFIG}.yaml
+   echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
 fi
 
 echo "export CONDA_BUILD_SYSROOT='${CONDA_BUILD_SYSROOT}'"                 > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
