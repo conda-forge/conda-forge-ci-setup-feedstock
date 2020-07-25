@@ -17,7 +17,7 @@ else
     # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
     # 2 cores available on TravisCI workers: https://docs.travis-ci.com/user/reference/overview/
     # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-    export CPU_COUNT=2
+    export CPU_COUNT="${CPU_COUNT:-2}"
 fi
 
 # Need strict priority for
