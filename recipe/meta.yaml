@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.0.15" %}
+{% set version = "3.1.3" %}
 
 package:
   name: {{ name|lower }}
@@ -19,6 +19,8 @@ build:
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
+    - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"                                         # [unix]
+    - cp "${RECIPE_DIR}/cross_compile_support.sh" "${PREFIX}/bin/cross_compile_support.sh"                               # [unix]
     - cd "%RECIPE_DIR%"   # [win]
     - cd "${RECIPE_DIR}"  # [unix]
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
@@ -47,8 +49,8 @@ requirements:
     - anaconda-client
     - conda-build 3.*
     - vs2008_express_vc_python_patch  # [win]
-    - shyaml  # [osx]
-    - jq      # [osx]
+    - shyaml  # [unix]
+    - jq  # [unix]
     - requests
     - ruamel_yaml
     - pip

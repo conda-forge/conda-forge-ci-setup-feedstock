@@ -4,13 +4,7 @@ travis:
 appveyor:
   secure:
     BINSTAR_TOKEN: tumuXLL8PU75WMnRDemRy02ruEq2RpNxeK3dz0MjFssnosPm2v4EFjfNB4PTotA1
-compiler_stack: comp7
-max_py_ver: '37'
-max_r_ver: '35'
 provider:
-  linux_aarch64: azure
-  linux_ppc64le: azure
-  win: azure
-  osx: azure
-  linux: azure
+  linux_aarch64: default
+  linux_ppc64le: default
 conda_forge_output_validation: true

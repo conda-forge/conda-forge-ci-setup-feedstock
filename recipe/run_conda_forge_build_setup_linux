@@ -20,10 +20,11 @@ else
     export CPU_COUNT="${CPU_COUNT:-2}"
 fi
 
-# Need strict priority for pypy as defaults is not fixed
-if [[ "$CONFIG" == *_pypy* ]]; then
-  conda config --set channel_priority strict
-fi
+# Need strict priority for
+# - pypy as defaults is not fixed
+# - cos7 as defaults is not fixed
+# but ppl can turn this off
+conda config --set channel_priority $(cat ${FEEDSTOCK_ROOT}/conda-forge.yml | shyaml get-value channel_priority strict)
 
 # the upstream image nvidia/cuda:9.2-devel-centos6 (on which linux-anvil-cuda:9.2 is based)
 # does not contain libcuda.so; it should be installed in ${CUDA_HOME}/compat-${CUDA_VER},
@@ -69,6 +70,13 @@ if [ -n "${CPU_COUNT}" ]; then
     echo "export CPU_COUNT='${CPU_COUNT}'"                  >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 fi
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${SCRIPT_DIR}/cross_compile_support.sh
+if [[ "${HOST_PLATFORM}" == osx* ]]; then
+    OSX_SDK_DIR=$(mktemp -d)
+    source ${SCRIPT_DIR}/download_osx_sdk.sh
+fi
 
 conda info
 conda config --show-sources
