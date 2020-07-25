@@ -6,61 +6,6 @@ export CPU_COUNT=2
 
 export PYTHONUNBUFFERED=1
 
-if [ -f .ci_support/${CONFIG}.yaml ]; then
-   export MACOSX_DEPLOYMENT_TARGET=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
-fi
-
-# deployment target should be set by conda_build_config.yaml (default in conda-forge-pinning).
-# The default here will only be used when that is undefined,
-# which should only be recipes still using conda-build 2.
-export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
-
-if [ -f .ci_support/${CONFIG}.yaml ]; then
-   export WITH_LATEST_OSX_SDK=$(cat .ci_support/${CONFIG}.yaml | shyaml get-value WITH_LATEST_OSX_SDK.0 0)
-fi
-
-if [[ "$WITH_LATEST_OSX_SDK" == "1" ]]; then
-    # Typically, we want to build with the lastest SDK, even though the deployment target may be older.
-    # See: https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/cross_development/Configuring/configuring.html#//apple_ref/doc/uid/10000163i-CH1-SW1
-    export MACOSX_SDK_VERSION=10.15
-else
-    export MACOSX_SDK_VERSION=$MACOSX_DEPLOYMENT_TARGET
-fi
-
-export CONDA_BUILD_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_SDK_VERSION}.sdk"
-
-if [[ ! -d ${CONDA_BUILD_SYSROOT} || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]]; then
-    echo "Downloading ${MACOSX_SDK_VERSION} sdk"
-    curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
-    tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
-    # set minimum sdk version to our target
-    plutil -replace MinimumSDKVersion -string ${MACOSX_SDK_VERSION} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
-    plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
-fi
-
-if [ -d "${CONDA_BUILD_SYSROOT}" ]
-then
-    echo "Found CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
-else
-    echo "Missing CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
-    exit 1
-fi
-
-if [ ! -z "$CONFIG" ]; then
-    echo "" >> ./.ci_support/${CONFIG}.yaml
-    echo "CONDA_BUILD_SYSROOT:" >> ./.ci_support/${CONFIG}.yaml
-    echo "- ${CONDA_BUILD_SYSROOT}" >> ./.ci_support/${CONFIG}.yaml
-    echo "" >> ./.ci_support/${CONFIG}.yaml
-
-    if [ ! -z "$CI" ]; then
-        echo "CI:" >> ./.ci_support/${CONFIG}.yaml
-        echo "- ${CI}" >> ./.ci_support/${CONFIG}.yaml
-        echo "" >> ./.ci_support/${CONFIG}.yaml
-    fi
-
-    cat ./.ci_support/${CONFIG}.yaml
-fi
-
 conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
@@ -73,10 +18,27 @@ conda config --set channel_priority $(cat ./conda-forge.yml | shyaml get-value c
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
 
 mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
-echo "export CONDA_BUILD_SYSROOT='${CONDA_BUILD_SYSROOT}'"                 > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export CPU_COUNT='${CPU_COUNT}'"                                    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-echo "export MACOSX_DEPLOYMENT_TARGET='${MACOSX_DEPLOYMENT_TARGET}'"      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+
+OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CI_SUPPORT=$PWD/.ci_support
+source ${SCRIPT_DIR}/cross_compile_support.sh
+source ${SCRIPT_DIR}/download_osx_sdk.sh
+
+# set minimum sdk version to our target
+plutil -replace MinimumSDKVersion -string ${MACOSX_SDK_VERSION} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+
+if [ ! -z "$CONFIG" ]; then
+    if [ ! -z "$CI" ]; then
+        echo "CI:" >> ${CI_SUPPORT}/${CONFIG}.yaml
+        echo "- ${CI}" >> ${CI_SUPPORT}/${CONFIG}.yaml
+        echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
+    fi
+    cat ${CI_SUPPORT}/${CONFIG}.yaml
+fi
 
 conda info
 conda config --show-sources
