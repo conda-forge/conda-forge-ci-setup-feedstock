@@ -73,9 +73,13 @@ echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${SCRIPT_DIR}/cross_compile_support.sh
-if [[ "${HOST_PLATFORM}" == osx* ]]; then
-    OSX_SDK_DIR=$(mktemp -d)
-    source ${SCRIPT_DIR}/download_osx_sdk.sh
+
+if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
+    need_osx_sdk=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 0)
+    if [[ "$need_osx_sdk" != "0" ]]; then
+        OSX_SDK_DIR=$(mktemp -d)
+        source ${SCRIPT_DIR}/download_osx_sdk.sh
+    fi
 fi
 
 conda info
