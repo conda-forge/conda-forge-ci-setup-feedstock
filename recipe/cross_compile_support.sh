@@ -1,7 +1,7 @@
 BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-    HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform ${BUILD_PLATFORM})
+    HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 ${BUILD_PLATFORM})
 fi
 
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
