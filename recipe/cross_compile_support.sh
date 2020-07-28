@@ -7,6 +7,6 @@ fi
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
-    echo "export CONDA_BUILD_CROSS_COMPILATION=1"                 > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+    echo "export CONDA_BUILD_CROSS_COMPILATION=1"                 >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
     export CONDA_BUILD_CROSS_COMPILATION=1
 fi
