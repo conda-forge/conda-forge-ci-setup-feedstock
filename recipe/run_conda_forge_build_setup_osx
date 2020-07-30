@@ -9,6 +9,7 @@ export PYTHONUNBUFFERED=1
 conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
+conda config --set channel_priority strict
 
 # Need strict priority for pypy as defaults is not fixed
 # but ppl can turn this off

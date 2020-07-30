@@ -8,6 +8,7 @@ set PYTHONUNBUFFERED=1
 conda.exe config --set show_channel_urls true
 conda.exe config --set auto_update_conda false
 conda.exe config --set add_pip_as_python_dependency false
+conda.exe config --set channel_priority strict
 
 call setup_x64
 
