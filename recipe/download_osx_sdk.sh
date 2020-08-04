@@ -16,6 +16,21 @@ else
     export MACOSX_SDK_VERSION=$MACOSX_DEPLOYMENT_TARGET
 fi
 
+if [[ "MACOSX_SDK_VERSION" == "11.0" ]]; then
+    if [[ "$(uname)" != "Darwin" ]]; then
+        echo "Can't cross compile to 11.0 from Linux yet as the SDK can't be downloaded."
+        exit 1
+    fi
+    if [[ "$CI" == "travis" ]]; then
+        export OSX_SDK_DIR=/Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+    elif [[ "$CI" == "azure" ]]; then
+        export OSX_SDK_DIR=/Applications/Xcode_12_beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+    else
+        echo "Can't compile for 11.0 as the SDK location is unknown"
+        exit 1
+    fi
+fi
+
 export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
 
 if [[ ! -d ${CONDA_BUILD_SYSROOT} || "$OSX_FORCE_SDK_DOWNLOAD" == "1" ]]; then
