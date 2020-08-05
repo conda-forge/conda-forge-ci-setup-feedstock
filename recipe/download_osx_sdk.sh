@@ -16,7 +16,7 @@ else
     export MACOSX_SDK_VERSION=$MACOSX_DEPLOYMENT_TARGET
 fi
 
-if [[ "MACOSX_SDK_VERSION" == "11.0" ]]; then
+if [[ "$MACOSX_SDK_VERSION" == "11.0" ]]; then
     if [[ "$(uname)" != "Darwin" ]]; then
         echo "Can't cross compile to 11.0 from Linux yet as the SDK can't be downloaded."
         exit 1
