@@ -27,9 +27,11 @@ CI_SUPPORT=$PWD/.ci_support
 source ${SCRIPT_DIR}/cross_compile_support.sh
 source ${SCRIPT_DIR}/download_osx_sdk.sh
 
-# set minimum sdk version to our target
-plutil -replace MinimumSDKVersion -string ${MACOSX_SDK_VERSION} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
-plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+if [[ "$MACOSX_DEPLOYMENT_TARGET" == 10.* ]]; then
+  # set minimum sdk version to our target
+  plutil -replace MinimumSDKVersion -string ${MACOSX_SDK_VERSION} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+  plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
+fi
 
 if [ ! -z "$CONFIG" ]; then
     if [ ! -z "$CI" ]; then
