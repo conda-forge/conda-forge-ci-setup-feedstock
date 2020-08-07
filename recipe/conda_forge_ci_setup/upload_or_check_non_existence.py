@@ -15,6 +15,7 @@ from conda_build.conda_interface import subdir as conda_subdir
 from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
+from conda_build.utils import DEFAULT_SUBDIRS
 
 from .feedstock_outputs import request_copy, split_pkg
 
@@ -158,7 +159,7 @@ def upload_or_check(
     allowed_dist_names = get_built_distribution_names(recipe_dir, variant)
 
     # The list of built distributions
-    paths = (
+    paths = set(
         [
             os.path.join('noarch', p)
             for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))
@@ -169,6 +170,14 @@ def upload_or_check(
                 os.path.join(conda_build.config.croot, conda_build.config.subdir))
         ]
     )
+    DEFAULT_OS=set([subdir.split("-")[0] for subdir in DEFAULT_SUBDIRS])
+    for subdir in os.listdir(conda_build.config.croot):
+        if not subdir.split("-")[0] in DEFAULT_OS:
+            continue
+        for p in os.listdir(
+                    os.path.join(conda_build.config.croot, subdir)):
+            paths.add(os.path.join(subdir, p))
+
     built_distributions = [
         (
             split_pkg(path)[1],
