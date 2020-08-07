@@ -15,7 +15,6 @@ from conda_build.conda_interface import subdir as conda_subdir
 from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
-from conda_build.utils import DEFAULT_SUBDIRS
 
 from .feedstock_outputs import request_copy, split_pkg
 
@@ -170,13 +169,16 @@ def upload_or_check(
                 os.path.join(conda_build.config.croot, conda_build.config.subdir))
         ]
     )
-    DEFAULT_OS=set([subdir.split("-")[0] for subdir in DEFAULT_SUBDIRS])
-    for subdir in os.listdir(conda_build.config.croot):
-        if not subdir.split("-")[0] in DEFAULT_OS:
+    for config_file in variant:
+        specific_config = safe_load(open(config_file))
+        if "target_platform" not in specific_config:
             continue
-        for p in os.listdir(
-                    os.path.join(conda_build.config.croot, subdir)):
-            paths.add(os.path.join(subdir, p))
+        for subdir in specific_config["target_platform"]:
+            if not os.path.exists(os.path.join(conda_build.config.croot, subdir)):
+                continue
+            for p in os.listdir(
+                        os.path.join(conda_build.config.croot, subdir)):
+                paths.add(os.path.join(subdir, p))
 
     built_distributions = [
         (
