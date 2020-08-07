@@ -15,6 +15,10 @@ from conda_build.conda_interface import subdir as conda_subdir
 from conda_build.conda_interface import get_index
 import conda_build.api
 import conda_build.config
+try:
+    from ruamel_yaml import safe_load
+except ImportError:
+    from yaml import safe_load
 
 from .feedstock_outputs import request_copy, split_pkg
 
