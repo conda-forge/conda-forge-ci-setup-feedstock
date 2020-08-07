@@ -23,7 +23,7 @@ except ImportError:
 from .feedstock_outputs import request_copy, split_pkg
 
 
-def get_built_distribution_names(recipe_dir, variant):
+def get_built_distribution_names_and_subdirs(recipe_dir, variant):
     additional_config = {}
     for v in variant:
         variant_dir, base_name = os.path.split(v)
@@ -46,7 +46,8 @@ def get_built_distribution_names(recipe_dir, variant):
     for m in skipped_distributions:
         print("{} configuration was skipped in build/skip.".format(m.name()))
 
-    return set([m.name() for m, _, _ in metas if not m.skip()])
+    subdirs = set([m.config.target_subdir for m, _, _ in metas if not m.skip()])
+    return set([m.name() for m, _, _ in metas if not m.skip()]), subdirs
 
 
 @contextlib.contextmanager
@@ -159,30 +160,15 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
-    allowed_dist_names = get_built_distribution_names(recipe_dir, variant)
+    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir, variant)
 
     # The list of built distributions
-    paths = set(
-        [
-            os.path.join('noarch', p)
-            for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))
-        ]
-        + [
-            os.path.join(conda_build.config.subdir, p)
-            for p in os.listdir(
-                os.path.join(conda_build.config.croot, conda_build.config.subdir))
-        ]
-    )
-    for config_file in variant:
-        specific_config = safe_load(open(config_file))
-        if "target_platform" not in specific_config:
+    paths = set()
+    for subdir in allowed_subdirs + [conda_build.config.subdir, 'noarch']:
+        if not os.path.exists(os.path.join(conda_build.config.croot, subdir)):
             continue
-        for subdir in specific_config["target_platform"]:
-            if not os.path.exists(os.path.join(conda_build.config.croot, subdir)):
-                continue
-            for p in os.listdir(
-                        os.path.join(conda_build.config.croot, subdir)):
-                paths.add(os.path.join(subdir, p))
+        for p in os.listdir(os.path.join(conda_build.config.croot, subdir)):
+            paths.add(os.path.join(subdir, p))
 
     built_distributions = [
         (
