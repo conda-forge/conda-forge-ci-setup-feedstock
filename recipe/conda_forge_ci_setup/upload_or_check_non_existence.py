@@ -160,7 +160,7 @@ def upload_or_check(
 
     # The list of built distributions
     paths = set()
-    for subdir in allowed_subdirs + [conda_build.config.subdir, 'noarch']:
+    for subdir in list(allowed_subdirs) + [conda_build.config.subdir, 'noarch']:
         if not os.path.exists(os.path.join(conda_build.config.croot, subdir)):
             continue
         for p in os.listdir(os.path.join(conda_build.config.croot, subdir)):
