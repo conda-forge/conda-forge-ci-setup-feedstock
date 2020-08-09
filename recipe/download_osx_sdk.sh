@@ -9,8 +9,8 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     export MACOSX_SDK_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 0)
     export WITH_LATEST_OSX_SDK=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value WITH_LATEST_OSX_SDK.0 0)
     if [[ "${WITH_LATEST_OSX_SDK}" != "0" ]]; then
-    	echo "Setting WITH_LATEST_OSX_SDK is removed. Use MACOSX_SDK_VERSION to specify an explicit version for the SDK."
-    	exit 1
+        echo "Setting WITH_LATEST_OSX_SDK is removed. Use MACOSX_SDK_VERSION to specify an explicit version for the SDK."
+        export MACOSX_SDK_VERSION=10.15
     fi
 fi
 
