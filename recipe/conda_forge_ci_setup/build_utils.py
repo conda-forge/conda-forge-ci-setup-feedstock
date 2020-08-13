@@ -149,6 +149,8 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
             "conda-forge", "conda-forge/label/", "defaults", "c4aarch64",
             "c4armv7l"]
         for source_channel in source_channels.split(","):
+            if source_channel.startswith('https://conda-web.anaconda.org/'):
+                source_channel = source_channel[len('https://conda-web.anaconda.org/'):]
             for c in allowed_channels:
                 if source_channel.startswith(c):
                     break
