@@ -53,7 +53,10 @@ def get_temp_token(token):
     with open(fn, "w") as fh:
         fh.write(token)
     yield fn
-    shutil.rmtree(dn)
+    try:
+        shutil.rmtree(dn)
+    except Exception:
+        print(f"Failed to remove temporary directroy '{dn}'")
 
 
 def built_distribution_already_exists(cli, name, version, fname, owner):
