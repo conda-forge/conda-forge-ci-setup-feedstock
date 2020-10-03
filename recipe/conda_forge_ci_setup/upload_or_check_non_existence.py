@@ -144,6 +144,7 @@ def upload_or_check(
     validate=False,
     git_sha=None,
     private_upload=False,
+    prod_owner="conda-forge",
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -186,10 +187,18 @@ def upload_or_check(
     if token:
         with get_temp_token(cli.token) as token_fn:
             if validate:
+                to_copy_paths = []
                 for name, version, path in built_distributions:
+                    need_copy = True
                     for i in range(0, 5):
                         time.sleep(i*15)
-                        if not built_distribution_already_exists(
+                        if built_distribution_already_exists(
+                            cli, name, version, path, prod_owner
+                        ):
+                            # package already in production
+                            need_copy = False
+                            break
+                        elif not built_distribution_already_exists(
                             cli, name, version, path, owner
                         ):
                             upload(token_fn, path, owner, channel)
@@ -208,9 +217,12 @@ def upload_or_check(
                         delete_dist(token_fn, path, owner, channel)
                         upload(token_fn, path, owner, channel)
 
-                if not request_copy(
+                    if need_copy:
+                        to_copy_paths.append(path)
+
+                if to_copy_paths and not request_copy(
                     feedstock,
-                    [path for _, _, path in built_distributions],
+                    to_copy_paths,
                     channel,
                     git_sha=git_sha,
                 ):
