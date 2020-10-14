@@ -26,7 +26,10 @@ if [[ "$MACOSX_SDK_VERSION" == "11.0" ]]; then
     if [[ "$CI" == "travis" ]]; then
         export OSX_SDK_DIR=/Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
     elif [[ "$CI" == "azure" ]]; then
-        export OSX_SDK_DIR=/Applications/Xcode_12_beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+        export OSX_SDK_DIR=/Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+        if [[ ! -d "${OSX_SDK_DIR}" ]]; then
+            export OSX_SDK_DIR=/Applications/Xcode_12_beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+        fi
     else
         echo "Can't compile for 11.0 as the SDK location is unknown"
         exit 1
