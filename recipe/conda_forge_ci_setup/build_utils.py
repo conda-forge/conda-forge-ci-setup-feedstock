@@ -103,6 +103,7 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
             update_global_config(feedstock_root)
             channels = _global_config["channels"]["sources"]
 
+        call(["conda", "config", "--remove-key", "channels"])
         call(["conda", "config", "--remove", "channels", "defaults"])
         for c in reversed(channels):
             call(["conda", "config", "--add", "channels", c])
