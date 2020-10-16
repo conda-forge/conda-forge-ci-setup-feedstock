@@ -20,6 +20,10 @@ jobs:
         CONFIG: linux_64_cuda_compiler_version10.0python3.8.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.0
+      linux_64_cuda_compiler_version10.0python3.9.____cpython:
+        CONFIG: linux_64_cuda_compiler_version10.0python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.0
       linux_64_cuda_compiler_version10.1python3.6.____cpython:
         CONFIG: linux_64_cuda_compiler_version10.1python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -30,6 +34,10 @@ jobs:
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.1
       linux_64_cuda_compiler_version10.1python3.8.____cpython:
         CONFIG: linux_64_cuda_compiler_version10.1python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.1
+      linux_64_cuda_compiler_version10.1python3.9.____cpython:
+        CONFIG: linux_64_cuda_compiler_version10.1python3.9.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.1
       linux_64_cuda_compiler_version10.2python3.6.____cpython:
@@ -44,6 +52,10 @@ jobs:
         CONFIG: linux_64_cuda_compiler_version10.2python3.8.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.2
+      linux_64_cuda_compiler_version10.2python3.9.____cpython:
+        CONFIG: linux_64_cuda_compiler_version10.2python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:10.2
       linux_64_cuda_compiler_version9.2python3.6.____cpython:
         CONFIG: linux_64_cuda_compiler_version9.2python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -56,6 +68,10 @@ jobs:
         CONFIG: linux_64_cuda_compiler_version9.2python3.8.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-cuda:9.2
+      linux_64_cuda_compiler_version9.2python3.9.____cpython:
+        CONFIG: linux_64_cuda_compiler_version9.2python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-cuda:9.2
       linux_64_cuda_compiler_versionNonepython3.6.____cpython:
         CONFIG: linux_64_cuda_compiler_versionNonepython3.6.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -66,6 +82,10 @@ jobs:
         DOCKER_IMAGE: condaforge/linux-anvil-comp7
       linux_64_cuda_compiler_versionNonepython3.8.____cpython:
         CONFIG: linux_64_cuda_compiler_versionNonepython3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: condaforge/linux-anvil-comp7
+      linux_64_cuda_compiler_versionNonepython3.9.____cpython:
+        CONFIG: linux_64_cuda_compiler_versionNonepython3.9.____cpython
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-comp7
   timeoutInMinutes: 360
