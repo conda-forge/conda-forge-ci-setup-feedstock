@@ -9,7 +9,7 @@ source:
   path: .
 
 build:
-  number: 1
+  number: 2
   script:
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
     - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]
@@ -21,6 +21,7 @@ build:
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
     - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"                                         # [unix]
     - cp "${RECIPE_DIR}/cross_compile_support.sh" "${PREFIX}/bin/cross_compile_support.sh"                               # [unix]
+    - COPY "%RECIPE_DIR%\\install_cuda.bat" "%SCRIPTS%\\install_cuda.bat"                                                # [win]
     - cd "%RECIPE_DIR%"   # [win]
     - cd "${RECIPE_DIR}"  # [unix]
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
@@ -49,7 +50,7 @@ requirements:
     - anaconda-client
     - conda-build 3.*
     - vs2008_express_vc_python_patch  # [win]
-    - shyaml  # [unix]
+    - shyaml
     - jq  # [unix]
     - requests
     - ruamel_yaml
@@ -60,10 +61,11 @@ requirements:
 
 test:
   # ensure that all variants of cuda_compiler_version are tested
-  requires:                                    # [linux and cuda_compiler_version not in (undefined, "None")]
-    - cudatoolkit {{ cuda_compiler_version }}  # [linux and cuda_compiler_version not in (undefined, "None")]
+  requires:                                    # [(linux or win) and cuda_compiler_version not in (undefined, "None")]
+    - cudatoolkit {{ cuda_compiler_version }}  # [(linux or win) and cuda_compiler_version not in (undefined, "None")]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
+    - if not exist "%PREFIX%\\Scripts\\install_cuda.bat" exit 1                   # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
     - ff_ci_pr_build --help
     - upload_or_check_non_existence --help
