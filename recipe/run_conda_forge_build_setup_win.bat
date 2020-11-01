@@ -53,8 +53,6 @@ set "PATH=%PATH:ostedtoolcache=%"
 
 :: Install CUDA drivers if needed
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
-:: TODO: Remove before merge?
-conda.exe install -yq shyaml
 <.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
 <cuda.version set /p CUDA_VERSION=
 del cuda.version

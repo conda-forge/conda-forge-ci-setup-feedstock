@@ -65,7 +65,6 @@ test:
     - cudatoolkit {{ cuda_compiler_version }}  # [(linux or win) and cuda_compiler_version not in (undefined, "None")]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
-    - if not exist "%PREFIX%\\Scripts\\install_cuda.bat" exit 1                   # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
     - ff_ci_pr_build --help
     - upload_or_check_non_existence --help
