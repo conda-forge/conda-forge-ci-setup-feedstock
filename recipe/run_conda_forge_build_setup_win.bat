@@ -52,10 +52,18 @@ if defined CI (
 set "PATH=%PATH:ostedtoolcache=%"
 
 :: Install CUDA drivers if needed
+for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
 <.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
 <cuda.version set /p CUDA_VERSION=
-if not "%CUDA_VERSION%" == "None" call %SCRIPTS%\install_cuda.bat %CUDA_VERSION%
 del cuda.version
+if not "%CUDA_VERSION%" == "None" (
+    call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
+    if errorlevel 1 (
+        echo Could not install CUDA
+        exit /b 1
+    )
+)
+:: /CUDA
 
 type .ci_support\%CONFIG%.yaml
 
