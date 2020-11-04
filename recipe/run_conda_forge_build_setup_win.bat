@@ -51,6 +51,20 @@ if defined CI (
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
 set "PATH=%PATH:ostedtoolcache=%"
 
+:: Install CUDA drivers if needed
+for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
+<.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
+<cuda.version set /p CUDA_VERSION=
+del cuda.version
+if not "%CUDA_VERSION%" == "None" (
+    call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
+    if errorlevel 1 (
+        echo Could not install CUDA
+        exit /b 1
+    )
+)
+:: /CUDA
+
 type .ci_support\%CONFIG%.yaml
 
 mkdir "%CONDA_PREFIX%\etc\conda\activate.d"

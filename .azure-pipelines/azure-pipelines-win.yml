@@ -8,17 +8,65 @@ jobs:
     vmImage: vs2017-win2016
   strategy:
     matrix:
-      win_64_python3.6.____cpython:
-        CONFIG: win_64_python3.6.____cpython
+      win_64_cuda_compiler_version10.0python3.6.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
-      win_64_python3.7.____cpython:
-        CONFIG: win_64_python3.7.____cpython
+      win_64_cuda_compiler_version10.0python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
-      win_64_python3.8.____cpython:
-        CONFIG: win_64_python3.8.____cpython
+      win_64_cuda_compiler_version10.0python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.8.____cpython
         UPLOAD_PACKAGES: 'True'
-      win_64_python3.9.____cpython:
-        CONFIG: win_64_python3.9.____cpython
+      win_64_cuda_compiler_version10.0python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.6.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.2python3.6.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.2python3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.2python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.2python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.2python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.2python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.2python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.2python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.0python3.6.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.0python3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.0python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.0python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.0python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.0python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.0python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.0python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_versionNonepython3.6.____cpython:
+        CONFIG: win_64_cuda_compiler_versionNonepython3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_versionNonepython3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_versionNonepython3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_versionNonepython3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_versionNonepython3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_versionNonepython3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_versionNonepython3.9.____cpython
         UPLOAD_PACKAGES: 'True'
   timeoutInMinutes: 360
   variables:
@@ -61,7 +109,7 @@ jobs:
 
     - task: CondaEnvironment@1
       inputs:
-        packageSpecs: 'python=3.6 conda-build conda "conda-forge-ci-setup=3" pip' # Optional
+        packageSpecs: 'python=3.6 conda-build conda "conda-forge-ci-setup=3" pip shyaml' # Optional
         installOptions: "-c conda-forge"
         updateConda: true
       displayName: Install conda-build and activate environment
