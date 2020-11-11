@@ -7,8 +7,8 @@ set "VAR=nvcc_%CUDA_VERSION% cuobjdump_%CUDA_VERSION% nvprune_%CUDA_VERSION% cup
 set "VAR=%VAR% memcheck_%CUDA_VERSION% nvdisasm_%CUDA_VERSION% nvprof_%CUDA_VERSION% cublas_%CUDA_VERSION%"
 set "VAR=%VAR% cublas_dev_%CUDA_VERSION% cudart_%CUDA_VERSION% cufft_%CUDA_VERSION% cufft_dev_%CUDA_VERSION%"
 set "VAR=%VAR% curand_%CUDA_VERSION% curand_dev_%CUDA_VERSION% cusolver_%CUDA_VERSION% cusolver_dev_%CUDA_VERSION%"
-set "VAR=%VAR% cusparse_%CUDA_VERSION% cusparse_dev_%CUDA_VERSION% nvgraph_%CUDA_VERSION% nvgraph_dev_%CUDA_VERSION%"
-set "VAR=%VAR% npp_%CUDA_VERSION% npp_dev_%CUDA_VERSION% nvrtc_%CUDA_VERSION% nvrtc_dev_%CUDA_VERSION% nvml_dev_%CUDA_VERSION%"
+set "VAR=%VAR% cusparse_%CUDA_VERSION% cusparse_dev_%CUDA_VERSION% npp_%CUDA_VERSION% npp_dev_%CUDA_VERSION%"
+set "VAR=%VAR% nvrtc_%CUDA_VERSION% nvrtc_dev_%CUDA_VERSION% nvml_dev_%CUDA_VERSION%"
 set "CUDA_COMPONENTS=%VAR%"
 
 if "%CUDA_VERSION%" == "9.2" goto cuda92
@@ -29,6 +29,7 @@ set "CUDA_INSTALLER_URL=https://developer.nvidia.com/compute/cuda/9.2/Prod2/loca
 set "CUDA_INSTALLER_CHECKSUM=f6c170a7452098461070dbba3e6e58f1"
 set "CUDA_PATCH_URL=https://developer.nvidia.com/compute/cuda/9.2/Prod2/patches/1/cuda_9.2.148.1_windows"
 set "CUDA_PATCH_CHECKSUM=09e20653f1346d2461a9f8f1a7178ba2"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nvgraph_%CUDA_VERSION% nvgraph_dev_%CUDA_VERSION%"
 goto cuda_common
 
 
@@ -37,6 +38,7 @@ set "CUDA_NETWORK_INSTALLER_URL=https://developer.nvidia.com/compute/cuda/10.0/P
 set "CUDA_NETWORK_INSTALLER_CHECKSUM=3312deac9c939bd78d0e7555606c22fc"
 set "CUDA_INSTALLER_URL=https://developer.nvidia.com/compute/cuda/10.0/Prod/local_installers/cuda_10.0.130_411.31_win10"
 set "CUDA_INSTALLER_CHECKSUM=90fafdfe2167ac25432db95391ca954e"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nvgraph_%CUDA_VERSION% nvgraph_dev_%CUDA_VERSION%"
 goto cuda_common
 
 
@@ -45,6 +47,7 @@ set "CUDA_NETWORK_INSTALLER_URL=http://developer.download.nvidia.com/compute/cud
 set "CUDA_NETWORK_INSTALLER_CHECKSUM=fae0c958440511576691b825d4599e93"
 set "CUDA_INSTALLER_URL=http://developer.download.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.243_426.00_win10.exe"
 set "CUDA_INSTALLER_CHECKSUM=b54cf32683f93e787321dcc2e692ff69"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nvgraph_%CUDA_VERSION% nvgraph_dev_%CUDA_VERSION%"
 goto cuda_common
 
 
@@ -55,6 +58,7 @@ set "CUDA_INSTALLER_URL=http://developer.download.nvidia.com/compute/cuda/10.2/P
 set "CUDA_INSTALLER_CHECKSUM=d9f5b9f24c3d3fc456a3c789f9b43419"
 set "CUDA_PATCH_URL=http://developer.download.nvidia.com/compute/cuda/10.2/Prod/patches/1/cuda_10.2.1_win10.exe"
 set "CUDA_PATCH_CHECKSUM=9d751ae129963deb7202f1d85149c69d"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nvgraph_%CUDA_VERSION% nvgraph_dev_%CUDA_VERSION%"
 goto cuda_common
 
 
