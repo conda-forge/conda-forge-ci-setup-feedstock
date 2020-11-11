@@ -1,10 +1,15 @@
 set "CUDA_VERSION=%1"
 
-:: :: If a faster installation is needed, this could work:
-:: Define a default subset of components to be installed and switch to network installers
-:: Full list of components in
+:: We define a default subset of components to be installed for faster installation times
+:: and reduced storage usage (CI is limited to 10GB). Full list of components is available at
 :: https://docs.nvidia.com/cuda/archive/%CUDA_VERSION%/cuda-installation-guide-microsoft-windows/index.html
-set "CUDA_COMPONENTS=nvcc_%CUDA_VERSION% Display.Driver"
+set "VAR=nvcc_%CUDA_VERSION% cuobjdump_%CUDA_VERSION% nvprune_%CUDA_VERSION% cupti_%CUDA_VERSION%"
+set "VAR=%VAR% memcheck_%CUDA_VERSION% nvdisasm_%CUDA_VERSION% nvprof_%CUDA_VERSION% cublas_%CUDA_VERSION%"
+set "VAR=%VAR% cublas_dev_%CUDA_VERSION% cudart_%CUDA_VERSION% cufft_%CUDA_VERSION% cufft_dev_%CUDA_VERSION%"
+set "VAR=%VAR% curand_%CUDA_VERSION% curand_dev_%CUDA_VERSION% cusolver_%CUDA_VERSION% cusolver_dev_%CUDA_VERSION%"
+set "VAR=%VAR% cusparse_%CUDA_VERSION% cusparse_dev_%CUDA_VERSION% nvgraph_%CUDA_VERSION% nvgraph_dev_%CUDA_VERSION%"
+set "VAR=%VAR% npp_%CUDA_VERSION% npp_dev_%CUDA_VERSION% nvrtc_%CUDA_VERSION% nvrtc_dev_%CUDA_VERSION% nvml_dev_%CUDA_VERSION%"
+set "CUDA_COMPONENTS=%VAR%"
 
 if "%CUDA_VERSION%" == "9.2" goto cuda92
 if "%CUDA_VERSION%" == "10.0" goto cuda100
@@ -88,9 +93,8 @@ if errorlevel 1 (
     echo Checksum does not match!
     exit /b 1
 )
-
-:: Run installer (TODO: add %CUDA_COMPONENTS% arg for speedups)
-cuda_installer.exe -s
+:: Run installer
+start /wait cuda_installer.exe -s %CUDA_COMPONENTS%
 if errorlevel 1 (
     echo Problem running installer...
     exit /b 1
