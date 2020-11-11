@@ -77,16 +77,18 @@ goto cuda_common
 :: The actual installation logic
 :cuda_common
 
+::We expect this CUDA_PATH
+set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
+
 echo Downloading CUDA version %CUDA_VERSION% installer from %CUDA_INSTALLER_URL%
 echo Expected MD5: %CUDA_INSTALLER_CHECKSUM%
 
 :: Download installer
-curl -k -L %CUDA_INSTALLER_URL% --output cuda_installer.exe
+curl --retry 3 -k -L %CUDA_INSTALLER_URL% --output cuda_installer.exe
 if errorlevel 1 (
     echo Problem downloading installer...
     exit /b 1
 )
-
 :: Check md5
 openssl md5 cuda_installer.exe | findstr %CUDA_INSTALLER_CHECKSUM%
 if errorlevel 1 (
@@ -96,14 +98,15 @@ if errorlevel 1 (
 :: Run installer
 start /wait cuda_installer.exe -s %CUDA_COMPONENTS%
 if errorlevel 1 (
-    echo Problem running installer...
+    echo Problem installing CUDA toolkit...
     exit /b 1
 )
+del cuda_installer.exe
 
 :: If patches are needed, download and apply
 if not "%CUDA_PATCH_URL%"=="" (
     echo This version requires an additional patch
-    curl -k -L %CUDA_PATCH_URL% --output cuda_patch.exe
+    curl --retry 3 -k -L %CUDA_PATCH_URL% --output cuda_patch.exe
     if errorlevel 1 (
         echo Problem downloading patch installer...
         exit /b 1
@@ -113,11 +116,18 @@ if not "%CUDA_PATCH_URL%"=="" (
         echo Checksum does not match!
         exit /b 1
     )
-    cuda_patch.exe -s
+    start /wait cuda_patch.exe -s
     if errorlevel 1 (
         echo Problem running patch installer...
         exit /b 1
     )
+    del cuda_patch.exe
+)
+
+:: This should exist by now!
+if not exist "%CUDA_PATH%\bin\nvcc.exe" (
+    echo CUDA toolkit installation failed!
+    exit /b 1
 )
 
 :: Add to PATH
