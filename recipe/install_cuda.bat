@@ -11,6 +11,7 @@ if "%CUDA_VERSION%" == "10.0" goto cuda100
 if "%CUDA_VERSION%" == "10.1" goto cuda101
 if "%CUDA_VERSION%" == "10.2" goto cuda102
 if "%CUDA_VERSION%" == "11.0" goto cuda110
+if "%CUDA_VERSION%" == "11.1" goto cuda111
 
 echo CUDA '%CUDA_VERSION%' is not supported
 exit /b 1
