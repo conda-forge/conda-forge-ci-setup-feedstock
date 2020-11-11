@@ -60,7 +60,7 @@ if not "%CUDA_VERSION%" == "None" (
     call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
     if errorlevel 1 (
         echo Could not install CUDA
-        exit /b 1
+        exit 1
     )
 )
 :: /CUDA
