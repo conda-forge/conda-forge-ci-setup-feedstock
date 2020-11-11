@@ -11,7 +11,7 @@ channel_targets:
 cuda_compiler_version:
 - None
 docker_image:
-- condaforge/linux-anvil-aarch64
+- quay.io/condaforge/linux-anvil-aarch64
 pin_run_as_build:
   python:
     min_pin: x.x
