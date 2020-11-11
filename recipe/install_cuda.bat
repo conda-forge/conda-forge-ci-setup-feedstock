@@ -130,8 +130,15 @@ if not exist "%CUDA_PATH%\bin\nvcc.exe" (
     exit /b 1
 )
 
-:: Add to PATH
-set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
+:: Notes about nvcuda.dll
+:: ----------------------
+:: We should also provide the drivers (nvcuda.dll), but the installer will not
+:: proceed without a physical Nvidia card attached (not the case in the CI).
+:: Expanding `<installer.exe>\Display.Driver\nvcuda.64.dl_` to `C:\Windows\System32`
+:: does not work anymore (.dl_ files are not PE-COFF according to Dependencies.exe).
+:: Forcing this results in a DLL error 193. Basically, there's no way to provide
+:: ncvuda.dll in a GPU-less machine without breaking the EULA (aka zipping nvcuda.dll
+:: from a working installation).
 
 if "%CI%" == "azure" (
     echo "Exporting and adding $CUDA_PATH ('%CUDA_PATH%') to $PATH"
@@ -139,7 +146,3 @@ if "%CI%" == "azure" (
     echo ##vso[task.setvariable variable=CUDA_PATH;]%CUDA_PATH%
     echo ##vso[task.setvariable variable=CUDA_HOME;]%CUDA_PATH%
 )
-
-:: Clean up
-del cuda_installer.exe
-if exist cuda_patch.exe del cuda_patch.exe
