@@ -2,3 +2,5 @@ provider:
   linux_aarch64: default
   linux_ppc64le: default
 conda_forge_output_validation: true
+build_platform:
+  osx_arm64: osx_64
