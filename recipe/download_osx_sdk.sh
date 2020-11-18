@@ -20,13 +20,14 @@ fi
 
 if [[ "$MACOSX_SDK_VERSION" == "11.0" ]]; then
     if [[ "$CI" == "travis" ]]; then
-        export OSX_SDK_DIR=/Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+        export OSX_SDK_DIR_NEW=/Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
     elif [[ "$CI" == "azure" ]]; then
-        export OSX_SDK_DIR=/Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
-        if [[ ! -d "${OSX_SDK_DIR}" ]]; then
-            export OSX_SDK_DIR=/Applications/Xcode_12_beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+        export OSX_SDK_DIR_NEW=/Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+        if [[ ! -d "${OSX_SDK_DIR_NEW}" ]]; then
+            export OSX_SDK_DIR_NEW=/Applications/Xcode_12_beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
         fi
-    else
+    fi
+    if [[ ! -d "${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk" ]]; then
         tmpdir=$(mktemp -d)
         mkdir -p $tmpdir
         pushd $tmpdir
@@ -34,6 +35,8 @@ if [[ "$MACOSX_SDK_VERSION" == "11.0" ]]; then
             tar -xf 0ecfb46da65f2f1fab77059ebb43de3ac7b0edad.tar.gz
             cp -rf MacOSX11.0.sdk ${OSX_SDK_DIR}/
         popd
+    else
+        export OSX_SDK_DIR=${OSX_SDK_DIR_NEW}
     fi
 fi
 
