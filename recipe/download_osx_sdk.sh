@@ -31,7 +31,7 @@ if [[ "$MACOSX_SDK_VERSION" == "11.0" ]]; then
         tmpdir=$(mktemp -d)
         mkdir -p $tmpdir
         pushd $tmpdir
-            wget https://github.com/alexey-lysiuk/macos-sdk/archive/0ecfb46da65f2f1fab77059ebb43de3ac7b0edad.tar.gz
+            curl -L -O https://github.com/alexey-lysiuk/macos-sdk/archive/0ecfb46da65f2f1fab77059ebb43de3ac7b0edad.tar.gz
             tar -xf 0ecfb46da65f2f1fab77059ebb43de3ac7b0edad.tar.gz
             cp -rf MacOSX11.0.sdk ${OSX_SDK_DIR}/
         popd
