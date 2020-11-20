@@ -27,7 +27,7 @@ if [[ "$MACOSX_SDK_VERSION" == "11.0" ]]; then
             export OSX_SDK_DIR_NEW=/Applications/Xcode_12_beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
         fi
     fi
-    if [[ ! -d "${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk" ]]; then
+    if [[ ! -d "${OSX_SDK_DIR_NEW}/MacOSX${MACOSX_SDK_VERSION}.sdk" ]]; then
         tmpdir=$(mktemp -d)
         mkdir -p $tmpdir
         pushd $tmpdir
