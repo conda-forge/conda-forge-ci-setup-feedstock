@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.5.1" %}
+{% set version = "3.5.3" %}
 
 package:
   name: {{ name|lower }}
@@ -38,6 +38,9 @@ build:
   skip: True  # [py2k]
 
 requirements:
+  build:
+    - python                              # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
     - python
     - pip
