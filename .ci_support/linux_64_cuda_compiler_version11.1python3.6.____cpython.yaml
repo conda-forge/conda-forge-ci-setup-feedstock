@@ -1,5 +1,5 @@
 cdt_name:
-- cos6
+- cos7
 channel_sources:
 - conda-forge,defaults
 channel_targets:
@@ -21,3 +21,4 @@ target_platform:
 zip_keys:
 - - cuda_compiler_version
   - docker_image
+  - cdt_name
