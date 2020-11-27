@@ -143,10 +143,3 @@ if not exist "%CUDA_PATH%\bin\nvcc.exe" (
 :: Forcing this results in a DLL error 193. Basically, there's no way to provide
 :: ncvuda.dll in a GPU-less machine without breaking the EULA (aka zipping nvcuda.dll
 :: from a working installation).
-
-if "%CI%" == "azure" (
-    echo "Exporting and adding $CUDA_PATH ('%CUDA_PATH%') to $PATH"
-    echo ##vso[task.prependpath]%CUDA_PATH%\bin
-    echo ##vso[task.setvariable variable=CUDA_PATH;]%CUDA_PATH%
-    echo ##vso[task.setvariable variable=CUDA_HOME;]%CUDA_PATH%
-)
