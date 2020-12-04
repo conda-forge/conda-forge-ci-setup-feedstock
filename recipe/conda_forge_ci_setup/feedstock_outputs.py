@@ -49,7 +49,7 @@ def _compute_md5sum(pth):
     return h.hexdigest()
 
 
-def request_copy(feedstock, dists, channel, git_sha=None):
+def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True):
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
@@ -67,6 +67,7 @@ def request_copy(feedstock, dists, channel, git_sha=None):
         "feedstock": feedstock,
         "outputs": checksums,
         "channel": channel,
+        "comment_on_error": comment_on_error,
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
