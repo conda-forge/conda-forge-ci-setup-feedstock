@@ -9,6 +9,11 @@ conda.exe config --set show_channel_urls true
 conda.exe config --set auto_update_conda false
 conda.exe config --set add_pip_as_python_dependency false
 
+type conda-forge.yml | shyaml get-value channel_priority strict > tmpFile
+set /p channel_priority= < tmpFile
+del tmpFile
+conda.exe config --set channel_priority %channel_priority%
+
 call setup_x64
 
 :: Set the conda-build working directory to a smaller path
