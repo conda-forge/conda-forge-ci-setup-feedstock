@@ -32,6 +32,10 @@ source ${RECIPE_ROOT}/run_conda_forge_build_setup_linux
 # make the build number clobber
 make_build_number "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
 
+if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
+     EXTRA_CB_OPTIONS="${EXTRA_CB_OPTIONS:-} --no-test"
+fi
+
 
 if [[ "${BUILD_WITH_CONDA_DEBUG:-0}" == 1 ]]; then
     if [[ "x${BUILD_OUTPUT_ID:-}" != "x" ]]; then

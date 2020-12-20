@@ -145,6 +145,7 @@ def upload_or_check(
     git_sha=None,
     private_upload=False,
     prod_owner="conda-forge",
+    comment_on_error=True,
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -225,6 +226,7 @@ def upload_or_check(
                     to_copy_paths,
                     channel,
                     git_sha=git_sha,
+                    comment_on_error=comment_on_error,
                 ):
                     raise RuntimeError(
                         "copy from staging to production channel failed")
@@ -269,7 +271,8 @@ def retry_upload_or_check(
         try:
             res = upload_or_check(
                 feedstock, recipe_dir, owner, channel, variant,
-                validate=validate, git_sha=git_sha if i == n_try-1 else None,
+                validate=validate, git_sha=git_sha,
+                comment_on_error=True if i == n_try-1 else False,
                 private_upload=private_upload
             )
             return res
