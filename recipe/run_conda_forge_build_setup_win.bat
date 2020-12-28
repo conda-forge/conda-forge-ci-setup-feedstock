@@ -65,8 +65,11 @@ if not "%CUDA_VERSION%" == "None" (
     call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
     if errorlevel 1 (
         echo Could not install CUDA
-        exit /b 1
+        exit 1
     )
+    :: We succeeded! Export paths
+    set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
+    set "PATH=%PATH%;%CUDA_PATH%\bin"
 )
 :: /CUDA
 
@@ -78,6 +81,10 @@ echo set "CONDA_BLD_PATH=%CONDA_BLD_PATH%"         > "%CONDA_PREFIX%\etc\conda\a
 echo set "CPU_COUNT=%CPU_COUNT%"                  >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "PYTHONUNBUFFERED=%PYTHONUNBUFFERED%"    >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "PATH=%PATH%"                            >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+if not "%CUDA_PATH%" == "" (
+    echo set "CUDA_PATH=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+    echo set "CUDA_HOME=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+)
 
 conda.exe info
 conda.exe config --show-sources
