@@ -13,4 +13,8 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         echo "build_platform:"       >> ${CI_SUPPORT}/${CONFIG}.yaml
         echo "- ${BUILD_PLATFORM}"   >> ${CI_SUPPORT}/${CONFIG}.yaml
     fi
+    if [[ "${BUILD_PLATFORM}" == "linux-64" && "${HOST_PLATFORM}" == linux-* ]]; then
+        conda create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}
+        export QEMU_LD_PREFIX=$CONDA_PREFIX/envs/sysroot_${HOST_PLATFORM}/*/sysroot
+    fi
 fi
