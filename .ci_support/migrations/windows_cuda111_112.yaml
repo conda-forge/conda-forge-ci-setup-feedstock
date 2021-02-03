@@ -1,4 +1,4 @@
-migrator_ts: 1604255168
+# migrator_ts: 1611736765
 __migrator:
   kind:
     version
@@ -18,11 +18,15 @@ cuda_compiler_version:         # [win]
   - 10.1                       # [win]
   - 10.2                       # [win]
   - 11.0                       # [win]
+  - 11.1                       # [win]
+  - 11.2                       # [win]
 cudnn:                         # [win]
   - undefined                  # [win]
   - 7                          # [win]
   - 7                          # [win]
   - 7                          # [win]
+  - 8                          # [win]
+  - 8                          # [win]
   - 8                          # [win]
 zip_keys:                      # [win]
   - - cudnn                    # [win]

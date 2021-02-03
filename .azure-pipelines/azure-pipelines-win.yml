@@ -68,6 +68,18 @@ jobs:
       win_64_cuda_compiler_version11.1python3.9.____cpython:
         CONFIG: win_64_cuda_compiler_version11.1python3.9.____cpython
         UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.2python3.6.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.2python3.6.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.2python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.2python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.2python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.2python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version11.2python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version11.2python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_versionNonepython3.6.____cpython:
         CONFIG: win_64_cuda_compiler_versionNonepython3.6.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -141,7 +153,7 @@ jobs:
     - script: |
         set "CI=azure"
         call activate base
-        # Overriding global run_conda_forge_build_setup_win with local copy.
+        :: Overriding global run_conda_forge_build_setup_win with local copy.
         recipe\run_conda_forge_build_setup_win
       displayName: conda-forge build setup
     
