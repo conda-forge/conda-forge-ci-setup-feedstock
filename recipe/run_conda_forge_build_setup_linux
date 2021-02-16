@@ -53,7 +53,7 @@ if [[ ! -z "$CUDA_HOME" && -d /usr/local/cuda-9.2 ]]; then
 fi
 
 # Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
-CUDA_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yml | shyaml get-value cuda_compiler_version.0)"
+CUDA_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yml | shyaml get-value cuda_compiler_version None)"
 if [[ "$CUDA_VERSION" == "None" ]]; then
     CUDA_VERSION=""
 fi
