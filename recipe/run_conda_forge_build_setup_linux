@@ -58,7 +58,6 @@ if [[ "$CUDA_VERSION" == "None" ]]; then
     CUDA_VERSION=""
 fi
 export CONDA_OVERRIDE_CUDA="${CUDA_VERSION}"
-echo "export CONDA_OVERRIDE_CUDA='${CUDA_VERSION}'" > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 if [ ! -z "$CONFIG" ]; then
     if [ ! -z "$CI" ]; then
@@ -78,6 +77,7 @@ if [ -n "${CPU_COUNT}" ]; then
     echo "export CPU_COUNT='${CPU_COUNT}'"                  >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 fi
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export CONDA_OVERRIDE_CUDA='${CONDA_OVERRIDE_CUDA}'" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${SCRIPT_DIR}/cross_compile_support.sh
