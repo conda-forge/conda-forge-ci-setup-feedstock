@@ -50,6 +50,10 @@ if [[ ! -z "$CUDA_HOME" && -d /usr/local/cuda-9.2 ]]; then
   sudo yum install -y cuda-compat-10-0.$(uname -m) ;
   # note: this path is added to ldconfig in linux-anvil-cuda:9.2
   if [[ ! -f "/usr/local/cuda-10.0/compat/libcuda.so" ]]; then exit 1; fi
+
+  # Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
+  CUDA_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yml | shyaml get-value cuda_compiler_version.0 None)"
+  echo "export CONDA_OVERRIDE_CUDA='${CUDA_VERSION}'" > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 fi
 
 if [ ! -z "$CONFIG" ]; then
