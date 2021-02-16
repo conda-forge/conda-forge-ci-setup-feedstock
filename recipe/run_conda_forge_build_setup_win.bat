@@ -71,6 +71,7 @@ if not "%CUDA_VERSION%" == "None" (
     set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
     set "PATH=%PATH%;%CUDA_PATH%\bin"
 )
+set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
 :: /CUDA
 
 type .ci_support\%CONFIG%.yaml
@@ -84,6 +85,9 @@ echo set "PATH=%PATH%"                            >> "%CONDA_PREFIX%\etc\conda\a
 if not "%CUDA_PATH%" == "" (
     echo set "CUDA_PATH=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
     echo set "CUDA_HOME=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+)
+if not "%CUDA_VERSION%" == "None" (
+    echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 )
 
 conda.exe info
