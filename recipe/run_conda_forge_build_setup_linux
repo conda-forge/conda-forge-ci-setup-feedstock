@@ -57,6 +57,7 @@ CUDA_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compile
 if [[ "$CUDA_VERSION" == "None" ]]; then
     CUDA_VERSION=""
 fi
+export CONDA_OVERRIDE_CUDA="${CUDA_VERSION}"
 echo "export CONDA_OVERRIDE_CUDA='${CUDA_VERSION}'" > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 if [ ! -z "$CONFIG" ]; then
