@@ -52,13 +52,6 @@ if [[ ! -z "$CUDA_HOME" && -d /usr/local/cuda-9.2 ]]; then
   if [[ ! -f "/usr/local/cuda-10.0/compat/libcuda.so" ]]; then exit 1; fi
 fi
 
-# Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
-CUDA_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)"
-if [[ "$CUDA_VERSION" == "None" ]]; then
-    CUDA_VERSION=""
-fi
-export CONDA_OVERRIDE_CUDA="${CUDA_VERSION}"
-
 if [ ! -z "$CONFIG" ]; then
     if [ ! -z "$CI" ]; then
         echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
@@ -77,7 +70,13 @@ if [ -n "${CPU_COUNT}" ]; then
     echo "export CPU_COUNT='${CPU_COUNT}'"                  >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 fi
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-echo "export CONDA_OVERRIDE_CUDA='${CONDA_OVERRIDE_CUDA}'" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+
+# Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
+CUDA_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)"
+if [[ "$CUDA_VERSION" != "None" ]]; then
+    export CONDA_OVERRIDE_CUDA="${CUDA_VERSION}"
+    echo "export CONDA_OVERRIDE_CUDA='${CONDA_OVERRIDE_CUDA}'" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${SCRIPT_DIR}/cross_compile_support.sh
