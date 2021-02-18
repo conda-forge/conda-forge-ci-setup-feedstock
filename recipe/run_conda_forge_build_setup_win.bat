@@ -70,8 +70,8 @@ if not "%CUDA_VERSION%" == "None" (
     :: We succeeded! Export paths
     set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
     set "PATH=%PATH%;%CUDA_PATH%\bin"
+    set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
 )
-set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
 :: /CUDA
 
 type .ci_support\%CONFIG%.yaml
