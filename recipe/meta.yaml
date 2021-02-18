@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.7.3" %}
+{% set version = "3.8.0" %}
 
 package:
   name: {{ name|lower }}
