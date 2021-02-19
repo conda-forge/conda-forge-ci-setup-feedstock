@@ -70,6 +70,7 @@ if not "%CUDA_VERSION%" == "None" (
     :: We succeeded! Export paths
     set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
     set "PATH=%PATH%;%CUDA_PATH%\bin"
+    set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
 )
 :: /CUDA
 
@@ -84,6 +85,8 @@ echo set "PATH=%PATH%"                            >> "%CONDA_PREFIX%\etc\conda\a
 if not "%CUDA_PATH%" == "" (
     echo set "CUDA_PATH=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
     echo set "CUDA_HOME=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+    :: Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
+    echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 )
 
 conda.exe info
