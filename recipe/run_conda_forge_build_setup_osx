@@ -21,13 +21,16 @@ mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
 echo "export CPU_COUNT='${CPU_COUNT}'"                                    > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
-OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
+if [[ "${OSX_SDK_DIR:-}" == "" ]]; then
+  OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
+  USING_SYSTEM_SDK_DIR=1
+fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 CI_SUPPORT=$PWD/.ci_support
 source ${SCRIPT_DIR}/cross_compile_support.sh
 source ${SCRIPT_DIR}/download_osx_sdk.sh
 
-if [[ "$MACOSX_DEPLOYMENT_TARGET" == 10.* ]]; then
+if [[ "$MACOSX_DEPLOYMENT_TARGET" == 10.* && "${USING_SYSTEM_SDK_DIR:-}" == "1" ]]; then
   # set minimum sdk version to our target
   plutil -replace MinimumSDKVersion -string ${MACOSX_SDK_VERSION} $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
   plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
