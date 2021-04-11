@@ -9,7 +9,7 @@ conda.exe config --set show_channel_urls true
 conda.exe config --set auto_update_conda false
 conda.exe config --set add_pip_as_python_dependency false
 
-type conda-forge.yml | shyaml get-value channel_priority strict > tmpFile
+(type conda-forge.yml | shyaml get-value channel_priority strict || echo strict) > tmpFile
 set /p channel_priority= < tmpFile
 del tmpFile
 conda.exe config --set channel_priority %channel_priority%
