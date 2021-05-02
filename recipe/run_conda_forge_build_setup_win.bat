@@ -51,6 +51,8 @@ set "PATH=%PATH:c:\tools\php;=%"
 if defined CI (
     DEL C:\Windows\System32\libcrypto-1_1-x64.dll || (Echo Ignoring failure to delete C:\Windows\System32\libcrypto-1_1-x64.dll)
     DEL C:\Windows\System32\libssl-1_1-x64.dll || (Echo Ignoring failure to delete C:\Windows\System32\libssl-1_1-x64.dll)
+    DEL C:\Windows\System32\msmpi.dll || (Echo Ignoring failure to delete C:\Windows\System32\msmpi.dll)
+    DEL C:\Windows\System32\msmpires.dll || (Echo Ignoring failure to delete C:\Windows\System32\msmpires.dll)
 )
 
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
