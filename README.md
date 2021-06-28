@@ -468,6 +468,7 @@ Installing `conda-forge-ci-setup` from the `conda-forge` channel can be achieved
 
 ```
 conda config --add channels conda-forge
+conda config --set channel_priority strict
 ```
 
 Once the `conda-forge` channel has been enabled, `conda-forge-ci-setup` can be installed with:
