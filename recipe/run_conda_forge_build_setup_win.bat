@@ -21,6 +21,13 @@ if "%CONDA_BLD_PATH%" == "" (
     set "CONDA_BLD_PATH=C:\\bld\\"
 )
 
+:: Increase pagefile size, cf. https://github.com/conda-forge/conda-forge-ci-setup-feedstock/issues/155
+if "%CI%" == "azure" (
+    if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
+        call recipe\SetPageFileSize.ps1 -MinimumSize 4GB -MaximumSize 8GB -DiskRoot "D:"
+    )
+)
+
 call conda activate base
 
 if "%CI%" == "" (
