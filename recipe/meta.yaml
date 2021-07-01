@@ -17,6 +17,7 @@ build:
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
+    - COPY "%RECIPE_DIR%\\SetPageFileSize.ps1" "%SCRIPTS%\\SetPageFileSize.ps1"                                          # [win]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
     - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"                                         # [unix]
