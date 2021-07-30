@@ -23,16 +23,20 @@ if "%CONDA_BLD_PATH%" == "" (
 )
 
 :: Increase pagefile size, cf. https://github.com/conda-forge/conda-forge-ci-setup-feedstock/issues/155
+:: Both in the recipe and in the final package, this script is co-located with
+:: SetPageFileSize.ps1 & ExecuteSetPageFileSize.bat, see meta.yaml
+set ThisScriptsDirectory=%~dp0
+set EntryPointPath=%ThisScriptsDirectory%ExecuteSetPageFileSize.bat
 if "%CI%" == "azure" (
     REM use different drive than CONDA_BLD_PATH-location for pagefile
     if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
-        REM this file will be run within %SCRIPTS%, where SetPageFileSize.ps1/ExecuteSetPageFileSize.bat is also copied into, see meta.yaml
-        call ExecuteSetPageFileSize.bat 8GB 8GB "D:"
+        REM Arguments are -MinimumSize, -MaximumSize, -DiskRoot see ExecuteSetPageFileSize.bat
+        call %EntryPointPath% 8GB 8GB "D:"
     )
     if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-        call ExecuteSetPageFileSize.bat 8GB 8GB "C:"
+        call %EntryPointPath% 8GB 8GB "C:"
     )
 )
 
