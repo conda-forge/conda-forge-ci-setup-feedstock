@@ -48,3 +48,19 @@ fi
 conda info
 conda config --show-sources
 conda list --show-channel-urls
+
+if [[ "${CI:-}" == "azure" ]]; then
+    PATH=$(echo $PATH | sed 's@/Users/runner/.yarn/bin:@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/Library/Android/sdk/tools:@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/Library/Android/sdk/platform-tools:@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/Library/Android/sdk/ndk-bundle:@@g')
+    PATH=$(echo $PATH | sed 's@/usr/local/lib/ruby/gems/2.7.0/bin:@@g')
+    PATH=$(echo $PATH | sed 's@/usr/local/opt/ruby@2.7/bin:@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/.cargo/bin:@@g')
+    PATH=$(echo $PATH | sed 's@/usr/local/opt/curl/bin:@@g')
+    PATH=$(echo $PATH | sed 's@/usr/local/opt/pipx_bin@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/.dotnet/tools:@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/.ghcup/bin:@@g')
+    PATH=$(echo $PATH | sed 's@/Users/runner/hostedtoolcache/stack/2.7.3/x64:@@g')
+    export PATH
+fi
