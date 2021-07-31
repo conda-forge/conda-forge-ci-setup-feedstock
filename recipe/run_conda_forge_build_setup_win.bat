@@ -32,11 +32,11 @@ if "%CI%" == "azure" (
     if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
         REM Arguments are -MinimumSize, -MaximumSize, -DiskRoot see ExecuteSetPageFileSize.bat
-        call %EntryPointPath% 8GB 8GB "D:"
+        call %EntryPointPath% 8GB 8GB D:
     )
     if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-        call %EntryPointPath% 8GB 8GB "C:"
+        call %EntryPointPath% 8GB 8GB C:
     )
 )
 
