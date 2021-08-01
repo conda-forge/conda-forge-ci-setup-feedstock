@@ -34,7 +34,7 @@ if "%CI%" == "azure" (
     )
     if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-        PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File """"%EntryPointPath%"""" -MinimumSize 8GB -MaximumSize 8GB -DiskRoot """""C:""""" '
+        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File """"%EntryPointPath%"""" -MinimumSize 8GB -MaximumSize 8GB -DiskRoot """""C:""""" '}"
     )
 )
 
