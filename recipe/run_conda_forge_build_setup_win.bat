@@ -30,11 +30,20 @@ if "%CI%" == "azure" (
     REM use different drive than CONDA_BLD_PATH-location for pagefile
     if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
-        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot """"D:"""" "
+        REM Everything about this is horrible; first, we need to call PowerShell scripts differently, see:
+        REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
+        REM Furthermore, we absolutely need to pass -DiskRoot wrapped in quotes due to the colon, but that conflicts with
+        REM the quotes necessary for the PowerShell invocation; escapes don't work, single quotes have other semantics,
+        REM and so we use the second, more involved, version of invocation from the blog (without the -Verb RunAs) that
+        REM inexplicably uses 4 quotes (and needs more options to actually see the output). This method then also manages
+        REM to break the default casting behaviour of "8GB" to UInt64, and so we pass 8 * 2^30 = 8589934592 explicitly.
+        REM The quoting of the drive letter was arrived at by trial and error (using echos in SetPageFileSize.ps1),
+        REM if you have better version (or better: an explanation), please open a PR.
+        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File """"%EntryPointPath%"""" -MinimumSize """"8589934592"""" -MaximumSize """"8589934592"""" -DiskRoot """"""""D:"""""""""""" ' -NoNewWindow -Wait}"
     )
     if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
         echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File """"%EntryPointPath%"""" -MinimumSize """"8589934592"""" -MaximumSize """"8589934592"""" -DiskRoot """"""""C:"""""""" ' -NoNewWindow -Wait}"
+        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process PowerShell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File """"%EntryPointPath%"""" -MinimumSize """"8589934592"""" -MaximumSize """"8589934592"""" -DiskRoot """"""""C:"""""""""""" ' -NoNewWindow -Wait}"
     )
 )
 

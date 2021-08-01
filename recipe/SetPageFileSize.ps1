@@ -7,7 +7,7 @@
   SetPageFileSize.ps1 -MinimumSize 4GB -MaximumSize 8GB -DiskRoot "D:"
 #>
 
-# this file taken 1:1 (with the exception of this comment) from the MIT-licensed
+# this file taken 1:1 (with the exception of this comment & the parameter echo) from the MIT-licensed
 # https://github.com/al-cheb/configure-pagefile-action/blob/916fa29e5d27bd4e8eef3666869afbaaee27d9eb/scripts/SetPageFileSize.ps1
 
 param(
