@@ -192,5 +192,6 @@ namespace Util
 
 Add-Type -TypeDefinition $source
 
+echo Parameters: $minimumSize, $maximumSize, $diskRoot
 # Set SetPageFileSize
 [Util.PageFile]::SetPageFileSize($minimumSize, $maximumSize, $diskRoot)
