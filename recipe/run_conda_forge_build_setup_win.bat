@@ -26,18 +26,21 @@ if "%CONDA_BLD_PATH%" == "" (
 :: Both in the recipe and in the final package, this script is co-located with SetPageFileSize.ps1, see meta.yaml
 set ThisScriptsDirectory=%~dp0
 set EntryPointPath=%ThisScriptsDirectory%SetPageFileSize.ps1
-if "%CI%" == "azure" (
-    REM use different drive than CONDA_BLD_PATH-location for pagefile
-    if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
-        echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
-        REM Inspired by:
-        REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
-        REM Drive-letter needs to be escaped in quotes
-        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"D:\""
-    )
-    if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
-        echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"C:\""
+:: Only run if SET_PAGEFILE is set; EntryPointPath needs to be set before if not using delayed execution.
+if "%SET_PAGEFILE%" NEQ "" (
+    if "%CI%" == "azure" (
+        REM use different drive than CONDA_BLD_PATH-location for pagefile
+        if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
+            REM Inspired by:
+            REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
+            REM Drive-letter needs to be escaped in quotes
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"D:\""
+        )
+        if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"C:\""
+        )
     )
 )
 
