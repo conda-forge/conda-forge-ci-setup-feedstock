@@ -1,4 +1,3 @@
-@echo on
 
 :: 2 cores available on Appveyor workers: https://www.appveyor.com/docs/build-environment/#build-vm-configurations
 :: CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
