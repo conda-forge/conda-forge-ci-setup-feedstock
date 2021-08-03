@@ -25,7 +25,7 @@ if "%CONDA_BLD_PATH%" == "" (
 :: Both in the recipe and in the final package, this script is co-located with SetPageFileSize.ps1, see meta.yaml
 set ThisScriptsDirectory=%~dp0
 set EntryPointPath=%ThisScriptsDirectory%SetPageFileSize.ps1
-:: Only run if SET_PAGEFILE is set; EntryPointPath needs to be set before if not using delayed execution.
+:: Only run if SET_PAGEFILE is set; EntryPointPath needs to be set outside if-condition when not using EnableDelayedExpansion.
 if "%SET_PAGEFILE%" NEQ "" (
     if "%CI%" == "azure" (
         REM use different drive than CONDA_BLD_PATH-location for pagefile
