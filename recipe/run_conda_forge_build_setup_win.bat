@@ -26,19 +26,19 @@ if "%CONDA_BLD_PATH%" == "" (
 set ThisScriptsDirectory=%~dp0
 set EntryPointPath=%ThisScriptsDirectory%SetPageFileSize.ps1
 :: Only run if SET_PAGEFILE is set; EntryPointPath needs to be set outside if-condition when not using EnableDelayedExpansion.
-if "%SET_PAGEFILE%" NEQ "" (
+if "%SET_PAGEFILE_SIZE%" NEQ "" (
     if "%CI%" == "azure" (
         REM use different drive than CONDA_BLD_PATH-location for pagefile
         if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to %SET_PAGEFILE_SIZE% on D:
             REM Inspired by:
             REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
             REM Drive-letter needs to be escaped in quotes
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"D:\""
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize %SET_PAGEFILE_SIZE% -MaximumSize %SET_PAGEFILE_SIZE% -DiskRoot \"D:\""
         )
         if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"C:\""
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to %SET_PAGEFILE_SIZE% on C:
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize %SET_PAGEFILE_SIZE% -MaximumSize %SET_PAGEFILE_SIZE% -DiskRoot \"C:\""
         )
     )
 )
