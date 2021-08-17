@@ -45,6 +45,11 @@ if "%SET_PAGEFILE%" NEQ "" (
 
 call conda activate base
 
+REM Disable conflict reports if mambabuild is NOT in use
+if "%GET_BOA%" == "" (
+    conda.exe config --set unsatisfiable_hints false
+)
+
 if "%CI%" == "" (
     echo "Not running on CI"
 ) else (

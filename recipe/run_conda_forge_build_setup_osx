@@ -36,6 +36,11 @@ if [[ "$MACOSX_DEPLOYMENT_TARGET" == 10.* && "${USING_SYSTEM_SDK_DIR:-}" == "1" 
   plutil -replace DTSDKName -string macosx${MACOSX_SDK_VERSION}internal $(xcode-select -p)/Platforms/MacOSX.platform/Info.plist
 fi
 
+# Disable conflict reports if mambabuild is NOT in use
+if [ -z "$GET_BOA" ]; then
+    conda config --set unsatisfiable_hints false
+fi
+
 if [ ! -z "$CONFIG" ]; then
     if [ ! -z "$CI" ]; then
         echo "CI:" >> ${CI_SUPPORT}/${CONFIG}.yaml
