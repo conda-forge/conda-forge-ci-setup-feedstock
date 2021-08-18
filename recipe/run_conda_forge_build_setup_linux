@@ -2,6 +2,11 @@
 
 export PYTHONUNBUFFERED=1
 
+# Behold the ugliest patch ever
+curl -sLo \
+    $(conda info --root)/lib/python$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')/site-packages/conda/resolve2.py \
+    https://github.com/jaimergp/conda/raw/fix-gh-9862/conda/resolve.py
+
 conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
