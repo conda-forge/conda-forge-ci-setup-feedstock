@@ -62,6 +62,7 @@ requirements:
     - pyyaml
     - m2-git  # [win]
     - git     # [unix]
+    # New ones don't work at the moment. See https://github.com/tpoechtrager/cctools-port/pull/105#issuecomment-908459824
     - cctools 949.*  # [osx]
 
 test:
