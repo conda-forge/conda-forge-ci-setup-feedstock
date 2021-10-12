@@ -13,6 +13,7 @@ import click
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
 OUTPUTS_REPO = "https://github.com/conda-forge/feedstock-outputs.git"
+OUTPUTS_REPO_RAW = "https://raw.githubusercontent.com/conda-forge/feedstock-outputs/main/"
 
 
 def _get_sharded_path(output):
@@ -20,7 +21,7 @@ def _get_sharded_path(output):
     while len(chars) < 3:
         chars.append("z")
 
-    return os.path.join("outputs", chars[0], chars[1], chars[2], output + ".json")
+    return "/".join(["outputs", chars[0], chars[1], chars[2], output + ".json"])
 
 
 def split_pkg(pkg):
@@ -118,41 +119,23 @@ def is_valid_feedstock_output(project, outputs):
 
     valid = {o: False for o in outputs}
 
-    tmpdir = None
-    try:
-        tmpdir = tempfile.mkdtemp('_recipe')
-        repo_path = os.path.join(tmpdir, "feedstock-outputs")
+    for dist in outputs:
+        try:
+            _, o, _, _ = split_pkg(dist)
+        except RuntimeError:
+            continue
 
-        subprocess.run(
-            ["git", "clone", "--depth=1", OUTPUTS_REPO, repo_path],
-            check=True,
-        )
+        opth = _get_sharded_path(o)
+        url = OUTPUTS_REPO_RAW + opth
+        res = requests.get(url)
 
-        for dist in outputs:
-            try:
-                _, o, _, _ = split_pkg(dist)
-            except RuntimeError:
-                continue
-
-            opth = _get_sharded_path(o)
-            pth = os.path.join(repo_path, opth)
-
-            if not os.path.exists(pth):
-                # no output exists and we can add it
-                valid[dist] = True
-            else:
-                # make sure feedstock is ok
-                with open(pth, "r") as fp:
-                    data = json.load(fp)
-                valid[dist] = feedstock in data["feedstocks"]
-    finally:
-        if tmpdir is not None:
-            # windows builds on azure sometimes fail when trying to remove
-            # tmpdirs, so we try and if it fails just move on
-            try:
-                shutil.rmtree(tmpdir)
-            except Exception:
-                pass
+        if not res.ok:
+            # no output exists and we can add it
+            valid[dist] = True
+        else:
+            # make sure feedstock is ok
+            data = json.loads(res.content.decode('utf-8'))
+            valid[dist] = feedstock in data["feedstocks"]
 
     return valid
 
