@@ -134,7 +134,7 @@ def is_valid_feedstock_output(project, outputs):
             valid[dist] = True
         else:
             # make sure feedstock is ok
-            data = json.loads(res.content.decode('utf-8'))
+            data = res.json()
             valid[dist] = feedstock in data["feedstocks"]
 
     return valid
