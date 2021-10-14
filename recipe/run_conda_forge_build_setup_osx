@@ -9,6 +9,10 @@ export PYTHONUNBUFFERED=1
 conda config --set show_channel_urls true
 conda config --set auto_update_conda false
 conda config --set add_pip_as_python_dependency false
+# Otherwise packages that don't explicitly pin openssl in their requirements
+# are forced to the newest OpenSSL version, even if their dependencies don't
+# support it.
+conda config --remove aggressive_update_packages openssl
 
 # Need strict priority for pypy as defaults is not fixed
 # but ppl can turn this off
