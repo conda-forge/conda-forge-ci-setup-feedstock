@@ -11,7 +11,7 @@ conda.exe config --set add_pip_as_python_dependency false
 :: Otherwise packages that don't explicitly pin openssl in their requirements
 :: are forced to the newest OpenSSL version, even if their dependencies don't
 :: support it.
-conda.exe config --add aggressive_update_packages openssl
+conda.exe config --show aggressive_update_packages >> %HOMEDRIVE%%HOMEPATH%\.condarc
 conda.exe config --remove aggressive_update_packages openssl
 
 (type conda-forge.yml | shyaml get-value channel_priority strict || echo strict) > tmpFile
