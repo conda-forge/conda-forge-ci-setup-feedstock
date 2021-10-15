@@ -8,6 +8,11 @@ set PYTHONUNBUFFERED=1
 conda.exe config --set show_channel_urls true
 conda.exe config --set auto_update_conda false
 conda.exe config --set add_pip_as_python_dependency false
+:: Otherwise packages that don't explicitly pin openssl in their requirements
+:: are forced to the newest OpenSSL version, even if their dependencies don't
+:: support it.
+conda.exe config --show aggressive_update_packages >> %HOMEDRIVE%%HOMEPATH%\.condarc
+conda.exe config --remove aggressive_update_packages openssl
 
 (type conda-forge.yml | shyaml get-value channel_priority strict || echo strict) > tmpFile
 set /p channel_priority= < tmpFile
