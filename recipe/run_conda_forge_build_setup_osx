@@ -12,7 +12,7 @@ conda config --set add_pip_as_python_dependency false
 # Otherwise packages that don't explicitly pin openssl in their requirements
 # are forced to the newest OpenSSL version, even if their dependencies don't
 # support it.
-conda config --add aggressive_update_packages openssl
+conda config --show > $HOME/.condarc
 conda config --remove aggressive_update_packages openssl
 
 # Need strict priority for pypy as defaults is not fixed
