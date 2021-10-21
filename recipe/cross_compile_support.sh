@@ -19,6 +19,8 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
             echo "CMAKE_CROSSCOMPILING_EMULATOR: " >> ${CI_SUPPORT}/${CONFIG}.yaml
             echo "- /usr/bin/qemu-$(echo $HOST_PLATFORM | cut -b 7-)-static"  >> ${CI_SUPPORT}/${CONFIG}.yaml
+            echo "CROSSCOMPILING_EMULATOR: " >> ${CI_SUPPORT}/${CONFIG}.yaml
+            echo "- /usr/bin/qemu-$(echo $HOST_PLATFORM | cut -b 7-)-static"  >> ${CI_SUPPORT}/${CONFIG}.yaml
         fi
     fi
 fi
