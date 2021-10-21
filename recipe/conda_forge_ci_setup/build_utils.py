@@ -104,14 +104,14 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
             channels = _global_config["channels"]["sources"]
 
         try:
-            call(["conda", "config", "--remove", "channels", "defaults"])
+            call(["conda", "config", "--env", "--remove", "channels", "defaults"])
         except subprocess.CalledProcessError:
             pass
 
         for c in reversed(channels):
-            call(["conda", "config", "--add", "channels", c])
+            call(["conda", "config", "--env", "--add", "channels", c])
 
-        call(["conda", "config", "--set", "show_channel_urls", "true"])
+        call(["conda", "config", "--env", "--set", "show_channel_urls", "true"])
 
 
 @click.command()
