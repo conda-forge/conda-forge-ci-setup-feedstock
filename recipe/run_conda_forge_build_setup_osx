@@ -6,18 +6,20 @@ export CPU_COUNT="${CPU_COUNT:-2}"
 
 export PYTHONUNBUFFERED=1
 
-conda config --set show_channel_urls true
-conda config --set auto_update_conda false
-conda config --set add_pip_as_python_dependency false
+conda config --env --set show_channel_urls true
+conda config --env --set auto_update_conda false
+conda config --env --set add_pip_as_python_dependency false
 # Otherwise packages that don't explicitly pin openssl in their requirements
 # are forced to the newest OpenSSL version, even if their dependencies don't
 # support it.
-conda config --show aggressive_update_packages >> $HOME/.condarc
-conda config --remove aggressive_update_packages openssl
+conda config --env --append aggressive_update_packages ca-certificates # add something to make sure the key exists
+conda config --env --remove-key aggressive_update_packages
+conda config --env --append aggressive_update_packages ca-certificates
+conda config --env --append aggressive_update_packages certifi
 
 # Need strict priority for pypy as defaults is not fixed
 # but ppl can turn this off
-conda config --set channel_priority $(cat ./conda-forge.yml | shyaml get-value channel_priority strict || echo strict)
+conda config --env --set channel_priority $(cat ./conda-forge.yml | shyaml get-value channel_priority strict || echo strict)
 
 # CONDA_PREFIX might be unset
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
@@ -51,7 +53,7 @@ if [ ! -z "$CONFIG" ]; then
 fi
 
 conda info
-conda config --show-sources
+conda config --env --show-sources
 conda list --show-channel-urls
 
 if [[ "${CI:-}" == "azure" ]]; then
