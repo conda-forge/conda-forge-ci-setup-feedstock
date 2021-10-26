@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.11.2" %}
+{% set version = "3.15.0" %}
 
 package:
   name: {{ name|lower }}
@@ -64,6 +64,8 @@ requirements:
     - git     # [unix]
     # New ones don't work at the moment. See https://github.com/tpoechtrager/cctools-port/pull/105#issuecomment-908459824
     - cctools 949.*  # [osx]
+  run_constrained:
+    - boa >=0.7,<0.8
 
 test:
   # ensure that all variants of cuda_compiler_version are tested

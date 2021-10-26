@@ -8,9 +8,6 @@ jobs:
     vmImage: vs2017-win2016
   strategy:
     matrix:
-      win_64_cuda_compiler_version10.2python3.6.____cpython:
-        CONFIG: win_64_cuda_compiler_version10.2python3.6.____cpython
-        UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version10.2python3.7.____cpython:
         CONFIG: win_64_cuda_compiler_version10.2python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -19,9 +16,6 @@ jobs:
         UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version10.2python3.9.____cpython:
         CONFIG: win_64_cuda_compiler_version10.2python3.9.____cpython
-        UPLOAD_PACKAGES: 'True'
-      win_64_cuda_compiler_version11.0python3.6.____cpython:
-        CONFIG: win_64_cuda_compiler_version11.0python3.6.____cpython
         UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version11.0python3.7.____cpython:
         CONFIG: win_64_cuda_compiler_version11.0python3.7.____cpython
@@ -32,9 +26,6 @@ jobs:
       win_64_cuda_compiler_version11.0python3.9.____cpython:
         CONFIG: win_64_cuda_compiler_version11.0python3.9.____cpython
         UPLOAD_PACKAGES: 'True'
-      win_64_cuda_compiler_version11.1python3.6.____cpython:
-        CONFIG: win_64_cuda_compiler_version11.1python3.6.____cpython
-        UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version11.1python3.7.____cpython:
         CONFIG: win_64_cuda_compiler_version11.1python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -44,9 +35,6 @@ jobs:
       win_64_cuda_compiler_version11.1python3.9.____cpython:
         CONFIG: win_64_cuda_compiler_version11.1python3.9.____cpython
         UPLOAD_PACKAGES: 'True'
-      win_64_cuda_compiler_version11.2python3.6.____cpython:
-        CONFIG: win_64_cuda_compiler_version11.2python3.6.____cpython
-        UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version11.2python3.7.____cpython:
         CONFIG: win_64_cuda_compiler_version11.2python3.7.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -55,9 +43,6 @@ jobs:
         UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version11.2python3.9.____cpython:
         CONFIG: win_64_cuda_compiler_version11.2python3.9.____cpython
-        UPLOAD_PACKAGES: 'True'
-      win_64_cuda_compiler_versionNonepython3.6.____cpython:
-        CONFIG: win_64_cuda_compiler_versionNonepython3.6.____cpython
         UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_versionNonepython3.7.____cpython:
         CONFIG: win_64_cuda_compiler_versionNonepython3.7.____cpython
@@ -146,7 +131,7 @@ jobs:
 
     - script: |
         call activate base
-        conda.exe build "recipe" -m .ci_support\%CONFIG%.yaml
+        conda.exe build "recipe" -m .ci_support\%CONFIG%.yaml --suppress-variables
       displayName: Build recipe
       env:
         PYTHONUNBUFFERED: 1
