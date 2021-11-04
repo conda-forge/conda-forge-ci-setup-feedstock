@@ -15,6 +15,11 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
     fi
     if [[ "${BUILD_PLATFORM}" == "linux-64" && "${HOST_PLATFORM}" == linux-* ]]; then
         conda create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}
+        for pkg in $(cat ${CI_SUPPORT}/../recipe/yum_requirements.txt); do
+            if [[ "${pkg}" != "#"* && "${pkg}" != "" ]]; then
+                conda install "${pkg}-cos7-${HOST_PLATFORM:6}" -n sysroot_${HOST_PLATFORM} --yes --quiet || true
+            fi
+        done
         export QEMU_LD_PREFIX=$(find ${CONDA_PREFIX}/envs/sysroot_${HOST_PLATFORM} -name sysroot | head -1)
         if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
             echo "CMAKE_CROSSCOMPILING_EMULATOR: " >> ${CI_SUPPORT}/${CONFIG}.yaml
