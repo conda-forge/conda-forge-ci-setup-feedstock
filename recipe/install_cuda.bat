@@ -21,7 +21,8 @@ if "%CUDA_VERSION%" == "11.1" goto cuda111
 if "%CUDA_VERSION%" == "11.2" goto cuda1122
 if "%CUDA_VERSION%" == "11.3" goto cuda1131
 if "%CUDA_VERSION%" == "11.4" goto cuda114
-if "%CUDA_VERSION%" == "11.5" goto cuda115
+if "%CUDA_VERSION%" == "11.5" goto cuda1151
+if "%CUDA_VERSION%" == "11.6" goto cuda116
 
 echo CUDA '%CUDA_VERSION%' is not supported
 exit /b 1
@@ -140,6 +141,22 @@ set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cu
 set "CUDA_NETWORK_INSTALLER_CHECKSUM=499fb5f0d25424a4a52f901a78beceef"
 set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.5.0/local_installers/cuda_11.5.0_496.13_win10.exe"
 set "CUDA_INSTALLER_CHECKSUM=9ae3759817c87dc8ae6f0d38cb164361"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
+goto cuda_common
+
+:cuda1151
+set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.5.1/network_installers/cuda_11.5.1_windows_network.exe"
+set "CUDA_NETWORK_INSTALLER_CHECKSUM=0e70240480f3d63bc17adcb046c01580"
+set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.5.1/local_installers/cuda_11.5.1_496.13_windows.exe"
+set "CUDA_INSTALLER_CHECKSUM=74d4a0723ca179f56f6877e72c9b1694"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
+goto cuda_common
+
+:cuda116
+set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.6.0/network_installers/cuda_11.6.0_windows_network.exe"
+set "CUDA_NETWORK_INSTALLER_CHECKSUM=99a5d04c00eeac430c7f34b013c5b7c6"
+set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.6.0/local_installers/cuda_11.6.0_511.23_windows.exe"
+set "CUDA_INSTALLER_CHECKSUM=7a91a7a7696e869ff8d90c52faf48f40"
 set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
 goto cuda_common
 
