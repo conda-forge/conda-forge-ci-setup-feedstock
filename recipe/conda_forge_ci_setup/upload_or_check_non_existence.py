@@ -161,7 +161,9 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
-    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir, variant)
+    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
+        recipe_dir, variant
+    )
 
     # The list of built distributions
     paths = set()
@@ -179,7 +181,7 @@ def upload_or_check(
         )
         # TODO: flip this over to .conda when that format
         #  is in flight
-        for path in paths if path.endswith('.tar.bz2')
+        for path in paths if (path.endswith('.tar.bz2') or path.endswith(".conda"))
         if split_pkg(path)[1] in allowed_dist_names
     ]
 
