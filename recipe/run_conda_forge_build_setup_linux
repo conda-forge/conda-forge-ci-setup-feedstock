@@ -18,8 +18,8 @@ export "CONDA_BLD_PATH=${FEEDSTOCK_ROOT}/build_artifacts"
 set +u
 
 # Don't set the number of CPUs for some CI systems
-if [ "${CI}" = "drone" ]; then
-    export CPU_COUNT=
+if [[ "${CI}" == "drone" || "${CI}" == "github_actions" ]]; then
+    unset CPU_COUNT
 else
     # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
     # 2 cores available on TravisCI workers: https://docs.travis-ci.com/user/reference/overview/
