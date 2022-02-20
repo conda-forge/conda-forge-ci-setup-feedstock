@@ -92,7 +92,6 @@ jobs:
       win_64_cuda_compiler_versionNonepython3.9.____cpython:
         CONFIG: win_64_cuda_compiler_versionNonepython3.9.____cpython
         UPLOAD_PACKAGES: 'True'
-    maxParallel: 19
   timeoutInMinutes: 360
   variables:
     CONDA_BLD_PATH: D:\\bld\\
