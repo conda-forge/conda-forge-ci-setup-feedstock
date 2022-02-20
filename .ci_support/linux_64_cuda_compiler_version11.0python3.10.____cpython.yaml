@@ -19,6 +19,6 @@ python:
 target_platform:
 - linux-64
 zip_keys:
-- - cdt_name
-  - cuda_compiler_version
+- - cuda_compiler_version
+  - cdt_name
   - docker_image
