@@ -10,10 +10,12 @@ __migrator:
     - cuda_compiler_stub
   ordering:
     cxx_compiler_version:
+      - 10
       - 9
       - 8
       - 7
     c_compiler_version:
+      - 10
       - 9
       - 8
       - 7
