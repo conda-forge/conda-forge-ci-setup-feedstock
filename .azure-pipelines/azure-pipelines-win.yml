@@ -5,9 +5,33 @@
 jobs:
 - job: win
   pool:
-    vmImage: vs2017-win2016
+    vmImage: windows-2019
   strategy:
     matrix:
+      win_64_cuda_compiler_version10.0python3.10.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.10.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.0python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.0python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.0python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.0python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.10.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.10.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.7.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.7.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.8.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.8.____cpython
+        UPLOAD_PACKAGES: 'True'
+      win_64_cuda_compiler_version10.1python3.9.____cpython:
+        CONFIG: win_64_cuda_compiler_version10.1python3.9.____cpython
+        UPLOAD_PACKAGES: 'True'
       win_64_cuda_compiler_version10.2python3.10.____cpython:
         CONFIG: win_64_cuda_compiler_version10.2python3.10.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -68,7 +92,7 @@ jobs:
       win_64_cuda_compiler_versionNonepython3.9.____cpython:
         CONFIG: win_64_cuda_compiler_versionNonepython3.9.____cpython
         UPLOAD_PACKAGES: 'True'
-    maxParallel: 17
+    maxParallel: 19
   timeoutInMinutes: 360
   variables:
     CONDA_BLD_PATH: D:\\bld\\
@@ -107,10 +131,9 @@ jobs:
 
       condition: contains(variables['CONFIG'], 'vs2008')
       displayName: Patch vs2008 (if needed)
-
     - task: CondaEnvironment@1
       inputs:
-        packageSpecs: 'python=3.9 conda-build conda "conda-forge-ci-setup=3" pip boa' # Optional
+        packageSpecs: 'python=3.9 conda-build conda pip boa conda-forge-ci-setup=3' # Optional
         installOptions: "-c conda-forge"
         updateConda: true
       displayName: Install conda-build and activate environment
@@ -121,7 +144,7 @@ jobs:
     # Configure the VM
     - script: |
         call activate base
-        conda.exe uninstall --quiet --yes --force "conda-forge-ci-setup=3"
+        conda.exe uninstall --quiet --yes --force boa conda-forge-ci-setup=3
         pip install --no-deps ".\recipe\."
         setup_conda_rc .\ ".\recipe" .\.ci_support\%CONFIG%.yaml
       displayName: conda-forge CI setup
