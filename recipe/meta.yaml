@@ -38,8 +38,8 @@ build:
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
   skip: True  # [py2k]
   ignore_run_exports_from:
-    - {{ compiler('cuda') }}              # [cuda_compiler_version != None]
-    - {{ compiler('c') }}                 # [cuda_compiler_version != None]
+    - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
+    - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
 
 requirements:
   build:
