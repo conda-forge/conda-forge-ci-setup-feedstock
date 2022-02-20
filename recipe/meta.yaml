@@ -37,9 +37,12 @@ build:
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
   skip: True  # [py2k]
+  ignore_run_exports_from:                # [(linux or win) and cuda_compiler_version not in (undefined, "None")]
+    - {{ compiler('cuda') }}              # [(linux or win) and cuda_compiler_version not in (undefined, "None")]
 
 requirements:
   build:
+    - {{ compiler('cuda') }}              # [(linux or win) and cuda_compiler_version not in (undefined, "None")]
     - python                              # [build_platform != target_platform]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
