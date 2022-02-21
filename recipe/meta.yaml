@@ -1,7 +1,7 @@
 {% set name = "conda-forge-ci-setup" %}
 {% set version = "3.18.3" %}
 {% set build = 0 %}
-{% if cuda_compiler_version in (undefined, None, "None") %}
+{% if cuda_compiler_version in (None, "None") %}
 # prioritize non-CUDA variant via build number
 {% set build = build + 100 %}
 {% endif %}
