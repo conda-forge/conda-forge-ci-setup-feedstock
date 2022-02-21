@@ -16,3 +16,7 @@ python:
 - 3.9.* *_cpython
 target_platform:
 - linux-ppc64le
+zip_keys:
+- - cuda_compiler_version
+  - cdt_name
+  - docker_image
