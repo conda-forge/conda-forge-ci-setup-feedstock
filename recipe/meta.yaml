@@ -1,5 +1,10 @@
 {% set name = "conda-forge-ci-setup" %}
 {% set version = "3.18.3" %}
+{% set build = 0 %}
+{% if cuda_compiler_version in (undefined, None, "None") %}
+# prioritize non-CUDA variant via build number
+{% set build = build + 100 %}
+{% endif %}
 
 package:
   name: {{ name|lower }}
@@ -9,7 +14,7 @@ source:
   path: .
 
 build:
-  number: 0
+  number: {{ build }}
   script:
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
     - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]
