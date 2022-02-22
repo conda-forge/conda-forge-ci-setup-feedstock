@@ -73,7 +73,7 @@ set -u
 
 mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
 echo "export CONDA_BLD_PATH='${CONDA_BLD_PATH}'"         > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-if [ -n "${CPU_COUNT}" ]; then
+if [ -n "${CPU_COUNT-}" ]; then
     echo "export CPU_COUNT='${CPU_COUNT}'"                  >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 fi
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"    >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
