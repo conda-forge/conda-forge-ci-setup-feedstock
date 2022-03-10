@@ -84,6 +84,20 @@ def fail_if_outdated_windows_ci(feedstock_root):
                     "This PR needs a rerender to switch from appveyor to azure")
 
 
+def fail_if_travis_not_allowed_for_arch(config_file):
+    specific_config = safe_load(open(config_file))
+    if "channel_targets" in specific_config:
+        channels = [c.strip().split(" ") for c in specific_config["channel_targets"]]
+    else:
+        update_global_config(feedstock_root)
+        channels = _global_config["channels"]["targets"]
+
+    upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
+    
+    if upload_to_conda_forge and os.environ.get("CI", None) == "travis" and platform.uname() == "x86_64":
+        raise RuntimeError("Travis CI cannot be used on x86_64 in conda-forge!")
+
+
 @click.command()
 @arg_feedstock_root
 @arg_recipe_root
@@ -91,6 +105,8 @@ def fail_if_outdated_windows_ci(feedstock_root):
 def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
     fail_if_outdated_windows_ci(feedstock_root)
+    
+    fail_if_travis_not_allowed_for_arch(config_file)
 
     with open(config_file) as f:
         specific_config = safe_load(f)
