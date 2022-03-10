@@ -94,7 +94,14 @@ def fail_if_travis_not_allowed_for_arch(config_file):
 
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     
-    if upload_to_conda_forge and os.environ.get("CI", None) == "travis" and platform.uname().machine.lower() in ["x86_64", "amd64"]:
+    if (
+        upload_to_conda_forge
+        and os.environ.get("CI", None) == "travis"
+        and (
+            platform.uname().machine.lower() in ["x86_64", "amd64"]
+            or platform.system().lower() != "linux"
+        )
+    ):
         raise RuntimeError("Travis CI cannot be used on x86_64 in conda-forge!")
 
 
