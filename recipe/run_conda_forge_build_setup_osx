@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# we do not allow travis for osx
-if [[ "${CI:-}" == "travis" ]];
-  echo "Travis CI is not allowed as a provider for OS X!"
-  exit 1
-fi
-
 # 2 core available on Travis CI OS X workers: https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
 # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
 export CPU_COUNT="${CPU_COUNT:-2}"
