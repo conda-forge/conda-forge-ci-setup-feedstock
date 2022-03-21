@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.19.1" %}
+{% set version = "3.20.0" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -77,7 +77,7 @@ requirements:
     # New ones don't work at the moment. See https://github.com/tpoechtrager/cctools-port/pull/105#issuecomment-908459824
     - cctools 949.*  # [osx]
   run_constrained:
-    - boa >=0.8,<0.9
+    - boa >=0.8,<1.0
 
 test:
   commands:
