@@ -22,9 +22,15 @@ export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
 
 if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     echo "Downloading ${MACOSX_SDK_VERSION} sdk"
-    curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
-    mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
-    tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
+    if [[ ${MACOSX_SDK_VERSION} == 12.* ]]; then
+        curl -L -O https://github.com/joseluisq/macosx-sdks/releases/download/${MACOSX_SDK_VERSION}/MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
+        mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
+        tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"  
+    else
+        curl -L -O https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
+        mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
+        tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
+    fi
 fi
 
 if [ ! -z "$CONFIG" ]; then
