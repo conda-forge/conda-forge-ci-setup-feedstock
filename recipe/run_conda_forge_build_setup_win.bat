@@ -21,8 +21,6 @@ set /p channel_priority= < tmpFile
 del tmpFile
 conda.exe config --set channel_priority %channel_priority%
 
-call setup_x64
-
 :: Set the conda-build working directory to a smaller path
 if "%CONDA_BLD_PATH%" == "" (
     set "CONDA_BLD_PATH=C:\\bld\\"
