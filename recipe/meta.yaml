@@ -59,7 +59,7 @@ requirements:
     - pip
   run:
     - python
-    - conda >=4.3
+    - conda >=4.12,<4.13
     - conda-env
     - click
     - jinja2
