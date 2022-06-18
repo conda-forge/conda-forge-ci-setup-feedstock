@@ -1,7 +1,7 @@
 About conda-forge-ci-setup
 ==========================
 
-Home: https://github.com/conda-forge/conda-forge-build-setup-feedstock
+Home: https://github.com/conda-forge/conda-forge-ci-setup-feedstock
 
 Package license: BSD-3-Clause
 
