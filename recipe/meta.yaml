@@ -90,7 +90,7 @@ test:
 
 
 about:
-  home: https://github.com/conda-forge/conda-forge-build-setup-feedstock
+  home: https://github.com/conda-forge/conda-forge-ci-setup-feedstock
   summary: A package installed by conda-forge each time a build is run on CI. This package has side-effects to your conda config.
   license: BSD-3-Clause
   license_file: LICENSE.txt
