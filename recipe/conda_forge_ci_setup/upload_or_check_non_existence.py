@@ -18,7 +18,6 @@ import conda_build.config
 
 from .feedstock_outputs import request_copy, split_pkg
 
-
 def get_built_distribution_names_and_subdirs(recipe_dir, variant):
     additional_config = {}
     for v in variant:
@@ -98,6 +97,9 @@ def upload(token_fn, path, owner, channels, private_upload=False):
         cmd.append("--private")
     subprocess.check_call(cmd,  env=os.environ)
 
+def upload_ghcr(path, channel):
+    from conda_oci_mirror.oci_mirror import upload_conda_package
+    upload_conda_package(path, "ghcr.io", channel, "")
 
 def delete_dist(token_fn, path, owner, channels):
     parts = path.split(os.sep)
@@ -203,6 +205,7 @@ def upload_or_check(
                             cli, name, version, path, owner
                         ):
                             upload(token_fn, path, owner, channel)
+                            upload_ghcr(path, channel)
                             break
                         else:
                             print(
@@ -217,7 +220,7 @@ def upload_or_check(
                         )
                         delete_dist(token_fn, path, owner, channel)
                         upload(token_fn, path, owner, channel)
-
+                        upload_ghcr(path, channel)
                     if need_copy:
                         to_copy_paths.append(path)
 
@@ -238,6 +241,7 @@ def upload_or_check(
                         cli, name, version, path, owner
                     ):
                         upload(token_fn, path, owner, channel, private_upload=private_upload)
+                        upload_ghcr(path, channel)
                     else:
                         print(
                             'Distribution {} already exists for {}'.format(path, owner))
