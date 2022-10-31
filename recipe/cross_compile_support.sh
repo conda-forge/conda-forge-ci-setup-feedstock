@@ -36,7 +36,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         fi
 
 
-        if [[ "${CUDA_COMPILER_VERSION}" == "11.2" && "${CDT_NAME}" == "cos8" ]]; then
+        if [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]] && [[ "${CDT_NAME}" == "cos8" || "${CDT_NAME}" == "cos7" ]]; then
+            # We use cdt_name=cos7 for rhel8 based nvcc till we figure out
+            # a stable cos8 replacement.
             EXTRACT_DIR=$(mktemp -d)
             pushd ${EXTRACT_DIR}
                 if [[ "${HOST_PLATFORM_ARCH}" == "aarch64" ]]; then
@@ -75,7 +77,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
             popd
             rm -rf ${EXTRACT_DIR}
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
-	    echo "cross compiling with cuda == 11.2 and cdt != cos8 not supported yet"
+	    echo "cross compiling with cuda == 11.2 and cdt != cos7/8 not supported yet"
 	    exit 1
         elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
 	    # FIXME: can use anaconda.org/nvidia packages to get the includes and libs
