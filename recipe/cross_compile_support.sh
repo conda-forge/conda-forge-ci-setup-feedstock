@@ -78,13 +78,42 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 # update manifest.json with devel packages
                 jq "${DEVELQUERY}" manifest.json > manifest_ext.json
 
-                # sanity check
-                cat manifest_ext.json
+                # collect as <pkg>:<ver> to avoid further json-parsing within loop
+                jq 'keys[] as $k | "\($k):\(.[$k] | .version)"' manifest_ext.json > versions.txt
 
-                # read names & versions for necessary RPMs from manifest; download & install them
-                jq 'keys[] as $k | "\($k)-11-2-\(.[$k] | .version)-1"' manifest_ext.json | while read d; do
-                    # normalize "_" -> "-"; also adapt "_dev" -> "-devel" (for cuda_nvml_dev)
-                    fn="$(echo $d | sed 's/_/-/g' | sed 's/-dev/-devel/g').${HOST_PLATFORM_ARCH}.rpm"
+                # map names from spelling in manifest to RPMs:
+                # remove quotes; normalize "_" -> "-"; remove "-api" suffix from cuda-sanitizer;
+                # also need to adapt "_dev" -> "-devel" (specifically for cuda_nvml_dev), which
+                # in turn requires us to undo the "overshoot" for the other devel-packages
+                sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/-api//g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
+
+                echo "Installing the following packages (<pkg>:<version>)"
+                cat rpms.txt
+
+                # read names & versions for necessary RPMs; download & install them
+                cat rpms.txt | while read pv; do
+                    pkg=$(echo $pv | cut -d ':' -f1)
+                    ver=$(echo $pv | cut -d ':' -f2)
+                    extra=""
+                    suffix="-1"
+                    if [[ "${pkg}" == cuda* || "${pkg}" == lib* ]]; then
+                        # packages cuda* and lib* all use "11-2-" as an extra_ver
+                        extra="11-2-"
+                    elif [[ "${pkg}" == nsight-* ]]; then
+                        # nsight uses the version without micro as extra
+                        extra="${ver%.*}-"
+                        if [[ "${pkg}" == "nsight-systems" ]]; then
+                            # nsight-systems does not follow the other patterns very well
+                            pkg="${pkg}-cli"
+                            # need to manually look up the right hash, see
+                            # https://developer.download.nvidia.com/compute/cuda/repos/rhel8
+                            suffix="_10543b6-0"
+                        fi
+                    elif [[ "${pkg}" == nvidia-* ]]; then
+                        suffix="${suffix}.el8"
+                    fi
+
+                    fn="${pkg}-${extra}${ver}${suffix}.${HOST_PLATFORM_ARCH}.rpm"
                     echo "Downloading & installing: $fn"
                     curl -L -O https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/${fn}
                     bsdtar -xvf ${fn}
