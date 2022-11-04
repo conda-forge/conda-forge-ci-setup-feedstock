@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
@@ -46,32 +49,19 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 else
                     CUDA_HOST_PLATFORM_ARCH=${HOST_PLATFORM_ARCH}
                 fi
-                for f in cuda-cudart-11-2-11.2.72-1 \
-                        cuda-cudart-devel-11-2-11.2.72-1\
-                        cuda-cupti-11-2-11.2.152-1 \
-                        cuda-driver-devel-11-2-11.2.152-1 \
-                        cuda-nvcc-11-2-11.2.152-1 \
-                        cuda-nvml-devel-11-2-11.2.67-1 \
-                        cuda-nvprof-11-2-11.2.67-1 \
-                        cuda-nvrtc-11-2-11.2.152-1 \
-                        cuda-nvrtc-devel-11-2-11.2.152-1 \
-                        cuda-nvtx-11-2-11.2.67-1 \
-                        libcublas-11-2-11.3.1.68-1 \
-                        libcublas-devel-11-2-11.3.1.68-1 \
-                        libcufft-11-2-10.4.1.152-1 \
-                        libcufft-devel-11-2-10.4.1.152-1 \
-                        libcurand-11-2-10.2.3.152-1 \
-                        libcurand-devel-11-2-10.2.3.152-1 \
-                        libcusolver-11-2-11.1.0.152-1 \
-                        libcusolver-devel-11-2-11.1.0.152-1 \
-                        libcusparse-11-2-11.4.1.1152-1 \
-                        libcusparse-devel-11-2-11.4.1.1152-1 \
-                        libnpp-11-2-11.2.1.68-1 \
-                        libnpp-devel-11-2-11.2.1.68-1 \
-                        libnvjpeg-11-2-11.4.0.152-1 \
-                        libnvjpeg-devel-11-2-11.4.0.152-1 ; do
-                    curl -L -O https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/${f}.${HOST_PLATFORM_ARCH}.rpm
-                    bsdtar -xvf ${f}.${HOST_PLATFORM_ARCH}.rpm
+                # download manifest for latest 11.2.x patch version
+                curl -L https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/version_11.2.2.json > manifest.json
+
+                # sanity check
+                cat manifest.json
+
+                # read names & versions for necessary RPMs from manifest; download & install them
+                jq 'keys[] as $k | "\($k)-11-2-\(.[$k] | .version)-1"' manifest.json | while read d; do
+                    # normalize "_" -> "-"; also adapt "_dev" -> "-devel" (for cuda_nvml_dev)
+                    fn="$(echo $d | sed 's/_/-/g' | sed 's/-dev/-devel/g').${HOST_PLATFORM_ARCH}.rpm"
+                    echo "Downloading & installing: $fn"
+                    curl -L -O https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/${fn}
+                    bsdtar -xvf ${fn}
                 done
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
             popd
