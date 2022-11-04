@@ -51,12 +51,38 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 fi
                 # download manifest for latest 11.2.x patch version
                 curl -L https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/version_11.2.2.json > manifest.json
+                # packages for which we also need to install the -devel version
+                # (names need "_" not "-" to match spelling in manifest);
+                # some packages don't have a key in the manifest, so we
+                # need to do a mapping, in this case new_key:from_old
+                declare -a DEVELS=(
+                    "cuda_cudart_devel:cuda_cudart"
+                    "cuda_driver_devel:cuda_cudart"
+                    "cuda_nvrtc_devel:cuda_nvrtc"
+                    "libcublas_devel:libcublas"
+                    "libcufft_devel:libcufft"
+                    "libcurand_devel:libcurand"
+                    "libcusolver_devel:libcusolver"
+                    "libcusparse_devel:libcusparse"
+                    "libnpp_devel:libnpp"
+                    "libnvjpeg_devel:libnvjpeg"
+                    "nvidia_driver_devel:nvidia_driver"
+                )
+                # add additional packages to manifest with same version (and formatting)
+                # as for key "from_old" specified in the mapping above
+                for map in "${DEVELS[@]}"; do
+                    new_key=$(echo $map | cut -d ':' -f1)
+                    from_old=$(echo $map | cut -d ':' -f2)
+                    DEVELQUERY="${DEVELQUERY:+${DEVELQUERY} | }. += {${new_key}: {version: .${from_old}.version}}"
+                done
+                # update manifest.json with devel packages
+                jq "${DEVELQUERY}" manifest.json > manifest_ext.json
 
                 # sanity check
-                cat manifest.json
+                cat manifest_ext.json
 
                 # read names & versions for necessary RPMs from manifest; download & install them
-                jq 'keys[] as $k | "\($k)-11-2-\(.[$k] | .version)-1"' manifest.json | while read d; do
+                jq 'keys[] as $k | "\($k)-11-2-\(.[$k] | .version)-1"' manifest_ext.json | while read d; do
                     # normalize "_" -> "-"; also adapt "_dev" -> "-devel" (for cuda_nvml_dev)
                     fn="$(echo $d | sed 's/_/-/g' | sed 's/-dev/-devel/g').${HOST_PLATFORM_ARCH}.rpm"
                     echo "Downloading & installing: $fn"
