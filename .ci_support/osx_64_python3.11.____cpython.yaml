@@ -1,18 +1,18 @@
-c_compiler:
-- vs2019
+MACOSX_DEPLOYMENT_TARGET:
+- '10.9'
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
-cuda_compiler:
-- nvcc
 cuda_compiler_version:
-- '11.0'
+- None
+macos_machine:
+- x86_64-apple-darwin13.4.0
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.10.* *_cpython
+- 3.11.* *_cpython
 target_platform:
-- win-64
+- osx-64
