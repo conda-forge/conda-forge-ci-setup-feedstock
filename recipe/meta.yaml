@@ -1,6 +1,6 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.18.5" %}
-{% set build = 0 %}
+{% set version = "3.21.0" %}
+{% set build = 1 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
 # prioritize non-CUDA variant via build number
@@ -65,7 +65,6 @@ requirements:
     - jinja2
     - anaconda-client
     - conda-build 3.*
-    - vs2008_express_vc_python_patch  # [win]
     - shyaml
     - jq  # [unix]
     - requests
@@ -74,10 +73,8 @@ requirements:
     - pyyaml
     - m2-git  # [win]
     - git     # [unix]
-    # New ones don't work at the moment. See https://github.com/tpoechtrager/cctools-port/pull/105#issuecomment-908459824
-    - cctools 949.*  # [osx]
   run_constrained:
-    - boa >=0.8,<0.9
+    - boa >=0.8,<1.0
 
 test:
   commands:
@@ -93,7 +90,7 @@ test:
 
 
 about:
-  home: https://github.com/conda-forge/conda-forge-build-setup-feedstock
+  home: https://github.com/conda-forge/conda-forge-ci-setup-feedstock
   summary: A package installed by conda-forge each time a build is run on CI. This package has side-effects to your conda config.
   license: BSD-3-Clause
   license_file: LICENSE.txt

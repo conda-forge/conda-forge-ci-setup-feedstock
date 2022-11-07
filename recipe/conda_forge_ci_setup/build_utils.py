@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import platform
 
 try:
     from ruamel_yaml import safe_load, safe_dump
@@ -38,11 +39,12 @@ arg_config_file = click.argument(
 
 def update_global_config(feedstock_root):
     """Merge the conda-forge.yml with predefined system defaults"""
-    with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
-        repo_config = safe_load(f)
-    for k1, k2 in [("channels", "sources"), ("channels", "targets")]:
-        if (k1 in repo_config) and (k2 in repo_config[k1]):
-            _global_config[k1][k2] = repo_config[k1][k2]
+    if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+            repo_config = safe_load(f)
+        for k1, k2 in [("channels", "sources"), ("channels", "targets")]:
+            if (k1 in repo_config) and (k2 in repo_config[k1]):
+                _global_config[k1][k2] = repo_config[k1][k2]
 
 
 def fail_if_outdated_windows_ci(feedstock_root):
@@ -84,6 +86,27 @@ def fail_if_outdated_windows_ci(feedstock_root):
                     "This PR needs a rerender to switch from appveyor to azure")
 
 
+def fail_if_travis_not_allowed_for_arch(config_file, feedstock_root):
+    specific_config = safe_load(open(config_file))
+    if "channel_targets" in specific_config:
+        channels = [c.strip().split(" ") for c in specific_config["channel_targets"]]
+    else:
+        update_global_config(feedstock_root)
+        channels = _global_config["channels"]["targets"]
+
+    upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
+    
+    if (
+        upload_to_conda_forge
+        and os.environ.get("CI", None) == "travis"
+        and (
+            platform.uname().machine.lower() in ["x86_64", "amd64"]
+            or platform.system().lower() != "linux"
+        )
+    ):
+        raise RuntimeError("Travis CI cannot be used on x86_64 in conda-forge!")
+
+
 @click.command()
 @arg_feedstock_root
 @arg_recipe_root
@@ -91,6 +114,8 @@ def fail_if_outdated_windows_ci(feedstock_root):
 def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
     fail_if_outdated_windows_ci(feedstock_root)
+    
+    fail_if_travis_not_allowed_for_arch(config_file, feedstock_root)
 
     with open(config_file) as f:
         specific_config = safe_load(f)
