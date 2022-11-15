@@ -114,13 +114,10 @@ def maybe_use_dot_conda(feedstock_root):
             repo_config = safe_load(f)
         pkg_format = repo_config.get("conda_pkg_format", None)
         if pkg_format is not None:
-            try:
-                call([
-                    "conda", "config", "--env", "--set",
-                    "conda_build.pkg_format", str(pkg_format)
-                ])
-            except subprocess.CalledProcessError:
-                pass
+            call([
+                "conda", "config", "--env", "--set",
+                "conda_build.pkg_format", str(pkg_format)
+            ])
 
 
 @click.command()
