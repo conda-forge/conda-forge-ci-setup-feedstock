@@ -63,7 +63,7 @@ requirements:
     - conda-env
     - click
     - jinja2
-    - anaconda-client
+    - anaconda-client >=1.11.0
     - conda-build 3.*
     - shyaml
     - jq  # [unix]
