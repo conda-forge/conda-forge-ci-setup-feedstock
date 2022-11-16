@@ -66,7 +66,6 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "libcusparse_devel:libcusparse"
                     "libnpp_devel:libnpp"
                     "libnvjpeg_devel:libnvjpeg"
-                    "nvidia_driver_devel:nvidia_driver"
                 )
                 # add additional packages to manifest with same version (and formatting)
                 # as for key "from_old" specified in the mapping above
@@ -87,31 +86,18 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 # in turn requires us to undo the "overshoot" for the other devel-packages
                 sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/-api//g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
 
+                # filter packages from manifest down to what we need for cross-compilation
+                grep -E "cuda-(cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
+
                 echo "Installing the following packages (<pkg>:<version>)"
-                cat rpms.txt
+                cat rpms_cc.txt
 
                 # read names & versions for necessary RPMs; download & install them
-                cat rpms.txt | while read pv; do
+                cat rpms_cc.txt | while read pv; do
                     pkg=$(echo $pv | cut -d ':' -f1)
                     ver=$(echo $pv | cut -d ':' -f2)
-                    extra=""
+                    extra="11-2-"
                     suffix="-1"
-                    if [[ "${pkg}" == cuda* || "${pkg}" == lib* ]]; then
-                        # packages cuda* and lib* all use "11-2-" as an extra_ver
-                        extra="11-2-"
-                    elif [[ "${pkg}" == nsight-* ]]; then
-                        # nsight uses the version without micro as extra
-                        extra="${ver%.*}-"
-                        if [[ "${pkg}" == "nsight-systems" ]]; then
-                            # nsight-systems does not follow the other patterns very well
-                            pkg="${pkg}-cli"
-                            # need to manually look up the right hash, see
-                            # https://developer.download.nvidia.com/compute/cuda/repos/rhel8
-                            suffix="_10543b6-0"
-                        fi
-                    elif [[ "${pkg}" == nvidia-* ]]; then
-                        suffix="${suffix}.el8"
-                    fi
 
                     fn="${pkg}-${extra}${ver}${suffix}.${HOST_PLATFORM_ARCH}.rpm"
                     echo "Downloading & installing: $fn"
