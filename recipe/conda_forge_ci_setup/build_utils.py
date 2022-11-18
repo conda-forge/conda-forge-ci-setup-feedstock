@@ -112,7 +112,7 @@ def maybe_use_dot_conda(feedstock_root):
     if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
         with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
             repo_config = safe_load(f)
-        pkg_format = repo_config.get("conda_build", {}).get("pkg_format", None)
+        pkg_format = repo_config.get("conda_build", {}).get("pkg_format", "2")
         if pkg_format is not None:
             call([
                 "conda", "config", "--env", "--set",
