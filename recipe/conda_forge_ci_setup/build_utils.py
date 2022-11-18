@@ -25,6 +25,8 @@ _global_config = {
     }
 }
 
+cf_conda_build_defaults = {"pkg_format": "2", "zstd_compression_level": 16}
+
 
 arg_feedstock_root = click.argument(
     "feedstock_root", type=click.Path(exists=True, file_okay=False, dir_okay=True)
@@ -112,23 +114,17 @@ def maybe_use_dot_conda(feedstock_root):
     if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
         with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
             repo_config = safe_load(f)
-        pkg_format = repo_config.get("conda_build", {}).get("pkg_format", "2")
-        if pkg_format is not None:
-            call([
-                "conda", "config", "--env", "--set",
-                "conda_build.pkg_format", str(pkg_format)
-            ])
 
-            # set compression level for v2 format
-            zlev = repo_config.get(
-                "conda_build", {}
-            ).get(
-                "zstd_compression_level", 16
-            )
-            if zlev is not None and str(pkg_format) == "2":
+        conda_build_config_vars = repo_config.get("conda_build", {})
+        for k, v in cf_conda_build_defaults.items():
+            if k not in conda_build_config_vars:
+                conda_build_config_vars[k] = v
+
+        for k, v in conda_build_config_vars.items():
+            if v is not None:
                 call([
                     "conda", "config", "--env", "--set",
-                    "conda_build.zstd_compression_level", str(zlev)
+                    f"conda_build.{k}", str(v)
                 ])
 
 
