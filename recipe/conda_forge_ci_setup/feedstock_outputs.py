@@ -38,8 +38,8 @@ def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
 
 
-def _compute_md5sum(pth):
-    h = hashlib.md5()
+def _compute_sha256sum(pth):
+    h = hashlib.sha256()
 
     with open(pth, 'rb') as fp:
         chunk = 0
@@ -54,7 +54,7 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
-        checksums[dist] = _compute_md5sum(path)
+        checksums[dist] = _compute_sha256sum(path)
 
     if "FEEDSTOCK_TOKEN" not in os.environ or os.environ["FEEDSTOCK_TOKEN"] is None:
         print(
@@ -69,6 +69,7 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
         "outputs": checksums,
         "channel": channel,
         "comment_on_error": comment_on_error,
+        "hash_type": "sha256",
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
