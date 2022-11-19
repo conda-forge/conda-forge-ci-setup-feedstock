@@ -69,6 +69,7 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
         "outputs": checksums,
         "channel": channel,
         "comment_on_error": comment_on_error,
+        "hash_type": "md5",
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
