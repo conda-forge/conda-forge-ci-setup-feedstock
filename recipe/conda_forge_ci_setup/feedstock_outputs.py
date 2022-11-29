@@ -1,9 +1,6 @@
 import os
 import hashlib
 import json
-import tempfile
-import subprocess
-import shutil
 
 import conda_build
 import conda_build.config
@@ -13,7 +10,7 @@ import click
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
 OUTPUTS_REPO = "https://github.com/conda-forge/feedstock-outputs.git"
-OUTPUTS_REPO_RAW = "https://raw.githubusercontent.com/conda-forge/feedstock-outputs/main/"
+OUTPUTS_REPO_RAW = "https://raw.githubusercontent.com/conda-forge/feedstock-outputs/main/"  # noqa
 
 
 def _get_sharded_path(output):
@@ -25,9 +22,12 @@ def _get_sharded_path(output):
 
 
 def split_pkg(pkg):
-    if not pkg.endswith(".tar.bz2"):
-        raise RuntimeError("Can only process packages that end in .tar.bz2")
-    pkg = pkg[:-8]
+    if pkg.endswith(".tar.bz2"):
+        pkg = pkg[:-len(".tar.bz2")]
+    elif pkg.endswith(".conda"):
+        pkg = pkg[:-len(".conda")]
+    else:
+        raise RuntimeError("Can only process packages that end in .tar.bz2 or .conda!")
     plat, pkg_name = pkg.split(os.path.sep)
     name_ver, build = pkg_name.rsplit('-', 1)
     name, ver = name_ver.rsplit('-', 1)
@@ -38,8 +38,8 @@ def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
 
 
-def _compute_md5sum(pth):
-    h = hashlib.md5()
+def _compute_sha256sum(pth):
+    h = hashlib.sha256()
 
     with open(pth, 'rb') as fp:
         chunk = 0
@@ -54,7 +54,7 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
-        checksums[dist] = _compute_md5sum(path)
+        checksums[dist] = _compute_sha256sum(path)
 
     if "FEEDSTOCK_TOKEN" not in os.environ or os.environ["FEEDSTOCK_TOKEN"] is None:
         print(
@@ -69,6 +69,7 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
         "outputs": checksums,
         "channel": channel,
         "comment_on_error": comment_on_error,
+        "hash_type": "sha256",
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
@@ -154,7 +155,11 @@ def main(feedstock_name):
             os.path.join(conda_build.config.subdir, p)
             for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
         ])
-    built_distributions = [path for path in paths if path.endswith('.tar.bz2')]
+    built_distributions = [
+        path
+        for path in paths
+        if (path.endswith('.tar.bz2') or path.endswith(".conda"))
+    ]
 
     results = is_valid_feedstock_output(feedstock_name, built_distributions)
 

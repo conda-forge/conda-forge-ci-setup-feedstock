@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.21.0" %}
+{% set version = "3.24.0" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -63,7 +63,7 @@ requirements:
     - conda-env
     - click
     - jinja2
-    - anaconda-client
+    - anaconda-client >=1.11.0
     - conda-build 3.*
     - shyaml
     - jq  # [unix]

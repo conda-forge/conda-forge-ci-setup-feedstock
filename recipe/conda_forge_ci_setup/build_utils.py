@@ -95,7 +95,7 @@ def fail_if_travis_not_allowed_for_arch(config_file, feedstock_root):
         channels = _global_config["channels"]["targets"]
 
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
-    
+
     if (
         upload_to_conda_forge
         and os.environ.get("CI", None) == "travis"
@@ -107,6 +107,31 @@ def fail_if_travis_not_allowed_for_arch(config_file, feedstock_root):
         raise RuntimeError("Travis CI cannot be used on x86_64 in conda-forge!")
 
 
+def maybe_use_dot_conda(feedstock_root):
+    """Maybe set the .condarc to use .conda files."""
+    if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+            repo_config = safe_load(f)
+        pkg_format = repo_config.get("conda_build", {}).get("pkg_format", "2")
+        if pkg_format is not None:
+            call([
+                "conda", "config", "--env", "--set",
+                "conda_build.pkg_format", str(pkg_format)
+            ])
+
+            # set compression level for v2 format
+            zlev = repo_config.get(
+                "conda_build", {}
+            ).get(
+                "zstd_compression_level", 16
+            )
+            if zlev is not None and str(pkg_format) == "2":
+                call([
+                    "conda", "config", "--env", "--set",
+                    "conda_build.zstd_compression_level", str(zlev)
+                ])
+
+
 @click.command()
 @arg_feedstock_root
 @arg_recipe_root
@@ -114,8 +139,10 @@ def fail_if_travis_not_allowed_for_arch(config_file, feedstock_root):
 def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
     fail_if_outdated_windows_ci(feedstock_root)
-    
+
     fail_if_travis_not_allowed_for_arch(config_file, feedstock_root)
+
+    maybe_use_dot_conda(feedstock_root)
 
     with open(config_file) as f:
         specific_config = safe_load(f)

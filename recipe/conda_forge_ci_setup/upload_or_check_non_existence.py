@@ -67,26 +67,36 @@ def built_distribution_already_exists(cli, name, version, fname, owner):
     """
     folder, basename = os.path.split(fname)
     _, platform = os.path.split(folder)
-    distro_name = '{}/{}'.format(platform, basename)
 
-    try:
-        dist_info = cli.distribution(owner, name, version, distro_name)
-    except binstar_client.errors.NotFound:
-        dist_info = {}
+    if basename.endswith(".tar.bz2"):
+        base_fname = basename[:-8]
+    elif basename.endswith(".conda"):
+        base_fname = basename[:-6]
+    else:
+        base_fname = basename
 
-    exists = bool(dist_info)
-    # Unfortunately, we cannot check the md5 quality of the built distribution, as
-    # this will depend on fstat information such as modification date (because
-    # distributions are tar files). Therefore we can only assume that the distribution
-    # just built, and the one on anaconda.org are the same.
-    # if exists:
-    #     md5_on_binstar = dist_info.get('md5')
-    #     with open(fname, 'rb') as fh:
-    #        md5_of_build = hashlib.md5(fh.read()).hexdigest()
-    #
-    #     if md5_on_binstar != md5_of_build:
-    #        raise ValueError('This build ({}), and the build already on binstar '
-    #                         '({}) are different.'.format(md5_of_build, md5_on_binstar))  # noqa
+    exists = False
+    for ext in [".tar.bz2", ".conda"]:
+        distro_name = '{}/{}'.format(platform, base_fname + ext)
+        try:
+            dist_info = cli.distribution(owner, name, version, distro_name)
+        except binstar_client.errors.NotFound:
+            dist_info = {}
+
+        exists = exists or bool(dist_info)
+        # Unfortunately, we cannot check the md5 quality of the built distribution, as
+        # this will depend on fstat information such as modification date (because
+        # distributions are tar files). Therefore we can only assume that the distribution
+        # just built, and the one on anaconda.org are the same.
+        # if exists:
+        #     md5_on_binstar = dist_info.get('md5')
+        #     with open(fname, 'rb') as fh:
+        #        md5_of_build = hashlib.md5(fh.read()).hexdigest()
+        #
+        #     if md5_on_binstar != md5_of_build:
+        #        raise ValueError('This build ({}), and the build already on binstar '
+        #                         '({}) are different.'.format(md5_of_build, md5_on_binstar))  # noqa
+
     return exists
 
 
@@ -123,14 +133,31 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
     channel_url = '/'.join([owner, 'label', channel])
     fname = os.path.basename(fname)
 
-    distributions_on_channel = get_index([channel_url],
-                                         prepend=False, use_cache=False)
+    if fname.endswith(".tar.bz2"):
+        base_fname = fname[:-8]
+    elif fname.endswith(".conda"):
+        base_fname = fname[:-6]
+    else:
+        base_fname = fname
 
-    try:
-        on_channel = (distributions_on_channel[fname]['subdir'] ==
-                      conda_subdir)
-    except KeyError:
-        on_channel = False
+    distributions_on_channel = get_index(
+        [channel_url],
+        prepend=False,
+        use_cache=False,
+    )
+
+    on_channel = False
+    for ext in [".tar.bz2", ".conda"]:
+        _fname = base_fname + ext
+        try:
+            _on_channel = (
+                distributions_on_channel[_fname]['subdir']
+                == conda_subdir
+            )
+        except KeyError:
+            _on_channel = False
+
+        on_channel = on_channel or _on_channel
 
     return on_channel
 
@@ -161,7 +188,9 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
-    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir, variant)
+    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
+        recipe_dir, variant
+    )
 
     # The list of built distributions
     paths = set()
@@ -179,7 +208,7 @@ def upload_or_check(
         )
         # TODO: flip this over to .conda when that format
         #  is in flight
-        for path in paths if path.endswith('.tar.bz2')
+        for path in paths if (path.endswith('.tar.bz2') or path.endswith(".conda"))
         if split_pkg(path)[1] in allowed_dist_names
     ]
 
