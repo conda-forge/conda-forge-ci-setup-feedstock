@@ -123,7 +123,7 @@ def maybe_use_dot_conda(feedstock_root):
             zlev = repo_config.get(
                 "conda_build", {}
             ).get(
-                "zstd_compression_level", 16
+                "zstd_compression_level", 19
             )
             if zlev is not None and str(pkg_format) == "2":
                 call([
