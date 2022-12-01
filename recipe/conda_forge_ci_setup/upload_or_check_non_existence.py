@@ -101,7 +101,7 @@ def built_distribution_already_exists(cli, name, version, fname, owner):
 
 
 def upload(token_fn, path, owner, channels, private_upload=False):
-    cmd = ['anaconda', '--quiet', ' --show-traceback', '-t', token_fn,
+    cmd = ['anaconda', '--quiet', '--show-traceback', '-t', token_fn,
            'upload', path, '--user={}'.format(owner),
            '--channel={}'.format(channels)]
     if private_upload:
