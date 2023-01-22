@@ -70,6 +70,7 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
         "channel": channel,
         "comment_on_error": comment_on_error,
         "hash_type": "sha256",
+        "provider": os.environ.get("CI", None),
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
