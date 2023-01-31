@@ -104,7 +104,10 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     curl -L -O https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/${fn}
                     bsdtar -xvf ${fn}
                 done
-                mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
+                # daisy-chain the copying because the docker images only have very specific combinations allowed
+                mkdir -p /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
+                mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
+                cp -r /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
             popd
             rm -rf ${EXTRACT_DIR}
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
