@@ -109,7 +109,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 mkdir -p /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
                 mkdir -p ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
-                sudo cp -r /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
+                /usr/bin/sudo cp -r /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
             popd
             rm -rf ${EXTRACT_DIR}
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
