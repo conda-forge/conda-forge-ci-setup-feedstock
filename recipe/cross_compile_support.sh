@@ -106,8 +106,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 done
                 # daisy-chain the copying because the docker images only have very specific combinations allowed, see
                 # https://github.com/conda-forge/docker-images/blob/main/scripts/run_commands
-                mkdir -p /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
-                mkdir -p ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
+                mkdir -p /opt/conda/targets/
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
                 /usr/bin/sudo cp -r /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
             popd
