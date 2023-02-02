@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import subprocess
 import platform
@@ -25,7 +26,7 @@ _global_config = {
     }
 }
 
-cf_conda_build_defaults = {"pkg_format": "2", "zstd_compression_level": 16}
+cf_conda_build_defaults = {"pkg_format": "2", "zstd_compression_level": 19}
 
 
 arg_feedstock_root = click.argument(
@@ -198,13 +199,13 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
         allowed_channels = [
-            "conda-forge", "conda-forge/label/", "defaults", "c4aarch64",
+            "conda-forge", "conda-forge/label/\S+", "defaults", "c4aarch64",
             "c4armv7l"]
         for source_channel in source_channels.split(","):
             if source_channel.startswith('https://conda-web.anaconda.org/'):
                 source_channel = source_channel[len('https://conda-web.anaconda.org/'):]
-            for c in allowed_channels:
-                if source_channel.startswith(c):
+            for pattern in allowed_channels:
+                if re.fullmatch(pattern, source_channel):
                     break
             else:
                 print(

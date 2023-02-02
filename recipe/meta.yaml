@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.23.0" %}
+{% set version = "3.26.0" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -42,7 +42,6 @@ build:
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
-  skip: True  # [py2k]
   ignore_run_exports_from:
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
@@ -73,6 +72,7 @@ requirements:
     - pyyaml
     - m2-git  # [win]
     - git     # [unix]
+    - libarchive
   run_constrained:
     - boa >=0.8,<1.0
 
