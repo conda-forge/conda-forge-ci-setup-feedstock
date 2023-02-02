@@ -72,6 +72,7 @@ requirements:
     - pyyaml
     - m2-git  # [win]
     - git     # [unix]
+    - libarchive
   run_constrained:
     - boa >=0.8,<1.0
 
