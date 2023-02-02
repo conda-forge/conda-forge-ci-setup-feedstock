@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 
