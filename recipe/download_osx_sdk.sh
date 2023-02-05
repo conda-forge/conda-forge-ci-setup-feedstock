@@ -28,8 +28,8 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     else
         url="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz"
     fi
-    mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
     curl -L -O "${url}" --output MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
+    mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
     tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
 fi
 
