@@ -53,7 +53,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 # packages for which we also need to install the -devel version
                 # (names need "_" not "-" to match spelling in manifest);
                 # some packages don't have a key in the manifest, so we
-                # need to do a mapping, in this case new_key:from_old
+                # need to do a mapping, in this case new_key:from_old;
+                # also new_key needs "_" not "-" as jq stumbles otherwise,
+                # will be mapped to "-" below for rpm-names anyway
                 declare -a DEVELS=(
                     "cuda_cudart_devel:cuda_cudart"
                     "cuda_driver_devel:cuda_cudart"
@@ -80,8 +82,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 # collect as <pkg>:<ver> to avoid further json-parsing within loop
                 jq 'keys[] as $k | "\($k):\(.[$k] | .version)"' manifest_ext.json > versions.txt
 
-                # map names from spelling in manifest to RPMs:
-                # remove quotes; normalize "_" -> "-"; remove "-api" suffix from cuda-sanitizer;
+                # map names from spelling in manifest to RPMs: remove quotes; normalize "_" -> "-";
                 # also need to adapt "_dev" -> "-devel" (specifically for cuda_nvml_dev), which
                 # in turn requires us to undo the "overshoot" for the other devel-packages
                 sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/-api//g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
