@@ -65,7 +65,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "libcusparse_devel:libcusparse"
                     "libnpp_devel:libnpp"
                     "libnvjpeg_devel:libnvjpeg"
-                    "cuda-compat:nvidia_driver"
+                    "cuda_compat:nvidia_driver"
                 )
                 # add additional packages to manifest with same version (and formatting)
                 # as for key "from_old" specified in the mapping above
