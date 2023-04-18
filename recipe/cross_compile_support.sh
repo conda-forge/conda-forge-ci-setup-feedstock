@@ -65,6 +65,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "libcusparse_devel:libcusparse"
                     "libnpp_devel:libnpp"
                     "libnvjpeg_devel:libnvjpeg"
+                    "cuda-compat:nvidia_driver"
                 )
                 # add additional packages to manifest with same version (and formatting)
                 # as for key "from_old" specified in the mapping above
@@ -86,7 +87,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/-api//g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
 
                 # filter packages from manifest down to what we need for cross-compilation
-                grep -E "cuda-(cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
+                grep -E "cuda-(compat|cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
 
                 echo "Installing the following packages (<pkg>:<version>)"
                 cat rpms_cc.txt
@@ -108,6 +109,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 mkdir -p /opt/conda/targets/
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
                 /usr/bin/sudo cp -r /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux ${CUDA_HOME}/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
+
+                # Need libcuda.so.1 in test phase to test the executables
+                mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/compat/* ${QEMU_LD_PREFIX}/usr/lib/
             popd
             rm -rf ${EXTRACT_DIR}
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
