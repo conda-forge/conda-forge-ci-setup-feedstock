@@ -33,9 +33,9 @@ CONDARC
 
 
 mamba install --update-specs --yes --quiet --channel conda-forge \
-    conda-build pip boa conda-forge-ci-setup=3 "py-lief<0.12" "conda-forge-metadata>=0.4.1"
+    conda-build pip boa conda-forge-ci-setup=3
 mamba update --update-specs --yes --quiet --channel conda-forge \
-    conda-build pip boa conda-forge-ci-setup=3 "py-lief<0.12" "conda-forge-metadata>=0.4.1"
+    conda-build pip boa conda-forge-ci-setup=3
 
 conda uninstall --quiet --yes --force conda-forge-ci-setup=3
 pip install --no-deps ${RECIPE_ROOT}/.
