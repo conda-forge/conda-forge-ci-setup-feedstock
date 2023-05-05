@@ -73,6 +73,7 @@ requirements:
     - m2-git  # [win]
     - git     # [unix]
     - libarchive
+    - conda-forge-metadata >=0.4.1
   run_constrained:
     - boa >=0.8,<1.0
 

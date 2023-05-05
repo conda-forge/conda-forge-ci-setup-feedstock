@@ -1,24 +1,18 @@
 import os
 import hashlib
 import json
+import time
+import sys
 
+from conda_forge_metadata.feedstock_outputs import package_to_feedstock
 import conda_build
 import conda_build.config
 import requests
 import click
 
+
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
-OUTPUTS_REPO = "https://github.com/conda-forge/feedstock-outputs.git"
-OUTPUTS_REPO_RAW = "https://raw.githubusercontent.com/conda-forge/feedstock-outputs/main/"  # noqa
-
-
-def _get_sharded_path(output):
-    chars = [c for c in output if c.isalnum()]
-    while len(chars) < 3:
-        chars.append("z")
-
-    return "/".join(["outputs", chars[0], chars[1], chars[2], output + ".json"])
 
 
 def split_pkg(pkg):
@@ -104,7 +98,7 @@ def is_valid_feedstock_output(project, outputs):
     project : str
         The GitHub repo.
     outputs : list of str
-        A list of ouputs top validate. The list entries should be the
+        A list of outputs top validate. The list entries should be the
         full names with the platform directory, version/build info, and file extension
         (e.g., `noarch/blah-fa31b0-2020.04.13.15.54.07-py_0.tar.bz2`).
 
@@ -126,18 +120,30 @@ def is_valid_feedstock_output(project, outputs):
             _, o, _, _ = split_pkg(dist)
         except RuntimeError:
             continue
-
-        opth = _get_sharded_path(o)
-        url = OUTPUTS_REPO_RAW + opth
-        res = requests.get(url)
-
-        if not res.ok:
-            # no output exists and we can add it
-            valid[dist] = True
-        else:
-            # make sure feedstock is ok
-            data = res.json()
-            valid[dist] = feedstock in data["feedstocks"]
+        
+        for i in range(3):  # three attempts
+            try:
+                registered_feedstocks = package_to_feedstock(o)
+            except requests.HTTPError as exc:
+                if exc.response.status_code == 404:
+                    # no output exists and we can add it
+                    valid[dist] = True
+                    break
+                elif i < 2:
+                    # wait and retry
+                    time.sleep(1)
+                else:  
+                    # last attempt, i==2, did not work
+                    # This should rarely happen, if ever
+                    print(
+                        "ERROR: Assuming package not allowed. "
+                        f"Failed to get feedstock data. {type(exc)}: {exc}"
+                    )
+                    valid[dist] = False
+            else:
+                # make sure feedstock is ok
+                valid[dist] = feedstock in registered_feedstocks
+                break
 
     return valid
 
