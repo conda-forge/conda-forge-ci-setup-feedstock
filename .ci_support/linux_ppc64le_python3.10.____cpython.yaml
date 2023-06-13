@@ -5,7 +5,7 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- nvcc
+- None
 cuda_compiler_version:
 - None
 docker_image:
@@ -19,6 +19,7 @@ python:
 target_platform:
 - linux-ppc64le
 zip_keys:
-- - cuda_compiler_version
+- - cuda_compiler
+  - cuda_compiler_version
   - cdt_name
   - docker_image
