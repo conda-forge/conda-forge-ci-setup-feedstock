@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.31.1" %}
+{% set version = "3.31.2" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -16,6 +16,9 @@ source:
 
 build:
   number: {{ build }}
+  {% if cuda_compiler_version.startswith("12") %}
+  skip: True
+  {% endif %}
   script:
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
     - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]

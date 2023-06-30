@@ -20,10 +20,10 @@ if "%CUDA_VERSION%" == "11.0" goto cuda110
 if "%CUDA_VERSION%" == "11.1" goto cuda111
 if "%CUDA_VERSION%" == "11.2" goto cuda1122
 if "%CUDA_VERSION%" == "11.3" goto cuda1131
-if "%CUDA_VERSION%" == "11.4" goto cuda114
-if "%CUDA_VERSION%" == "11.5" goto cuda1151
-if "%CUDA_VERSION%" == "11.6" goto cuda116
-if "%CUDA_VERSION%" == "11.7" goto cuda117
+if "%CUDA_VERSION%" == "11.4" goto cuda1143
+if "%CUDA_VERSION%" == "11.5" goto cuda1152
+if "%CUDA_VERSION%" == "11.6" goto cuda1162
+if "%CUDA_VERSION%" == "11.7" goto cuda1171
 if "%CUDA_VERSION%" == "11.8" goto cuda118
 
 echo CUDA '%CUDA_VERSION%' is not supported
@@ -138,6 +138,14 @@ set "CUDA_INSTALLER_CHECKSUM=423695ea246810200e210f07a0e0bd43"
 set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
 goto cuda_common
 
+:cuda1143
+set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.4.3/network_installers/cuda_11.4.3_win10_network.exe"
+set "CUDA_NETWORK_INSTALLER_CHECKSUM=4f57e50ec238ac29d82e549dc00b7bdd"
+set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.4.3/local_installers/cuda_11.4.3_472.50_win10.exe"
+set "CUDA_INSTALLER_CHECKSUM=602bf92bddd198375f8f5b2aef9ad3f0"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
+goto cuda_common
+
 :cuda115
 set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.5.0/network_installers/cuda_11.5.0_win10_network.exe"
 set "CUDA_NETWORK_INSTALLER_CHECKSUM=499fb5f0d25424a4a52f901a78beceef"
@@ -154,6 +162,14 @@ set "CUDA_INSTALLER_CHECKSUM=74d4a0723ca179f56f6877e72c9b1694"
 set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
 goto cuda_common
 
+:cuda1152
+set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.5.2/network_installers/cuda_11.5.2_windows_network.exe"
+set "CUDA_NETWORK_INSTALLER_CHECKSUM=6f70a0e4d798b63e2c19d8993d5806f4"
+set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.5.2/local_installers/cuda_11.5.2_496.13_windows.exe"
+set "CUDA_INSTALLER_CHECKSUM=7fd10dfd044ec3c11160468886d5b10d"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
+goto cuda_common
+
 :cuda116
 set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.6.0/network_installers/cuda_11.6.0_windows_network.exe"
 set "CUDA_NETWORK_INSTALLER_CHECKSUM=99a5d04c00eeac430c7f34b013c5b7c6"
@@ -162,11 +178,27 @@ set "CUDA_INSTALLER_CHECKSUM=7a91a7a7696e869ff8d90c52faf48f40"
 set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
 goto cuda_common
 
+:cuda1162
+set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.6.2/network_installers/cuda_11.6.2_windows_network.exe"
+set "CUDA_NETWORK_INSTALLER_CHECKSUM=0bc12c8d5b835681931be4b58c092699"
+set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.6.0/local_installers/cuda_11.6.2_511.65_windows.exe"
+set "CUDA_INSTALLER_CHECKSUM=b5ca553bcf7e702a6bc454979aa87e65"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
+goto cuda_common
+
 :cuda117
 set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.7.0/network_installers/cuda_11.7.0_windows_network.exe"
 set "CUDA_NETWORK_INSTALLER_CHECKSUM=89397d589806387de679b97565a2e800"
 set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_516.01_windows.exe"
 set "CUDA_INSTALLER_CHECKSUM=a2388d0044b2dd6a3469938eb6108c85"
+set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
+goto cuda_common
+
+:cuda1171
+set "CUDA_NETWORK_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.7.1/network_installers/cuda_11.7.1_windows_network.exe"
+set "CUDA_NETWORK_INSTALLER_CHECKSUM=f52378dc72666ae0d3ab3ee63df5aebf"
+set "CUDA_INSTALLER_URL=https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda_11.7.0_516.94_windows.exe"
+set "CUDA_INSTALLER_CHECKSUM=2890ae7ba9b23591029ac24c8e2e805a"
 set "CUDA_COMPONENTS=%CUDA_COMPONENTS% nsight_nvtx_%CUDA_VERSION%"
 goto cuda_common
 
