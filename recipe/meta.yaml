@@ -16,6 +16,9 @@ source:
 
 build:
   number: {{ build }}
+  {% if cuda_compiler_version.startswith("12") %}
+  skip: True
+  {% endif %}
   script:
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
     - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]
