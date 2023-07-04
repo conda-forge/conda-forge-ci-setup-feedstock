@@ -113,9 +113,7 @@ jobs:
         set "CI=azure"
         call activate base
         :: Overriding global run_conda_forge_build_setup_win with local copy.
-        call recipe\run_conda_forge_build_setup_win.bat
-        echo "BUILD_PLATFORM: %BUILD_PLATFORM%"
-        echo "TARGET_PLATFORM: %TARGET_PLATFORM%"
+        recipe\run_conda_forge_build_setup_win
       displayName: conda-forge build setup
 
     - script: |
