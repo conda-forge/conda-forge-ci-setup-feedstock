@@ -114,6 +114,8 @@ jobs:
         call activate base
         :: Overriding global run_conda_forge_build_setup_win with local copy.
         recipe\run_conda_forge_build_setup_win
+        echo "BUILD_PLATFORM: %BUILD_PLATFORM%"
+        echo "TARGET_PLATFORM: %TARGET_PLATFORM%"
       displayName: conda-forge build setup
 
     - script: |
