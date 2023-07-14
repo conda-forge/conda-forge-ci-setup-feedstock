@@ -116,13 +116,13 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
             popd
             rm -rf ${EXTRACT_DIR}
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
-	    echo "cross compiling with cuda == 11.2 and cdt != cos7/8 not supported yet"
-	    exit 1
+            echo "cross compiling with cuda == 11.2 and cdt != cos7/8 not supported yet"
+            exit 1
         elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
-	    # FIXME: can use anaconda.org/nvidia packages to get the includes and libs
-	    # for cuda >=11.3.
-	    echo "cross compiling with cuda != 11.2 not supported yet"
-	    exit 1
+            # FIXME: can use anaconda.org/nvidia packages to get the includes and libs
+            # for cuda >=11.3.
+            echo "cross compiling with cuda != 11.2 not supported yet"
+            exit 1
         fi
     fi
 fi
