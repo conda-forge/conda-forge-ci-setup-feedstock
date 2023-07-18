@@ -119,8 +119,8 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
             echo "cross compiling with cuda == 11.2 and cdt != cos7/8 not supported yet"
             exit 1
         elif [[ "${CUDA_COMPILER_VERSION}" == "12.0" ]] && [[ "${CDT_NAME}" == "cos7" ]]; then
-            # No extra steps necessary for CUDA 12, handled through new packages
-            true
+            # Need libcuda stub when running test phase in emulation
+            mamba install -n sysroot_${HOST_PLATFORM} --yes --quiet cuda-driver-dev
         elif [[ "${CUDA_COMPILER_VERSION}" == "12.0" ]]; then
             echo "cross compiling with cuda == 12.0 and cdt != cos7 not supported yet"
             exit 1
