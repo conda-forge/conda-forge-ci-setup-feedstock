@@ -107,9 +107,9 @@ conda.exe info --json | shyaml get-value platform > build_platform.txt
 set /p BUILD_PLATFORM=<build_platform.txt
 del build_platform.txt
 
-cat .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 %BUILD_PLATFORM% > target_platform.txt
-set /p TARGET_PLATFORM=<target_platform.txt
-del target_platform.txt
+cat .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 %BUILD_PLATFORM% > host_platform.txt
+set /p HOST_PLATFORM=<host_platform.txt
+del host_platform.txt
 
 type .ci_support\%CONFIG%.yaml
 
@@ -126,7 +126,7 @@ if not "%CUDA_PATH%" == "" (
     echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 )
 echo set "BUILD_PLATFORM=%BUILD_PLATFORM%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-echo set "TARGET_PLATFORM=%TARGET_PLATFORM%"      >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 
 conda.exe info
 conda.exe config --show-sources
