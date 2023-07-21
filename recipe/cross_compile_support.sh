@@ -104,6 +104,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     echo "Downloading & installing: $fn"
                     curl -L -O https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/${fn}
                     bsdtar -xvf ${fn}
+                    rm ${fn}
                 done
                 # daisy-chain the copying because the docker images only have very specific combinations allowed, see
                 # https://github.com/conda-forge/docker-images/blob/main/scripts/run_commands
