@@ -9,6 +9,7 @@ export PYTHONUNBUFFERED=1
 conda config --env --set show_channel_urls true
 conda config --env --set auto_update_conda false
 conda config --env --set add_pip_as_python_dependency false
+conda config --env --set solver libmamba
 # Otherwise packages that don't explicitly pin openssl in their requirements
 # are forced to the newest OpenSSL version, even if their dependencies don't
 # support it.
