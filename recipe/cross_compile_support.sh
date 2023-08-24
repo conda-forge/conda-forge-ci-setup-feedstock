@@ -107,10 +107,10 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 cat rpms_cc.txt | while read pv; do
                     pkg=$(echo $pv | cut -d ':' -f1)
                     ver=$(echo $pv | cut -d ':' -f2)
-                    extra="11-2-"
+                    extra="${CUDA_COMPILER_VERSION/\./-}"
                     suffix="-1"
 
-                    fn="${pkg}-${extra}${ver}${suffix}.${HOST_PLATFORM_ARCH}.rpm"
+                    fn="${pkg}-${extra}-${ver}${suffix}.${HOST_PLATFORM_ARCH}.rpm"
                     echo "Downloading & installing: $fn"
                     curl -L -O https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/${fn}
                     bsdtar -xvf ${fn}
