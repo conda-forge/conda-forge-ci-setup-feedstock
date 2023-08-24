@@ -23,7 +23,7 @@ export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
 if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     echo "Downloading ${MACOSX_SDK_VERSION} sdk"
 
-    if [[ "${MACOSX_SDK_VERSION}" == "12.3" ]]; then
+    if [[ "${MACOSX_SDK_VERSION}" == "12.3" || "${MACOSX_SDK_VERSION}" == "13.3" ]]; then
         url="https://github.com/alexey-lysiuk/macos-sdk/releases/download/${MACOSX_SDK_VERSION}/MacOSX${MACOSX_SDK_VERSION}.tar.xz"
     else
         url="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz"
