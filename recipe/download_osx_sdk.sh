@@ -15,7 +15,9 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
 fi
 
 if [[ "${MACOSX_SDK_VERSION:-0}" == "0" ]]; then
-    export MACOSX_SDK_VERSION=$MACOSX_DEPLOYMENT_TARGET
+    # ensure minimal SDK of 10.13, while treatement of
+    # deployment targets <10.13 is being figured out
+    export MACOSX_SDK_VERSION="10.13"
 fi
 
 export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
