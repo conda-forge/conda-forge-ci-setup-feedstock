@@ -9,7 +9,6 @@ export PYTHONUNBUFFERED=1
 conda config --env --set show_channel_urls true
 conda config --env --set auto_update_conda false
 conda config --env --set add_pip_as_python_dependency false
-conda config --env --set solver libmamba
 # Otherwise packages that don't explicitly pin openssl in their requirements
 # are forced to the newest OpenSSL version, even if their dependencies don't
 # support it.
@@ -21,6 +20,10 @@ conda config --env --append aggressive_update_packages certifi
 # Need strict priority for pypy as defaults is not fixed
 # but ppl can turn this off
 conda config --env --set channel_priority $(cat ./conda-forge.yml | shyaml get-value channel_priority strict || echo strict)
+
+# Configure the default solver. Defaults to libmamba, but users can override
+# it in their conda-forge.yml file via `conda.solver`.
+conda config --env --set solver $(cat ./conda-forge.yml | shyaml get-value conda.solver libmamba || echo libmamba)
 
 # CONDA_PREFIX might be unset
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
