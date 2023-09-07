@@ -35,7 +35,7 @@ conda config --env --set channel_priority $(cat ${FEEDSTOCK_ROOT}/conda-forge.ym
 
 # Configure the default solver. Defaults to libmamba, but users can override
 # it in their conda-forge.yml file via `conda.solver`.
-conda config --env --set solver $(cat ${FEEDSTOCK_ROOT}/conda-forge.yml | shyaml get-value conda.solver libmamba || echo libmamba)
+conda config --env --set solver $(cat ${FEEDSTOCK_ROOT}/conda-forge.yml | shyaml get-value conda_solver libmamba || echo libmamba)
 
 # the upstream image nvidia/cuda:9.2-devel-centos6 (on which linux-anvil-cuda:9.2 is based)
 # does not contain libcuda.so; it should be installed in ${CUDA_HOME}/compat-${CUDA_VER},

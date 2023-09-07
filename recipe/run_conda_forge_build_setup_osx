@@ -23,7 +23,7 @@ conda config --env --set channel_priority $(cat ./conda-forge.yml | shyaml get-v
 
 # Configure the default solver. Defaults to libmamba, but users can override
 # it in their conda-forge.yml file via `conda.solver`.
-conda config --env --set solver $(cat ./conda-forge.yml | shyaml get-value conda.solver libmamba || echo libmamba)
+conda config --env --set solver $(cat ./conda-forge.yml | shyaml get-value conda_solver libmamba || echo libmamba)
 
 # CONDA_PREFIX might be unset
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"

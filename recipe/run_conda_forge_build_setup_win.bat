@@ -21,7 +21,7 @@ set /p channel_priority= < tmpFile
 del tmpFile
 conda.exe config --set channel_priority %channel_priority%
 
-(type conda-forge.yml | shyaml get-value conda.solver libmamba || echo libmamba) > tmpFile
+(type conda-forge.yml | shyaml get-value conda_solver libmamba || echo libmamba) > tmpFile
 set /p conda_solver= < tmpFile
 del tmpFile
 conda.exe config --set solver %conda_solver%
