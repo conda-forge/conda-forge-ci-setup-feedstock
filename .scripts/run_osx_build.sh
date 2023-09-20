@@ -29,7 +29,7 @@ mamba update --update-specs --yes --quiet --channel conda-forge --strict-channel
     pip mamba conda-build boa conda-forge-ci-setup
 
 
-mamba uninstall --quiet --yes --force conda-forge-ci-setup
+conda uninstall --quiet --yes --force conda-forge-ci-setup
 pip install --no-deps recipe/.
 
 echo -e "\n\nSetting up the condarc and mangling the compiler."
