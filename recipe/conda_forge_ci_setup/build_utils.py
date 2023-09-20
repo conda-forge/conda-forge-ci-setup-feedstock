@@ -173,6 +173,9 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 def upload_package(feedstock_root, recipe_root, config_file, validate, private, feedstock_name):
     if feedstock_name is None and validate:
         raise RuntimeError("You must supply the --feedstock-name option if validating!")
+    if feedstock_name and "/" in feedstock_name:
+        print("INFO: --feedstock-name should not contain slashes. Using the last component.")
+        feedstock_name = feedstock_name.split("/")[-1]
 
     specific_config = safe_load(open(config_file))
     if "channel_targets" in specific_config:
