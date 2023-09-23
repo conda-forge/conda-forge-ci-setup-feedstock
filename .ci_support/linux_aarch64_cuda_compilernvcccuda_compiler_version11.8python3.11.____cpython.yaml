@@ -1,15 +1,25 @@
+BUILD:
+- aarch64-conda_cos7-linux-gnu
 MACOSX_SDK_VERSION:
 - '13.3'
 c_compiler:
-- vs2019
+- gcc
+c_compiler_version:
+- '11'
+cdt_arch:
+- aarch64
+cdt_name:
+- cos7
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- None
+- nvcc
 cuda_compiler_version:
-- None
+- '11.8'
+docker_image:
+- quay.io/condaforge/linux-anvil-cuda:11.8
 pin_run_as_build:
   python:
     min_pin: x.x
@@ -17,7 +27,10 @@ pin_run_as_build:
 python:
 - 3.11.* *_cpython
 target_platform:
-- win-64
+- linux-aarch64
 zip_keys:
-- - cuda_compiler
+- - c_compiler_version
+  - cuda_compiler
   - cuda_compiler_version
+  - cdt_name
+  - docker_image
