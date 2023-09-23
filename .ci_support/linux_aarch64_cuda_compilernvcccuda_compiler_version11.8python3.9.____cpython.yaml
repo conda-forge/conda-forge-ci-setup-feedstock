@@ -1,7 +1,5 @@
 BUILD:
 - aarch64-conda_cos7-linux-gnu
-MACOSX_SDK_VERSION:
-- '13.3'
 c_compiler:
 - gcc
 c_compiler_version:
