@@ -156,7 +156,7 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
                         "When searching for a package conda-build will only consider "
                         "the first channel that contains any version of the package "
                         "due to strict channel priority.\n"
-                        "As all channel_source entrys are added to the build environment, this could "
+                        "As all channel_source entries are added to the build environment, this could "
                         "lead to unexpected behaviour."
                     )
                 else:
