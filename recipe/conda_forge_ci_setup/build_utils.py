@@ -161,8 +161,6 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
                     )
                 else:
                     last_channel = source
-
-            return channels
         else:
             update_global_config(feedstock_root)
             channels = _global_config["channels"]["sources"]
