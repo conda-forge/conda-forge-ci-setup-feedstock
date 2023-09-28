@@ -144,10 +144,23 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
     with open(config_file) as f:
         specific_config = safe_load(f)
         if "channel_sources" in specific_config:
-            # Due to rendering we may have more than one row for channel_sources
-            # if nothing gets zipped with it
-            first_row = specific_config["channel_sources"][0]  # type: str
-            channels = [c.strip() for c in first_row.split(",")]
+            channels = []
+            last_channel = None
+            for source in specific_config["channel_sources"]:
+                # channel_sources might be part of some zip_key
+                channels.extend([c.strip() for c in source.split(",")])
+
+                if last_channel is not None and last_channel != source:
+                    print(
+                        "WARNING: Differing channel_sources found in config file.\n"
+                        "When searching for a package conda-build will only consider "
+                        "the first channel that contains any version of the package "
+                        "due to strict channel priority.\n"
+                        "As all channel_source entries are added to the build environment, this could "
+                        "lead to unexpected behaviour."
+                    )
+                else:
+                    last_channel = source
         else:
             update_global_config(feedstock_root)
             channels = _global_config["channels"]["sources"]
