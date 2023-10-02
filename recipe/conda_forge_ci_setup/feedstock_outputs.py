@@ -96,7 +96,8 @@ def is_valid_feedstock_output(project, outputs):
     Parameters
     ----------
     project : str
-        The GitHub repo.
+        The GitHub repo, sans owner or `-feedstock` suffix. For example,
+        for `numpy`, just use `numpy`, not `conda-forge/numpy-feedstock` or `numpy-feedstock`.
     outputs : list of str
         A list of outputs top validate. The list entries should be the
         full names with the platform directory, version/build info, and file extension
@@ -108,6 +109,8 @@ def is_valid_feedstock_output(project, outputs):
         A dict keyed on output name with True if it is valid and False
         otherwise.
     """
+    if "/" in project:
+        project = project.split("/")[-1]
     if project.endswith("-feedstock"):
         feedstock = project[:-len("-feedstock")]
     else:
