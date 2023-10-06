@@ -78,6 +78,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "libnpp_devel:libnpp"
                     "libnvjpeg_devel:libnvjpeg"
                     "cuda_compat:nvidia_driver"
+                    "cuda_profiler_api":""
                 )
                 # add additional packages to manifest with same version (and formatting)
                 # as for key "from_old" specified in the mapping above
