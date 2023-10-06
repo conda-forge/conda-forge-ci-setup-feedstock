@@ -79,6 +79,13 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "libnvjpeg_devel:libnvjpeg"
                     "cuda_compat:nvidia_driver"
                 )
+
+                # the cuda-profiler-api package is only for 11.8+; steal the version
+                # from cuda_nsight because they are related packages
+                if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
+                    DEVELS+=("cuda_profiler_api:cuda_nsight")
+                fi
+
                 # add additional packages to manifest with same version (and formatting)
                 # as for key "from_old" specified in the mapping above
                 for map in "${DEVELS[@]}"; do
@@ -95,16 +102,10 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 # map names from spelling in manifest to RPMs: remove quotes; normalize "_" -> "-";
                 # also need to adapt "_dev" -> "-devel" (specifically for cuda_nvml_dev), which
                 # in turn requires us to undo the "overshoot" for the other devel-packages
-                sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/-api//g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
+                sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/sanitizer-api/sanitizer/g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
 
                 # filter packages from manifest down to what we need for cross-compilation
                 grep -E "cuda-(compat|cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
-
-                # the cuda-profiler-api package is not listed in the manifest, so we
-                # cannot generate it automatically
-                if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
-                    echo "cuda-profiler-api:11.8.86" >> rpms_cc.txt
-                fi
 
                 echo "Installing the following packages (<pkg>:<version>)"
                 cat rpms_cc.txt
