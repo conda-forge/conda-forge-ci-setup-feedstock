@@ -105,7 +105,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/sanitizer-api/sanitizer/g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
 
                 # filter packages from manifest down to what we need for cross-compilation
-                grep -E "cuda-(compat|cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
+                grep -E "cuda-(compat|cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx|profiler).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
 
                 echo "Installing the following packages (<pkg>:<version>)"
                 cat rpms_cc.txt
