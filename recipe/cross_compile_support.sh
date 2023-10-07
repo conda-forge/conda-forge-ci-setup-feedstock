@@ -81,9 +81,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 )
 
                 # the cuda-profiler-api package is only for 11.8+; steal the version
-                # from cuda_nsight because they are related packages
+                # from cuda_sanitizer because they are related packages?
                 if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
-                    DEVELS+=("cuda_profiler_api:cuda_nsight")
+                    DEVELS+=("cuda_profiler_api:cuda_sanitizer_api")
                 fi
 
                 # add additional packages to manifest with same version (and formatting)
