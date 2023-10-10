@@ -23,7 +23,7 @@ echo Installing dependencies
 mamba.exe install "python=3.10" pip mamba conda-build boa conda-forge-ci-setup=3 -c conda-forge --strict-channel-priority --yes
 if !errorlevel! neq 0 exit /b !errorlevel!
 echo Overriding conda-forge-ci-setup with local version
-conda.exe uninstall --quiet --yes --force conda-forge-ci-setup
+conda.exe uninstall --quiet --yes --force conda-forge-ci-setup=3
 if !errorlevel! neq 0 exit /b !errorlevel!
 pip install --no-deps ".\recipe\."
 if !errorlevel! neq 0 exit /b !errorlevel!
