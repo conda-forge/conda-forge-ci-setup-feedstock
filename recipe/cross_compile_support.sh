@@ -85,6 +85,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 # Take version info from packages available in older CUDAs.
                 if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
                     DEVELS+=(
+                        "cuda_cccl:cuda_cudart"
                         "cuda_profiler_api:cuda_sanitizer_api"
                     )
                 fi
