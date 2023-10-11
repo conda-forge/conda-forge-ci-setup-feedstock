@@ -80,8 +80,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "cuda_compat:nvidia_driver"
                 )
 
-                # the cuda-profiler-api package is only for 11.8+; steal the version
-                # from cuda_sanitizer because they are related packages?
+                # Some packages are added after CUDA 11.2+.
+                # Handle them seperately here.
+                # Take version info from packages available in older CUDAs.
                 if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
                     DEVELS+=(
                         "cuda_profiler_api:cuda_sanitizer_api"
