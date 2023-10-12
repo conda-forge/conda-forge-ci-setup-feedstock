@@ -82,7 +82,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
 
                 # Some packages are added after CUDA 11.2+.
                 # Handle them seperately here.
-                # Take version info from packages available in older CUDAs.
+                # Take version info from packages available in the manifest.
                 if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
                     DEVELS+=(
                         "cuda_profiler_api:cuda_sanitizer_api"
