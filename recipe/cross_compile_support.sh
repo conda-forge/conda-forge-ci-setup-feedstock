@@ -80,10 +80,13 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                     "cuda_compat:nvidia_driver"
                 )
 
-                # the cuda-profiler-api package is only for 11.8+; steal the version
-                # from cuda_sanitizer because they are related packages?
+                # Some packages are added after CUDA 11.2+.
+                # Handle them seperately here.
+                # Take version info from packages available in the manifest.
                 if [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
-                    DEVELS+=("cuda_profiler_api:cuda_sanitizer_api")
+                    DEVELS+=(
+                        "cuda_profiler_api:cuda_sanitizer_api"
+                    )
                 fi
 
                 # add additional packages to manifest with same version (and formatting)
@@ -105,7 +108,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 sed 's/"//g' versions.txt | sed 's/_/-/g' | sed 's/sanitizer-api/sanitizer/g' | sed 's/-dev/-devel/g' | sed 's/-develel/-devel/g' > rpms.txt
 
                 # filter packages from manifest down to what we need for cross-compilation
-                grep -E "cuda-(compat|cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx|profiler).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
+                grep -E "cuda-(cccl|compat|cudart|cupti|driver|nvcc|nvml|nvprof|nvrtc|nvtx|profiler).*|lib(cu|npp|nvjpeg).*" rpms.txt > rpms_cc.txt
 
                 echo "Installing the following packages (<pkg>:<version>)"
                 cat rpms_cc.txt
