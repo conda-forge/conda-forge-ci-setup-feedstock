@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "3.33.5" %}
+{% set version = "4.0.0" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -61,7 +61,9 @@ requirements:
     - pip
   run:
     - python
-    - conda >=4.3
+    - conda >=23.9
+    - conda-libmamba-solver >=23.9
+    - conda-build >=3.27
     - conda-env
     - click
     - jinja2
