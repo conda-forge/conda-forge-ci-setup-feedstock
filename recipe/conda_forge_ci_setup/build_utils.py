@@ -5,9 +5,28 @@ import subprocess
 import platform
 
 try:
-    from ruamel_yaml import safe_load, safe_dump
+    from ruamel.yaml import YAML
 except ImportError:
     from yaml import safe_load, safe_dump
+else:
+    def get_yaml_safe():
+        # define global yaml API
+        # safe-loader and allowing duplicate keys
+        # for handling # [filter] / # [not filter]
+        # Don't use a global variable for this as a global
+        # variable will make conda-smithy thread unsafe.
+        yaml = YAML(typ="safe")
+        yaml.allow_duplicate_keys = True
+        return yaml
+
+
+    def safe_load(stream):
+        return get_yaml_safe().load(stream)
+
+
+    def safe_dump(data, stream=None, **kwargs):
+        return get_yaml_safe().dump(data, stream=stream, **kwargs)
+
 
 import click
 
