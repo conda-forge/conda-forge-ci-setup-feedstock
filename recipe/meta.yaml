@@ -73,7 +73,7 @@ requirements:
     - shyaml
     - jq  # [unix]
     - requests
-    - ruamel.yaml
+    - ruamel.yaml >=0.15
     - pip
     - pyyaml
     - m2-git  # [win]
