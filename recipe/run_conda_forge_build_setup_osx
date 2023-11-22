@@ -29,8 +29,12 @@ echo "export CPU_COUNT='${CPU_COUNT}'"                                    > "${C
 echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 if [[ "${OSX_SDK_DIR:-}" == "" ]]; then
-  OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
-  USING_SYSTEM_SDK_DIR=1
+  if [[ "${CI:-}" == "" ]]; then
+    OSX_SDK_DIR=$(mktemp -d)
+  else
+    OSX_SDK_DIR="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"
+    USING_SYSTEM_SDK_DIR=1
+  fi
 fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 CI_SUPPORT=$PWD/.ci_support
