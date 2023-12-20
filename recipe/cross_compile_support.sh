@@ -56,7 +56,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                         (*) echo "" ;;
                     esac)
                 if [[ "${CUDA_MANIFEST_VERSION}" == "" ]]; then
-                    echo "cross compiling with cuda not in (11.2, 11.8, 12.0) not supported yet"
+                    echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
                     exit 1
                 fi
                 curl -L https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/version_${CUDA_MANIFEST_VERSION}.json > manifest.json
@@ -142,16 +142,14 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
             echo "cross compiling with cuda == 11.8 and cdt != cos7/8 not supported yet"
             exit 1
-        elif [[ "${CUDA_COMPILER_VERSION}" == "12.0" ]] && [[ "${CDT_NAME}" == "cos7" ]]; then
+        elif [[ "${CUDA_COMPILER_VERSION}" == 12* ]] && [[ "${CDT_NAME}" == "cos7" ]]; then
             # No extra steps necessary for CUDA 12, handled through new packages
             true
-        elif [[ "${CUDA_COMPILER_VERSION}" == "12.0" ]]; then
-            echo "cross compiling with cuda == 12.0 and cdt != cos7 not supported yet"
+        elif [[ "${CUDA_COMPILER_VERSION}" == 12* ]]; then
+            echo 'cross compiling with cuda == 12.* and cdt != cos7 not supported yet'
             exit 1
         elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
-            # FIXME: can use anaconda.org/nvidia packages to get the includes and libs
-            # for cuda >=11.3.
-            echo "cross compiling with cuda not in (11.2, 11.8, 12.0) not supported yet"
+            echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
             exit 1
         fi
     fi
