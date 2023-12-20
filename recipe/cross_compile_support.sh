@@ -149,8 +149,6 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
             echo 'cross compiling with cuda == 12.* and cdt != cos7 not supported yet'
             exit 1
         elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
-            # FIXME: can use anaconda.org/nvidia packages to get the includes and libs
-            # for cuda >=11.3.
             echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
             exit 1
         fi
