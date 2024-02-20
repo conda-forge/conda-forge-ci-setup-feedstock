@@ -69,7 +69,6 @@ requirements:
     - click
     - jinja2
     - anaconda-client >=1.11.2
-    - conda-build 3.*
     - shyaml
     - jq  # [unix]
     - requests
