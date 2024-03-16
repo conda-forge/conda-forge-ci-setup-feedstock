@@ -5,7 +5,6 @@ import time
 import sys
 
 from conda_forge_metadata.feedstock_outputs import package_to_feedstock
-import conda_build
 import conda_build.config
 import requests
 import click
