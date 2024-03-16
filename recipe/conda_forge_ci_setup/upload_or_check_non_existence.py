@@ -11,12 +11,14 @@ import time
 
 from binstar_client.utils import get_server_api
 import binstar_client.errors
-from conda_build.conda_interface import subdir as conda_subdir
-from conda_build.conda_interface import get_index
+from conda.base.context import context
+from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
 
 from .feedstock_outputs import request_copy, split_pkg
+
+conda_subdir = context.subdir
 
 
 def get_built_distribution_names_and_subdirs(recipe_dir, variant):
@@ -142,11 +144,14 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
     else:
         base_fname = fname
 
-    distributions_on_channel = get_index(
-        [channel_url],
-        prepend=False,
-        use_cache=False,
-    )
+    distributions_on_channel = {
+        f"{prec.name}-{prec.version}-{prec.build}": prec
+        for prec in get_index(
+            [channel_url],
+            prepend=False,
+            use_cache=False,
+        )
+    }
 
     on_channel = False
     for ext in [".tar.bz2", ".conda"]:
