@@ -24,7 +24,7 @@ target_platform:
 - linux-ppc64le
 zip_keys:
 - - c_compiler_version
+  - cdt_name
   - cuda_compiler
   - cuda_compiler_version
-  - cdt_name
   - docker_image
