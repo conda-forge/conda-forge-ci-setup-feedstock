@@ -14,5 +14,5 @@ provider:
   linux_aarch64: default
   linux_ppc64le: default
 remote_ci_setup: 
-  - conda_forge_ci_setup=4
+  - conda-forge-ci-setup=4
 test: native_and_emulated
