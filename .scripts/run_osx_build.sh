@@ -26,12 +26,12 @@ export CONDA_SOLVER="libmamba"
 export CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1
 
 mamba install --update-specs --quiet --yes --channel conda-forge --strict-channel-priority \
-    pip mamba conda-build conda_forge_ci_setup=4
+    pip mamba conda-build conda-forge-ci-setup=4
 mamba update --update-specs --yes --quiet --channel conda-forge --strict-channel-priority \
-    pip mamba conda-build conda_forge_ci_setup=4
+    pip mamba conda-build conda-forge-ci-setup=4
 
 
-conda uninstall --quiet --yes --force conda_forge_ci_setup=4
+conda uninstall --quiet --yes --force conda-forge-ci-setup=4
 pip install --no-deps recipe/.
 
 echo -e "\n\nSetting up the condarc and mangling the compiler."
