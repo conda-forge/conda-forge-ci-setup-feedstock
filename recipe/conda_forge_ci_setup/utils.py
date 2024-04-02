@@ -44,3 +44,10 @@ def compute_sha256sum(pth):
             h.update(chunk)
 
     return h.hexdigest()
+
+def human_readable_bytes(number):
+    for unit in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if abs(number) < 1024.0:
+            return f"{number:3.1f}{unit}"
+        number /= 1024.0
+    return f"{number:3.1f}{unit}"
