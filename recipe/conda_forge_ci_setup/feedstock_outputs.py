@@ -1,53 +1,26 @@
 import os
-import hashlib
 import json
 import time
-import sys
 
-from conda_forge_metadata.feedstock_outputs import package_to_feedstock
-import conda_build.config
-import requests
 import click
+import requests
+from conda_forge_metadata.feedstock_outputs import package_to_feedstock
 
+from .utils import built_distributions, compute_sha256sum, split_pkg
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
-
-
-def split_pkg(pkg):
-    if pkg.endswith(".tar.bz2"):
-        pkg = pkg[:-len(".tar.bz2")]
-    elif pkg.endswith(".conda"):
-        pkg = pkg[:-len(".conda")]
-    else:
-        raise RuntimeError("Can only process packages that end in .tar.bz2 or .conda!")
-    plat, pkg_name = pkg.split(os.path.sep)
-    name_ver, build = pkg_name.rsplit('-', 1)
-    name, ver = name_ver.rsplit('-', 1)
-    return plat, name, ver, build
 
 
 def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
 
 
-def _compute_sha256sum(pth):
-    h = hashlib.sha256()
-
-    with open(pth, 'rb') as fp:
-        chunk = 0
-        while chunk != b'':
-            chunk = fp.read(1024)
-            h.update(chunk)
-
-    return h.hexdigest()
-
-
 def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True):
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
-        checksums[dist] = _compute_sha256sum(path)
+        checksums[dist] = compute_sha256sum(path)
 
     if "FEEDSTOCK_TOKEN" not in os.environ or os.environ["FEEDSTOCK_TOKEN"] is None:
         print(
@@ -155,22 +128,7 @@ def is_valid_feedstock_output(project, outputs):
 def main(feedstock_name):
     """Validate the feedstock outputs."""
 
-    paths = (
-        [
-            os.path.join('noarch', p)
-            for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))  # noqa
-        ]
-        + [
-            os.path.join(conda_build.config.subdir, p)
-            for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
-        ])
-    built_distributions = [
-        path
-        for path in paths
-        if (path.endswith('.tar.bz2') or path.endswith(".conda"))
-    ]
-
-    results = is_valid_feedstock_output(feedstock_name, built_distributions)
+    results = is_valid_feedstock_output(feedstock_name, built_distributions())
 
     print("validation results:\n%s" % json.dumps(results, indent=2))
     print("NOTE: Any outputs marked as False are not allowed for this feedstock.")

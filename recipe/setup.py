@@ -40,6 +40,7 @@ setup(
             "make_build_number = conda_forge_ci_setup.build_utils:make_build_number",  # noqa
             "mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main",
             "validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main",  # noqa
+            "inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main",
         ]
     },
 )
