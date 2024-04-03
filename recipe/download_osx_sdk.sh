@@ -41,6 +41,12 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             ("11.3") echo "cd4f08a75577145b8f05245a2975f7c81401d75e9535dcffbb879ee1deefcbf4" ;;
             ("11.1") echo "68797baaacb52f56f713400de306a58a7ca00b05c3dc6d58f0a8283bcac721f8" ;;
             ("11.0") echo "d3feee3ef9c6016b526e1901013f264467bb927865a03422a9cb925991cc9783" ;;
+            ("10.15") echo "ac75d9e0eb619881f5aa6240689fce862dcb8e123f710032b7409ff5f4c3d18b" ;;
+            ("10.14") echo "123dcd2e02051bed8e189581f6eea1b04eddd55a80f98960214421404aa64b72" ;;
+            ("10.13") echo "1d2984acab2900c73d076fbd40750035359ee1abe1a6c61eafcd218f68923a5a" ;;
+            ("10.12") echo "b314704d85934481c9927a0450db1768baf9af9efe649562fcb1a503bb44512f" ;;
+            ("10.11") echo "d080fc672d94f95eb54651c37ede80f61761ce4c91f87061e11a20222c8d00c8" ;;
+            ("10.10") echo "3839b875df1f2bc98893b8502da456cc0b022c4666bc6b7eb5764a5f915a9b00" ;;
             ("10.9") echo "fcf88ce8ff0dd3248b97f4eb81c7909f2cc786725de277f4d05a2b935cc49de0" ;;
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
