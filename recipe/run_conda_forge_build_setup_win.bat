@@ -138,8 +138,8 @@ echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\a
 
 if "%HOST_PLATFORM%-%BUILD_PLATFORM%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
     echo set "CROSSCOMPILING_EMULATOR=1"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-    echo "CROSSCOMPILING_EMULATOR:"               >> ".ci_support\%CONFIG%.yaml"
-    echo "- 1"                                    >> ".ci_support\%CONFIG%.yaml"
+    echo CROSSCOMPILING_EMULATOR:                 >> ".ci_support\%CONFIG%.yaml"
+    echo - 1                                      >> ".ci_support\%CONFIG%.yaml"
 )
 
 call activate base
