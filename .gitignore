@@ -22,7 +22,3 @@
 /build_artifacts
 
 *.pyc
-# pixi environments
-.pixi
-*.egg-info
-

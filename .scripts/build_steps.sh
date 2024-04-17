@@ -34,11 +34,11 @@ CONDARC
 export CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1
 
 mamba install --update-specs --yes --quiet --channel conda-forge --strict-channel-priority \
-    pip mamba conda-build conda-forge-ci-setup=4
+    pip mamba conda-build conda-forge-ci-setup=4 rattler-build-conda-compat
 mamba update --update-specs --yes --quiet --channel conda-forge --strict-channel-priority \
-    pip mamba conda-build conda-forge-ci-setup=4
+    pip mamba conda-build conda-forge-ci-setup=4 rattler-build-conda-compat
 
-conda uninstall --quiet --yes --force conda-forge-ci-setup=4
+conda uninstall --quiet --yes --force conda-forge-ci-setup=4 rattler-build-conda-compat
 pip install --no-deps ${RECIPE_ROOT}/.
 # set up the condarc
 setup_conda_rc "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
