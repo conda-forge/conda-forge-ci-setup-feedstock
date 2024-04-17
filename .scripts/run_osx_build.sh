@@ -31,7 +31,7 @@ mamba update --update-specs --yes --quiet --channel conda-forge --strict-channel
     pip mamba conda-build conda-forge-ci-setup=4 rattler-build-conda-compat
 
 
-conda uninstall --quiet --yes --force conda-forge-ci-setup=4 rattler-build-conda-compat
+conda uninstall --quiet --yes --force conda-forge-ci-setup=4
 pip install --no-deps recipe/.
 
 echo -e "\n\nSetting up the condarc and mangling the compiler."
