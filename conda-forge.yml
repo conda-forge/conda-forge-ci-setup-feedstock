@@ -15,4 +15,5 @@ provider:
   linux_ppc64le: default
 remote_ci_setup: 
   - conda-forge-ci-setup=4
+  - rattler-build-conda-compat
 test: native_and_emulated
