@@ -15,6 +15,7 @@ from conda.base.context import context
 from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
+import rattler_build_conda_compat.render
 
 from .feedstock_outputs import request_copy, split_pkg
 
@@ -32,12 +33,21 @@ def get_built_distribution_names_and_subdirs(recipe_dir, variant):
             }
             break
 
-    metas = conda_build.api.render(
-        recipe_dir,
-        variant_config_files=variant,
-        finalize=False,
-        bypass_env_check=True,
-        **additional_config)
+    try:
+        metas = conda_build.api.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config)
+    except Exception:
+        metas = rattler_build_conda_compat.render.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config)
+
 
     # Print the skipped distributions
     skipped_distributions = [m for m, _, _ in metas if m.skip()]

@@ -1,0 +1,32 @@
+[project]
+name = "conda-forge-ci-setup-feedstock"
+version = "0.1.0"
+description = "Add a short description here"
+authors = ["nichmor <nmorkotilo@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tasks]
+
+[dependencies]
+python = "~=3.9"
+conda = ">=23.9"
+conda-libmamba-solver = ">=23.9"
+conda-build = ">=3.27"
+mamba = ">=1.5.2"
+conda-env = "*"
+click = "*"
+jinja2 = "*"
+anaconda-client = ">=1.11.2"
+shyaml = "*"
+jq = "*"
+requests = "*"
+ruamel_yaml = "*"
+pyyaml = "*"
+git = "*"
+libarchive = "*"
+conda-forge-metadata = ">=0.4.1"
+
+[pypi-dependencies]
+rattler-build-conda-compat = {path = "/Users/graf/projects/oss/rattler-build-conda-compat", editable = true }
+conda_forge_ci_setup = { path = ".", editable = true}
