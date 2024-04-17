@@ -154,6 +154,7 @@ def is_valid_feedstock_output(project, outputs):
 @click.argument("feedstock_name", type=str)
 def main(feedstock_name):
     """Validate the feedstock outputs."""
+
     paths = (
         [
             os.path.join('noarch', p)
