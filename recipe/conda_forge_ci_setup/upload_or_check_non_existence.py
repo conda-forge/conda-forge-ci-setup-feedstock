@@ -40,7 +40,6 @@ def get_built_distribution_names_and_subdirs(recipe_dir, variant):
         new_recipe = find_rattler_recipe(recipe_dir)
         if new_recipe:
             is_recipe_yaml = True
-
     except OSError:
         # we couldn't find recipe.yaml
         pass
