@@ -16,7 +16,7 @@ from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
 import rattler_build_conda_compat.render
-from rattler_build_conda_compat.utils import find_recipe as find_rattler_recipe
+from rattler_build_conda_compat.utils import has_recipe as rattler_has_recipe
 
 from .feedstock_outputs import request_copy, split_pkg
 
@@ -34,19 +34,9 @@ def get_built_distribution_names_and_subdirs(recipe_dir, variant):
             }
             break
     
-    is_recipe_yaml = False
-
-    try:
-        new_recipe = find_rattler_recipe(recipe_dir)
-        if new_recipe:
-            is_recipe_yaml = True
-    except OSError:
-        # we couldn't find recipe.yaml
-        pass
-
     # if feedstock don't have new recipe.yaml
     # use default conda_build.api.render for meta.yaml
-    if not is_recipe_yaml:
+    if not rattler_has_recipe(recipe_dir):
         metas = conda_build.api.render(
             recipe_dir,
             variant_config_files=variant,
