@@ -45,7 +45,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir, variant):
         pass
 
     # if feedstock don't have new recipe.yaml
-    # use conda_build.api.render for meta.yaml
+    # use default conda_build.api.render for meta.yaml
     if not is_recipe_yaml:
         metas = conda_build.api.render(
             recipe_dir,
