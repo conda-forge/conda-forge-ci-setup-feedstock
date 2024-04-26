@@ -19,9 +19,11 @@ import rattler_build_conda_compat.render
 from yaml import safe_load
 
 from .feedstock_outputs import request_copy, split_pkg
-from .build_utils import CONDA_BUILD, RATTLER_BUILD
 
 conda_subdir = context.subdir
+
+CONDA_BUILD = "conda-build"
+RATTLER_BUILD = "rattler-build"
 
 
 def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CONDA_BUILD):
