@@ -39,7 +39,6 @@ arg_config_file = click.argument(
     "config_file", type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
 
-
 def update_global_config(feedstock_root):
     """Merge the conda-forge.yml with predefined system defaults"""
     if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
@@ -247,11 +246,15 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
         if validate and owner == "conda-forge":
             retry_upload_or_check(
                 feedstock_name, recipe_root, STAGING, channel,
-                [config_file], validate=True, git_sha=git_sha)
+                [config_file], validate=True, git_sha=git_sha,
+                feedstock_root=feedstock_root,
+            )
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
-                [config_file], validate=False, private_upload=private)
+                [config_file], validate=False, private_upload=private,
+                feedstock_root=feedstock_root,
+            )
 
 
 @click.command()

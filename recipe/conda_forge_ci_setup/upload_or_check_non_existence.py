@@ -15,13 +15,18 @@ from conda.base.context import context
 from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
+import rattler_build_conda_compat.render
+from yaml import safe_load
 
 from .feedstock_outputs import request_copy, split_pkg
 
 conda_subdir = context.subdir
 
+CONDA_BUILD = "conda-build"
+RATTLER_BUILD = "rattler-build"
 
-def get_built_distribution_names_and_subdirs(recipe_dir, variant):
+
+def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CONDA_BUILD):
     additional_config = {}
     for v in variant:
         variant_dir, base_name = os.path.split(v)
@@ -32,12 +37,22 @@ def get_built_distribution_names_and_subdirs(recipe_dir, variant):
             }
             break
 
-    metas = conda_build.api.render(
-        recipe_dir,
-        variant_config_files=variant,
-        finalize=False,
-        bypass_env_check=True,
-        **additional_config)
+    if build_tool == RATTLER_BUILD:
+        metas = rattler_build_conda_compat.render.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
+    else:        
+        metas = conda_build.api.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
 
     # Print the skipped distributions
     skipped_distributions = [m for m, _, _ in metas if m.skip()]
@@ -180,6 +195,7 @@ def upload_or_check(
     private_upload=False,
     prod_owner="conda-forge",
     comment_on_error=True,
+    feedstock_root=None,
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -195,8 +211,17 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
+    build_tool = CONDA_BUILD
+
+    if feedstock_root and os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+            conda_forge_config = safe_load(f)
+            
+            if conda_forge_config.get("conda_build_tool", CONDA_BUILD) == RATTLER_BUILD:
+                build_tool = RATTLER_BUILD
+
     allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
-        recipe_dir, variant
+        recipe_dir, variant, build_tool=build_tool
     )
 
     # The list of built distributions
@@ -299,6 +324,7 @@ def retry_upload_or_check(
     validate=False,
     git_sha=None,
     private_upload=False,
+    feedstock_root=None,
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
@@ -309,7 +335,8 @@ def retry_upload_or_check(
                 feedstock, recipe_dir, owner, channel, variant,
                 validate=validate, git_sha=git_sha,
                 comment_on_error=True if i == n_try-1 else False,
-                private_upload=private_upload
+                private_upload=private_upload,
+                feedstock_root=feedstock_root,
             )
             return res
         except Exception as e:
@@ -332,12 +359,17 @@ def retry_upload_or_check(
 @click.option('--variant', '-m', multiple=True,
               type=click.Path(exists=True, file_okay=True, dir_okay=False),
               help="path to conda_build_config.yaml defining your base matrix")
-def main(recipe_dir, owner, channel, variant):
+@click.option('--feedstock-root', '-f', 
+              multiple=False,
+              default=None,
+              type=click.Path(exists=True, file_okay=False, dir_okay=True),
+              help="path to feedstock")
+def main(recipe_dir, owner, channel, variant, feedstock_root):
     """
     Upload or check consistency of a built version of a conda recipe with binstar.
     Note: The existence of the BINSTAR_TOKEN environment variable determines
     whether the upload should actually take place."""
-    return retry_upload_or_check(None, recipe_dir, owner, channel, variant)
+    return retry_upload_or_check(None, recipe_dir, owner, channel, variant, feedstock_root=feedstock_root)
 
 
 if __name__ == '__main__':

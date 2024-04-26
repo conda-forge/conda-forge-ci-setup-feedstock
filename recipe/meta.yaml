@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.3.6" %}
+{% set version = "4.4.6" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -79,6 +79,8 @@ requirements:
     - git     # [unix]
     - libarchive
     - conda-forge-metadata >=0.4.1
+    - rattler-build-conda-compat >=0.0.2
+
   run_constrained:
     - boa >=0.8,<1.0
 
