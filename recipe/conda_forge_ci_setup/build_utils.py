@@ -39,6 +39,8 @@ arg_config_file = click.argument(
     "config_file", type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
 
+CONDA_BUILD = "conda-build"
+RATTLER_BUILD = "rattler-build"
 
 def update_global_config(feedstock_root):
     """Merge the conda-forge.yml with predefined system defaults"""
