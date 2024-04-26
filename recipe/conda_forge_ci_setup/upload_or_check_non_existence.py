@@ -193,6 +193,7 @@ def upload_or_check(
     private_upload=False,
     prod_owner="conda-forge",
     comment_on_error=True,
+    feedstock_root=None,
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -210,8 +211,8 @@ def upload_or_check(
 
     build_tool = CONDA_BUILD
 
-    if os.path.exists(os.path.join(feedstock, "conda-forge.yml")):
-        with open(os.path.join(feedstock, "conda-forge.yml")) as f:
+    if feedstock_root and os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
             conda_forge_config = safe_load(f)
             
             if conda_forge_config.get("conda_build_tool", CONDA_BUILD) == RATTLER_BUILD:
@@ -321,6 +322,7 @@ def retry_upload_or_check(
     validate=False,
     git_sha=None,
     private_upload=False,
+    feedstock_root=None,
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
@@ -331,7 +333,8 @@ def retry_upload_or_check(
                 feedstock, recipe_dir, owner, channel, variant,
                 validate=validate, git_sha=git_sha,
                 comment_on_error=True if i == n_try-1 else False,
-                private_upload=private_upload
+                private_upload=private_upload,
+                feedstock_root=feedstock_root,
             )
             return res
         except Exception as e:
@@ -354,17 +357,17 @@ def retry_upload_or_check(
 @click.option('--variant', '-m', multiple=True,
               type=click.Path(exists=True, file_okay=True, dir_okay=False),
               help="path to conda_build_config.yaml defining your base matrix")
-@click.option('--feedstock-dir', '-f', 
+@click.option('--feedstock-root', '-f', 
               multiple=False,
               default=None,
               type=click.Path(exists=True, file_okay=False, dir_okay=True),
               help="path to feedstock")
-def main(recipe_dir, owner, channel, variant, feedstock_dir):
+def main(recipe_dir, owner, channel, variant, feedstock_root):
     """
     Upload or check consistency of a built version of a conda recipe with binstar.
     Note: The existence of the BINSTAR_TOKEN environment variable determines
     whether the upload should actually take place."""
-    return retry_upload_or_check(feedstock_dir, recipe_dir, owner, channel, variant)
+    return retry_upload_or_check(None, recipe_dir, owner, channel, variant, feedstock_root=feedstock_root)
 
 
 if __name__ == '__main__':
