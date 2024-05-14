@@ -54,6 +54,7 @@ requirements:
      # ensure that all variants of cuda_compiler_version are tested
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
+    - {{ stdlib('c') }}                   # [cuda_compiler_version != "None"]
     - python                              # [build_platform != target_platform]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
