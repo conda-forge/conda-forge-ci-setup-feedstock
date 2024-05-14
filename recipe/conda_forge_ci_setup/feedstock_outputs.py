@@ -5,10 +5,13 @@ import time
 import sys
 
 from conda_forge_metadata.feedstock_outputs import package_to_feedstock
+from conda.base.context import context
 import conda_build.config
 import requests
 import click
 
+
+conda_subdir = context.subdir
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
@@ -161,8 +164,8 @@ def main(feedstock_name):
             for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))  # noqa
         ]
         + [
-            os.path.join(conda_build.config.subdir, p)
-            for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
+            os.path.join(conda_subdir, p)
+            for p in os.listdir(os.path.join(conda_build.config.croot, conda_subdir))  # noqa
         ])
     built_distributions = [
         path
