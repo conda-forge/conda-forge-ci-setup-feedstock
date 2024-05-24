@@ -1,10 +1,10 @@
 set -e
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-   export MACOSX_DEPLOYMENT_TARGET=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.13)
+   export MACOSX_DEPLOYMENT_TARGET=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 10.9)
 fi
 
-export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.13}
+export MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET:-10.9}
 
 # Some project require a new SDK version even though they can target older versions
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
