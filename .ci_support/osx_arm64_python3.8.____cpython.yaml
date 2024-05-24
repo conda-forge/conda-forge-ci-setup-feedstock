@@ -1,8 +1,6 @@
 MACOSX_DEPLOYMENT_TARGET:
 - '11.0'
-c_stdlib:
-- macosx_deployment_target
-c_stdlib_version:
+MACOSX_SDK_VERSION:
 - '11.0'
 channel_sources:
 - conda-forge
