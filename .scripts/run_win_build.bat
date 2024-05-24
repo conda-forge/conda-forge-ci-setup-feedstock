@@ -24,7 +24,7 @@ set "CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1"
 
 :: Provision the necessary dependencies to build the recipe later
 echo Installing dependencies
-mamba.exe install "python=3.10" pip mamba conda-build conda-forge-ci-setup=4 'rattler-build-conda-compat>=0.0.2' -c conda-forge --strict-channel-priority --yes
+mamba.exe install "python=3.10" pip mamba conda-build conda-forge-ci-setup=4 -c conda-forge --strict-channel-priority --yes
 if !errorlevel! neq 0 exit /b !errorlevel!
 echo Overriding conda-forge-ci-setup with local version
 conda.exe uninstall --quiet --yes --force conda-forge-ci-setup=4
