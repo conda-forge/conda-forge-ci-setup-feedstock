@@ -2,23 +2,19 @@ import hashlib
 import os
 
 import conda_build.config
+from conda.base.context import context
 
-def built_distributions():
+
+def built_distributions(subdirs=()):
     "List conda artifacts in conda-build's root workspace"
-    paths = (
-            [
-                os.path.join('noarch', p)
-                for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))  # noqa
-            ]
-            + [
-                os.path.join(conda_build.config.subdir, p)
-                for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
-            ])
-    return [
-            path
-            for path in paths
-            if (path.endswith('.tar.bz2') or path.endswith(".conda"))
-        ]
+    if not subdirs:
+        subdirs = context.subdir, "noarch"
+    paths = []
+    for subdir in subdirs:
+        for path in os.listdir(os.path.join(conda_build.config.croot, subdir)):
+            if path.endswith((".tar.bz2", ".conda")):
+                paths.append(os.path.join(subdir, path))
+    return paths
 
 
 def split_pkg(pkg):
