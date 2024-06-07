@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.5.1" %}
+{% set version = "4.6.0" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -45,6 +45,7 @@ build:
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
+    - inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main
   ignore_run_exports_from:
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
@@ -80,6 +81,7 @@ requirements:
     - git     # [unix]
     - libarchive
     - conda-forge-metadata >=0.4.1
+    - conda-package-handling >=2.3.0
     - rattler-build-conda-compat >=0.0.2
 
   run_constrained:
@@ -96,6 +98,7 @@ test:
     - make_build_number --help
     - mangle_homebrew --help
     - validate_recipe_outputs --help
+    - inspect_artifacts --help
 
 
 about:
