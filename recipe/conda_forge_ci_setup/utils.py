@@ -13,7 +13,7 @@ def built_distributions(subdirs=()):
     for subdir in subdirs:
         for path in os.listdir(os.path.join(conda_build.config.croot, subdir)):
             if path.endswith((".tar.bz2", ".conda")):
-                paths.append(os.path.join(subdir, path))
+                paths.append(os.path.join(conda_build.config.croot, subdir, path))
     return paths
 
 

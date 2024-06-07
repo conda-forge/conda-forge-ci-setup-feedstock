@@ -4,6 +4,7 @@ import time
 
 import click
 import requests
+import conda_build.config
 from conda_forge_metadata.feedstock_outputs import package_to_feedstock
 
 from .utils import built_distributions, compute_sha256sum, split_pkg
@@ -129,7 +130,8 @@ def is_valid_feedstock_output(project, outputs):
 def main(feedstock_name):
     """Validate the feedstock outputs."""
 
-    results = is_valid_feedstock_output(feedstock_name, built_distributions())
+    distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions()]
+    results = is_valid_feedstock_output(feedstock_name, distributions)
 
     print("validation results:\n%s" % json.dumps(results, indent=2))
     print("NOTE: Any outputs marked as False are not allowed for this feedstock.")
