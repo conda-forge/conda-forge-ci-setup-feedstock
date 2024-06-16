@@ -70,6 +70,7 @@ set "PATH=%PATH:C:\Program Files\OpenSSL\bin;=%"
 set "PATH=%PATH:C:\Strawberry\c\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
+set "PATH=%PATH:C:\mingw64\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
 
 :: On azure, there are libcrypto*.dll & libssl*.dll under
@@ -84,6 +85,7 @@ if defined CI (
 
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
 set "PATH=%PATH:ostedtoolcache=%"
+set "PATH=%PATH:xternals\git\mingw=%"
 
 :: Install CUDA drivers if needed
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
