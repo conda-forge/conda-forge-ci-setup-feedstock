@@ -4,6 +4,13 @@ import os
 import conda_build.config
 from conda.base.context import context
 
+try:
+    from ruamel_yaml import safe_load
+except ImportError:
+    from yaml import safe_load
+
+CONDA_BUILD = "conda-build"
+RATTLER_BUILD = "rattler-build"
 
 def built_distributions(subdirs=()):
     "List conda artifacts in conda-build's root workspace"
@@ -47,3 +54,16 @@ def human_readable_bytes(number):
             return f"{number:3.1f}{unit}"
         number /= 1024.0
     return f"{number:3.1f}{unit}"
+
+
+def determine_build_tool(feedstock_root):
+    build_tool = CONDA_BUILD
+
+    if feedstock_root and os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+            conda_forge_config = safe_load(f)
+
+            if conda_forge_config.get("conda_build_tool", CONDA_BUILD) == RATTLER_BUILD:
+                build_tool = RATTLER_BUILD
+
+    return build_tool

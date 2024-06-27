@@ -15,7 +15,7 @@ import click
 from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
 
 from .feedstock_outputs import STAGING
-
+from .utils import determine_build_tool, CONDA_BUILD
 
 call = subprocess.check_call
 
@@ -227,6 +227,18 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
                     "Uploading to %s with source channel '%s' "
                     "is not allowed" % ("conda-forge", source_channel))
                 return
+
+    build_tool = determine_build_tool(feedstock_root)
+    if build_tool != CONDA_BUILD and upload_to_conda_forge:
+        # make sure that we are not uploading to the main conda-forge channel
+        # when building packages with `rattler-build`
+        if ["conda-forge", "main"] in channels:
+            print(
+                "Uploading to conda-forge's main channel is not yet allowed when building with rattler-build.\n"
+                "You can set a label channel in the channel_targets section of the config file\n"
+                "to upload to a label channel."
+            )
+            return
 
     # get the git sha of the current commit
     git_sha = subprocess.run(

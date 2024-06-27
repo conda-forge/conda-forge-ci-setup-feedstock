@@ -16,15 +16,11 @@ from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
 import rattler_build_conda_compat.render
-from yaml import safe_load
 
 from .feedstock_outputs import request_copy, split_pkg
+from .utils import CONDA_BUILD, determine_build_tool
 
 conda_subdir = context.subdir
-
-CONDA_BUILD = "conda-build"
-RATTLER_BUILD = "rattler-build"
-
 
 def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CONDA_BUILD):
     additional_config = {}
@@ -211,14 +207,7 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
-    build_tool = CONDA_BUILD
-
-    if feedstock_root and os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
-        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
-            conda_forge_config = safe_load(f)
-            
-            if conda_forge_config.get("conda_build_tool", CONDA_BUILD) == RATTLER_BUILD:
-                build_tool = RATTLER_BUILD
+    build_tool = determine_build_tool(feedstock_root)
 
     allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
         recipe_dir, variant, build_tool=build_tool
