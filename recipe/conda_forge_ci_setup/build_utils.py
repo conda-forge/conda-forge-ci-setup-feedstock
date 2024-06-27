@@ -234,9 +234,9 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
         # when building packages with `rattler-build`
         if any(["label/" not in channels]):
             print(
-                "Uploading to conda-forge's main channel is not yet allowed when building with rattler-build\n"
+                "Uploading to conda-forge's main channel is not yet allowed when building with rattler-build.\n"
                 "You can set a label channel in the channel_targets section of the config file\n"
-                "to upload to a label channel"
+                "to upload to a label channel."
             )
             return
 
