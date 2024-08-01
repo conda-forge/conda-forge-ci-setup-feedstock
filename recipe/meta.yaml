@@ -82,7 +82,7 @@ requirements:
     - libarchive
     - conda-forge-metadata >=0.4.1
     - conda-package-handling >=2.3.0
-    - rattler-build-conda-compat >=0.0.2
+    - rattler-build-conda-compat >=0.0.2,<1
 
   run_constrained:
     - boa >=0.8,<1.0
