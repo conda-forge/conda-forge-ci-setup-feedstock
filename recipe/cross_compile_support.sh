@@ -6,11 +6,13 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 ${BUILD_PLATFORM})
     CUDA_COMPILER_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)
     CDT_NAME=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cdt_name.0 cos6)
+    GLIBC_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 2.17)
 fi
 
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
 CUDA_COMPILER_VERSION=${CUDA_COMPILER_VERSION:-None}
 CDT_NAME=${CDT_NAME:-cos6}
+GLIBC_VERSION=${GLIBC_VERSION:-2.17}
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
     echo "export CONDA_BUILD_CROSS_COMPILATION=1" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
@@ -20,7 +22,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         echo "- ${BUILD_PLATFORM}"   >> ${CI_SUPPORT}/${CONFIG}.yaml
     fi
     if [[ "${BUILD_PLATFORM}" == "linux-64" && "${HOST_PLATFORM}" == linux-* ]]; then
-        mamba create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}
+        mamba create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}=${GLIBC_VERSION}
         HOST_PLATFORM_ARCH=${HOST_PLATFORM:6}
         if [[ -f ${RECIPE_ROOT}/yum_requirements.txt ]]; then
             for pkg in $(cat ${RECIPE_ROOT}/yum_requirements.txt); do
