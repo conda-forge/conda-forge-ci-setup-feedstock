@@ -18,7 +18,7 @@ import conda_build.config
 import rattler_build_conda_compat.render
 
 from .feedstock_outputs import request_copy, split_pkg
-from .utils import CONDA_BUILD, determine_build_tool
+from .utils import CONDA_BUILD, RATTLER_BUILD, determine_build_tool
 
 conda_subdir = context.subdir
 
