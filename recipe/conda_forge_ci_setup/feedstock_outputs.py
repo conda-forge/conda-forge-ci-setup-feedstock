@@ -10,9 +10,27 @@ from conda_forge_metadata.feedstock_outputs import package_to_feedstock
 from .utils import built_distributions, compute_sha256sum, split_pkg
 
 
-VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
-STAGING = "cf-staging"
+@lru_cache(maxsize=1)
+def _load_allowed_autoreg_feedstock_globs(time_int):
+    r = requests.get(
+        "https://raw.githubusercontent.com/conda-forge/admin-requests/"
+        "main/.feedstock_outputs_autoreg_allowlist.yml"
+    )
+    r.raise_for_status()
+    yaml = YAML(typ="safe")
+    return yaml.load(r.text)
 
+
+def load_allowed_autoreg_feedstock_globs():
+    return _load_allowed_autoreg_feedstock_globs(time.monotonic() // 120)
+
+
+def check_allowed_autoreg_feedstock_globs(feedstock, output):
+    fs_pats = load_allowed_autoreg_feedstock_globs()
+    for pat in fs_pats.get(feedstock, []):
+        if fnmatch(output, pat):
+            return True
+    return False
 
 def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
@@ -104,7 +122,7 @@ def is_valid_feedstock_output(project, outputs):
             except requests.HTTPError as exc:
                 if exc.response.status_code == 404:
                     # no output exists and we can add it
-                    valid[dist] = True
+                    valid[dist] = True or check_allowed_autoreg_feedstock_globs(feedstock, o)
                     break
                 elif i < 2:
                     # wait and retry
