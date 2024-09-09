@@ -127,6 +127,7 @@ def is_valid_feedstock_output(project, outputs):
             except requests.HTTPError as exc:
                 if exc.response.status_code == 404:
                     # no output exists and we can add it
+                    # if we turn off autoregistration, then the True here should be False
                     valid[dist] = True or check_allowed_autoreg_feedstock_globs(feedstock, o)
                     break
                 elif i < 2:
