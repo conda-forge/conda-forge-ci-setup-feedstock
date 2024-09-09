@@ -133,10 +133,13 @@ def main(feedstock_name):
     distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions()]
     results = is_valid_feedstock_output(feedstock_name, distributions)
 
-    print("validation results:\n%s" % json.dumps(results, indent=2))
-    print("NOTE: Any outputs marked as False are not allowed for this feedstock.")
+    print("validation results:\n%s" % json.dumps(results, indent=2), flush=True)
+    print(
+        "NOTE: Any outputs marked as False are not allowed for this feedstock. "
+        "See https://conda-forge.org/docs/maintainer/infrastructure/#output-validation-and-feedstock-tokens "
+        "for information on how to address this error.",
+        flush=True,
+    )
 
-    # FIXME: removing this for now - we can add extra arguments for us to
-    # compute the output names properly later
-    # if not all(v for v in results.values()):
-    #     sys.exit(1)
+    if not all(v for v in results.values()):
+        sys.exit(1)
