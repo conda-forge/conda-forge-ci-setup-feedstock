@@ -1,43 +1,18 @@
-from functools import lru_cache
-from fnmatch import fnmatch
 import os
 import json
 import time
+import sys
 
 import click
 import requests
 import conda_build.config
 from conda_forge_metadata.feedstock_outputs import package_to_feedstock
-from ruamel.yaml import YAML
 
 from .utils import built_distributions, compute_sha256sum, split_pkg
 
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
-
-
-@lru_cache(maxsize=1)
-def _load_allowed_autoreg_feedstock_globs(time_int):
-    r = requests.get(
-        "https://raw.githubusercontent.com/conda-forge/feedstock-outputs/"
-        "main/feedstock_outputs_autoreg_allowlist.yml"
-    )
-    r.raise_for_status()
-    yaml = YAML(typ="safe")
-    return yaml.load(r.text)
-
-
-def load_allowed_autoreg_feedstock_globs():
-    return _load_allowed_autoreg_feedstock_globs(time.monotonic() // 120)
-
-
-def check_allowed_autoreg_feedstock_globs(feedstock, output):
-    fs_pats = load_allowed_autoreg_feedstock_globs()
-    for pat in fs_pats.get(feedstock, []):
-        if fnmatch(output, pat):
-            return True
-    return False
 
 
 def _unix_dist_path(path):
@@ -123,7 +98,7 @@ def is_valid_feedstock_output(project, outputs):
             _, o, _, _ = split_pkg(dist)
         except RuntimeError:
             continue
-        
+
         for i in range(3):  # three attempts
             try:
                 registered_feedstocks = package_to_feedstock(o)
@@ -131,12 +106,12 @@ def is_valid_feedstock_output(project, outputs):
                 if exc.response.status_code == 404:
                     # no output exists and we can add it
                     # if we turn off autoregistration, then the True here should be False
-                    valid[dist] = True or check_allowed_autoreg_feedstock_globs(feedstock, o)
+                    valid[dist] = True
                     break
                 elif i < 2:
                     # wait and retry
                     time.sleep(1)
-                else:  
+                else:
                     # last attempt, i==2, did not work
                     # This should rarely happen, if ever
                     print(
