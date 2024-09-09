@@ -10,6 +10,10 @@ from conda_forge_metadata.feedstock_outputs import package_to_feedstock
 from .utils import built_distributions, compute_sha256sum, split_pkg
 
 
+VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
+STAGING = "cf-staging"
+
+
 @lru_cache(maxsize=1)
 def _load_allowed_autoreg_feedstock_globs(time_int):
     r = requests.get(
