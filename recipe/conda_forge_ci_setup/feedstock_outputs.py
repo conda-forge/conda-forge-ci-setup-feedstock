@@ -7,6 +7,7 @@ import click
 import requests
 import conda_build.config
 from conda_forge_metadata.feedstock_outputs import package_to_feedstock
+from ruamel.yaml import YAML
 
 from .utils import built_distributions, compute_sha256sum, split_pkg
 
