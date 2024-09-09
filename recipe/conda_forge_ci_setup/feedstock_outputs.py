@@ -18,8 +18,8 @@ STAGING = "cf-staging"
 @lru_cache(maxsize=1)
 def _load_allowed_autoreg_feedstock_globs(time_int):
     r = requests.get(
-        "https://raw.githubusercontent.com/conda-forge/admin-requests/"
-        "main/.feedstock_outputs_autoreg_allowlist.yml"
+        "https://raw.githubusercontent.com/conda-forge/feedstock-outputs/"
+        "main/feedstock_outputs_autoreg_allowlist.yml"
     )
     r.raise_for_status()
     yaml = YAML(typ="safe")
