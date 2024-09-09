@@ -39,6 +39,7 @@ def check_allowed_autoreg_feedstock_globs(feedstock, output):
             return True
     return False
 
+
 def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
 
