@@ -102,7 +102,7 @@ def is_valid_feedstock_output(project, outputs):
         for i in range(3):  # three attempts
             try:
                 registered_feedstocks = package_to_feedstock(o)
-            except requests.HTTPError as exc:
+            except requests.exceptions.HTTPError as exc:
                 if exc.response.status_code == 404:
                     # no output exists and we can add it
                     # if we turn off autoregistration, then the True here should be False
