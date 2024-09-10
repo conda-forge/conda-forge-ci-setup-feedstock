@@ -6,7 +6,10 @@ import sys
 import click
 import requests
 import conda_build.config
-from conda_forge_metadata.feedstock_outputs import package_to_feedstock
+from conda_forge_metadata.feedstock_outputs import (
+    package_to_feedstock,
+    feedstock_outputs_config,
+)
 
 from .utils import built_distributions, compute_sha256sum, split_pkg
 
@@ -104,9 +107,8 @@ def is_valid_feedstock_output(project, outputs):
                 registered_feedstocks = package_to_feedstock(o)
             except requests.exceptions.HTTPError as exc:
                 if exc.response.status_code == 404:
-                    # no output exists and we can add it
-                    # if we turn off autoregistration, then the True here should be False
-                    valid[dist] = False  # do not change to true!
+                    # no output exists so see if we can add itand we can add it
+                    valid[dist] = feedstock_outputs_config().get("auto_register_all", False)
                     break
                 elif i < 2:
                     # wait and retry
