@@ -21,7 +21,7 @@ call = subprocess.check_call
 
 _global_config = {
     "channels": {
-        "sources": ["conda-forge", "defaults"],
+        "sources": ["conda-forge"],
         "targets": [["conda-forge", "main"]],
     }
 }
@@ -214,8 +214,7 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
         allowed_channels = [
-            "conda-forge", "conda-forge/label/\S+", "defaults", "c4aarch64",
-            "c4armv7l"]
+            "conda-forge", "conda-forge/label/\S+", "c4aarch64", "c4armv7l"]
         for source_channel in source_channels.split(","):
             if source_channel.startswith('https://conda-web.anaconda.org/'):
                 source_channel = source_channel[len('https://conda-web.anaconda.org/'):]
