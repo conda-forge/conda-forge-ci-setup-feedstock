@@ -107,7 +107,7 @@ def is_valid_feedstock_output(project, outputs):
                 registered_feedstocks = package_to_feedstock(o)
             except requests.exceptions.HTTPError as exc:
                 if exc.response.status_code == 404:
-                    # no output exists so see if we can add itand we can add it
+                    # no output exists so see if we can add it
                     valid[dist] = feedstock_outputs_config().get("auto_register_all", False)
                     break
                 elif i < 2:
