@@ -1,11 +1,15 @@
 import os
 import json
 import time
+import sys
 
 import click
 import requests
 import conda_build.config
-from conda_forge_metadata.feedstock_outputs import package_to_feedstock
+from conda_forge_metadata.feedstock_outputs import (
+    package_to_feedstock,
+    feedstock_outputs_config,
+)
 
 from .utils import built_distributions, compute_sha256sum, split_pkg
 
@@ -97,19 +101,19 @@ def is_valid_feedstock_output(project, outputs):
             _, o, _, _ = split_pkg(dist)
         except RuntimeError:
             continue
-        
+
         for i in range(3):  # three attempts
             try:
                 registered_feedstocks = package_to_feedstock(o)
-            except requests.HTTPError as exc:
+            except requests.exceptions.HTTPError as exc:
                 if exc.response.status_code == 404:
-                    # no output exists and we can add it
-                    valid[dist] = True
+                    # no output exists so see if we can add it
+                    valid[dist] = feedstock_outputs_config().get("auto_register_all", False)
                     break
                 elif i < 2:
                     # wait and retry
                     time.sleep(1)
-                else:  
+                else:
                     # last attempt, i==2, did not work
                     # This should rarely happen, if ever
                     print(
@@ -133,10 +137,13 @@ def main(feedstock_name):
     distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions()]
     results = is_valid_feedstock_output(feedstock_name, distributions)
 
-    print("validation results:\n%s" % json.dumps(results, indent=2))
-    print("NOTE: Any outputs marked as False are not allowed for this feedstock.")
+    print("validation results:\n%s" % json.dumps(results, indent=2), flush=True)
+    print(
+        "NOTE: Any outputs marked as False are not allowed for this feedstock. "
+        "See https://conda-forge.org/docs/maintainer/infrastructure/#output-validation-and-feedstock-tokens "
+        "for information on how to address this error.",
+        flush=True,
+    )
 
-    # FIXME: removing this for now - we can add extra arguments for us to
-    # compute the output names properly later
-    # if not all(v for v in results.values()):
-    #     sys.exit(1)
+    if not all(v for v in results.values()):
+        sys.exit(1)
