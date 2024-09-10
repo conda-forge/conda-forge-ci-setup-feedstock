@@ -61,6 +61,7 @@ requirements:
   host:
     - python
     - pip
+    - setuptools
   run:
     - python
     - conda >=23.9
