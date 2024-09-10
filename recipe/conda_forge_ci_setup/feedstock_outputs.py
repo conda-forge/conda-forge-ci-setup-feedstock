@@ -106,7 +106,7 @@ def is_valid_feedstock_output(project, outputs):
                 if exc.response.status_code == 404:
                     # no output exists and we can add it
                     # if we turn off autoregistration, then the True here should be False
-                    valid[dist] = True
+                    valid[dist] = False  # do not change to true!
                     break
                 elif i < 2:
                     # wait and retry
