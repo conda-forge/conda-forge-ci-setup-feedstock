@@ -11,7 +11,12 @@ from conda_forge_metadata.feedstock_outputs import (
     feedstock_outputs_config,
 )
 
-from .utils import built_distributions, compute_sha256sum, split_pkg
+from .utils import (
+    built_distributions,
+    compute_sha256sum,
+    split_pkg,
+    is_conda_forge_output_validation_on,
+)
 
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
@@ -134,16 +139,19 @@ def is_valid_feedstock_output(project, outputs):
 def main(feedstock_name):
     """Validate the feedstock outputs."""
 
-    distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions()]
-    results = is_valid_feedstock_output(feedstock_name, distributions)
+    if is_conda_forge_output_validation_on():
+        distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions()]
+        results = is_valid_feedstock_output(feedstock_name, distributions)
 
-    print("validation results:\n%s" % json.dumps(results, indent=2), flush=True)
-    print(
-        "NOTE: Any outputs marked as False are not allowed for this feedstock. "
-        "See https://conda-forge.org/docs/maintainer/infrastructure/#output-validation-and-feedstock-tokens "
-        "for information on how to address this error.",
-        flush=True,
-    )
+        print("validation results:\n%s" % json.dumps(results, indent=2), flush=True)
+        print(
+            "NOTE: Any outputs marked as False are not allowed for this feedstock. "
+            "See https://conda-forge.org/docs/maintainer/infrastructure/#output-validation-and-feedstock-tokens "
+            "for information on how to address this error.",
+            flush=True,
+        )
 
-    if not all(v for v in results.values()):
-        sys.exit(1)
+        if not all(v for v in results.values()):
+            sys.exit(1)
+    else:
+        print("Output validation is turned off. Skipping validation.", flush=True)
