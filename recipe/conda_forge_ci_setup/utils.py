@@ -67,3 +67,13 @@ def determine_build_tool(feedstock_root):
                 build_tool = RATTLER_BUILD
 
     return build_tool
+
+
+def is_conda_forge_output_validation_on():
+    feedstock_root = os.environ.get("FEEDSTOCK_ROOT", "/home/conda/feedstock_root")
+    ison = False
+    if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+            conda_forge_config = safe_load(f)
+            ison = conda_forge_config.get("conda_forge_output_validation", False)
+    return ison
