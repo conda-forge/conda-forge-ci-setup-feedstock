@@ -1,6 +1,6 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.8.1" %}
-{% set build = 2 %}
+{% set version = "4.10" %}
+{% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
 # prioritize non-CUDA variant via build number
@@ -81,7 +81,7 @@ requirements:
     - m2-git  # [win]
     - git     # [unix]
     - libarchive
-    - conda-forge-metadata >=0.4.1
+    - conda-forge-metadata >=0.9.2
     - conda-package-handling >=2.3.0
     - rattler-build-conda-compat >=0.0.2,<2.0.0a0
 
