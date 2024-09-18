@@ -25,7 +25,7 @@ from .utils import (
     '-m',
     multiple=True,
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
-    default=None,
+    default=(),
     help="path to conda_build_config.yaml defining your base matrix",
 )
 def main(recipe_dir, variant):

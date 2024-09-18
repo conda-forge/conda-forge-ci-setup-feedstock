@@ -148,7 +148,7 @@ def is_valid_feedstock_output(project, outputs):
     '-m',
     multiple=True,
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
-    default=None,
+    default=(),
     help="path to conda_build_config.yaml defining your base matrix",
 )
 def main(feedstock_name, recipe_dir, variant):
