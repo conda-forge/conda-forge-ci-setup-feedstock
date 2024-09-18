@@ -173,7 +173,7 @@ def upload_or_check(
     build_tool = determine_build_tool(feedstock_root)
 
     allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
-        recipe_dir, variant, build_tool=build_tool
+        recipe_dir=recipe_dir, variant=variant, build_tool=build_tool
     )
 
     # The list of built distributions

@@ -15,7 +15,15 @@ CONDA_BUILD = "conda-build"
 RATTLER_BUILD = "rattler-build"
 
 
-def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CONDA_BUILD):
+def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, build_tool=None):
+    feedstock_root = os.environ.get(
+        "FEEDSTOCK_ROOT",
+        os.getcwd(),
+    )
+    if recipe_dir is None:
+        recipe_dir = os.path.join(feedstock_root, "recipe")
+    if build_tool is None:
+        build_tool = determine_build_tool(feedstock_root)
     if variant is None:
         if "CONFIG_FILE" in os.environ:
             variant = [os.environ.get("CONFIG_FILE")]
@@ -26,6 +34,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CON
                     os.environ.get("CONFIG") + ".yaml"
                 )
             ]
+
     additional_config = {}
     for v in variant:
         variant_dir, base_name = os.path.split(v)

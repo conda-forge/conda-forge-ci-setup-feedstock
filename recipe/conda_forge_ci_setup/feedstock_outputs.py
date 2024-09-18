@@ -14,7 +14,6 @@ from conda_forge_metadata.feedstock_outputs import (
 from .utils import (
     built_distributions,
     compute_sha256sum,
-    determine_build_tool,
     get_built_distribution_names_and_subdirs,
     split_pkg,
     is_conda_forge_output_validation_on,
@@ -142,20 +141,12 @@ def main(feedstock_name):
     """Validate the feedstock outputs."""
 
     if is_conda_forge_output_validation_on():
-        feedstock_root = os.environ.get(
-            "FEEDSTOCK_ROOT",
-            os.getcwd(),
-        )
-        recipe_root = os.path.join(feedstock_root, "recipe")
-        build_tool = determine_build_tool(feedstock_root)
-        allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
-            recipe_root, None, build_tool=build_tool
-        )
+        allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs()
         distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions(subdirs=allowed_subdirs)]
         distributions = [
             dist
             for dist in distributions
-            if any(dist.startswith(allowed + "-") for allowed in allowed_dist_names)
+            if any(os.path.basename(dist).startswith(allowed + "-") for allowed in allowed_dist_names)
         ]
         results = is_valid_feedstock_output(feedstock_name, distributions)
 
