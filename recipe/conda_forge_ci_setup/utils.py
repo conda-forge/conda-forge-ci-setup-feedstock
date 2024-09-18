@@ -9,8 +9,58 @@ try:
 except ImportError:
     from yaml import safe_load
 
+import rattler_build_conda_compat.render
+
 CONDA_BUILD = "conda-build"
 RATTLER_BUILD = "rattler-build"
+
+
+def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CONDA_BUILD):
+    if variant is None:
+        if "CONFIG_FILE" in os.environ:
+            variant = [os.environ.get("CONFIG_FILE")]
+        else:
+            variant = [
+                os.path.join(
+                    os.environ.get("CI_SUPPORT"),
+                    os.environ.get("CONFIG") + ".yaml"
+                )
+            ]
+    additional_config = {}
+    for v in variant:
+        variant_dir, base_name = os.path.split(v)
+        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
+        if os.path.exists(clobber_file):
+            additional_config = {
+                'clobber_sections_file': clobber_file
+            }
+            break
+
+    if build_tool == RATTLER_BUILD:
+        metas = rattler_build_conda_compat.render.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
+    else:
+        metas = conda_build.api.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
+
+    # Print the skipped distributions
+    skipped_distributions = [m for m, _, _ in metas if m.skip()]
+    for m in skipped_distributions:
+        print("{} configuration was skipped in build/skip.".format(m.name()))
+
+    subdirs = set([m.config.target_subdir for m, _, _ in metas if not m.skip()])
+    return set([m.name() for m, _, _ in metas if not m.skip()]), subdirs
+
 
 def built_distributions(subdirs=()):
     "List conda artifacts in conda-build's root workspace"
