@@ -14,8 +14,22 @@ from .utils import (
 
 
 @click.command()
-def main():
-    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs()
+@click.option(
+    '--recipe-dir',
+    type=click.Path(exists=False, file_okay=False, dir_okay=True),
+    default=None,
+    help='the conda recipe directory'
+)
+@click.option(
+    '--variant',
+    '-m',
+    multiple=True,
+    type=click.Path(exists=False, file_okay=True, dir_okay=False),
+    default=None,
+    help="path to conda_build_config.yaml defining your base matrix",
+)
+def main(recipe_dir, variant):
+    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir=recipe_dir, variant=variant)
     distributions = built_distributions(subdirs=allowed_subdirs)
     distributions = [
         dist
