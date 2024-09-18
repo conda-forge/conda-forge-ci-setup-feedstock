@@ -22,11 +22,6 @@ JOBLIB_MEMORY = joblib.Memory(".joblib_cache", verbose=0)
 
 @JOBLIB_MEMORY.cache
 def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, build_tool=None):
-    print("inputs:", flush=True)
-    print("  recipe dir:", recipe_dir, flush=True)
-    print("  variants:", variant, flush=True)
-    print("  build tool:", build_tool, flush=True)
-
     feedstock_root = os.environ.get(
         "FEEDSTOCK_ROOT",
         os.getcwd(),
@@ -35,7 +30,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
         recipe_dir = os.path.join(feedstock_root, "recipe")
     if build_tool is None:
         build_tool = determine_build_tool(feedstock_root)
-    if variant is None:
+    if not variant:
         if "CONFIG_FILE" in os.environ:
             variant = [os.environ.get("CONFIG_FILE")]
         else:
@@ -45,11 +40,6 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
                     os.environ.get("CONFIG") + ".yaml"
                 )
             ]
-
-    print("final values:", flush=True)
-    print("  recipe dir:", recipe_dir, flush=True)
-    print("  variants:", variant, flush=True)
-    print("  build tool:", build_tool, flush=True)
 
     additional_config = {}
     for v in variant:
