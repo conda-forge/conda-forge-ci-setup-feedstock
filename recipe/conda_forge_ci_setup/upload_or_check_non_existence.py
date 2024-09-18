@@ -15,48 +15,11 @@ from conda.base.context import context
 from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
-import rattler_build_conda_compat.render
 
 from .feedstock_outputs import request_copy, split_pkg
-from .utils import CONDA_BUILD, RATTLER_BUILD, determine_build_tool
+from .utils import determine_build_tool, get_built_distribution_names_and_subdirs
 
 conda_subdir = context.subdir
-
-def get_built_distribution_names_and_subdirs(recipe_dir, variant, build_tool=CONDA_BUILD):
-    additional_config = {}
-    for v in variant:
-        variant_dir, base_name = os.path.split(v)
-        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
-        if os.path.exists(clobber_file):
-            additional_config = {
-                'clobber_sections_file': clobber_file
-            }
-            break
-
-    if build_tool == RATTLER_BUILD:
-        metas = rattler_build_conda_compat.render.render(
-            recipe_dir,
-            variant_config_files=variant,
-            finalize=False,
-            bypass_env_check=True,
-            **additional_config
-        )
-    else:        
-        metas = conda_build.api.render(
-            recipe_dir,
-            variant_config_files=variant,
-            finalize=False,
-            bypass_env_check=True,
-            **additional_config
-        )
-
-    # Print the skipped distributions
-    skipped_distributions = [m for m, _, _ in metas if m.skip()]
-    for m in skipped_distributions:
-        print("{} configuration was skipped in build/skip.".format(m.name()))
-
-    subdirs = set([m.config.target_subdir for m, _, _ in metas if not m.skip()])
-    return set([m.name() for m, _, _ in metas if not m.skip()]), subdirs
 
 
 @contextlib.contextmanager
@@ -210,7 +173,7 @@ def upload_or_check(
     build_tool = determine_build_tool(feedstock_root)
 
     allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
-        recipe_dir, variant, build_tool=build_tool
+        recipe_dir=recipe_dir, variant=variant, build_tool=build_tool
     )
 
     # The list of built distributions
@@ -348,7 +311,7 @@ def retry_upload_or_check(
 @click.option('--variant', '-m', multiple=True,
               type=click.Path(exists=True, file_okay=True, dir_okay=False),
               help="path to conda_build_config.yaml defining your base matrix")
-@click.option('--feedstock-root', '-f', 
+@click.option('--feedstock-root', '-f',
               multiple=False,
               default=None,
               type=click.Path(exists=True, file_okay=False, dir_okay=True),
