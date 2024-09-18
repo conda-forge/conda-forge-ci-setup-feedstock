@@ -31,7 +31,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
         else:
             variant = [
                 os.path.join(
-                    os.environ.get("CI_SUPPORT"),
+                    os.environ.get("CI_SUPPORT", os.path.join(feedstock_root, ".ci_support")),
                     os.environ.get("CONFIG") + ".yaml"
                 )
             ]
@@ -130,7 +130,7 @@ def determine_build_tool(feedstock_root):
 
 
 def is_conda_forge_output_validation_on():
-    feedstock_root = os.environ.get("FEEDSTOCK_ROOT", "/home/conda/feedstock_root")
+    feedstock_root = os.environ.get("FEEDSTOCK_ROOT", os.getcwd())
     ison = False
     if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
         with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
