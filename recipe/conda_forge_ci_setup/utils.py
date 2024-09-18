@@ -1,6 +1,7 @@
 import hashlib
 import os
 
+import conda_build.api
 import conda_build.config
 from conda.base.context import context
 
