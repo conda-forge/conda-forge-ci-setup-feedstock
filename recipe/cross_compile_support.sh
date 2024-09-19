@@ -25,7 +25,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         mamba create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}=${GLIBC_VERSION}
         HOST_PLATFORM_ARCH=${HOST_PLATFORM:6}
         if [[ -f ${RECIPE_ROOT}/yum_requirements.txt ]]; then
-            for pkg in $(cat ${RECIPE_ROOT}/yum_requirements.txt); do
+            cat ${RECIPE_ROOT}/yum_requirements.txt | while read pkg; do
                 if [[ "${pkg}" != "#"* && "${pkg}" != "" ]]; then
                     mamba install "${pkg}-cos7-${HOST_PLATFORM_ARCH}" -n sysroot_${HOST_PLATFORM} --yes --quiet || true
                 fi
