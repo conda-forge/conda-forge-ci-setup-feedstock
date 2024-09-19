@@ -15,6 +15,11 @@ from .utils import (
 
 @click.command()
 @click.option(
+    '--all-packages',
+    is_flag=True,
+    help='inspect all packages found in the conda-build root directory'
+)
+@click.option(
     '--recipe-dir',
     type=click.Path(exists=False, file_okay=False, dir_okay=True),
     default=None,
@@ -28,14 +33,17 @@ from .utils import (
     default=(),
     help="path to conda_build_config.yaml defining your base matrix",
 )
-def main(recipe_dir, variant):
-    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir=recipe_dir, variant=variant)
-    distributions = built_distributions(subdirs=allowed_subdirs)
-    distributions = [
-        dist
-        for dist in distributions
-        if any(os.path.basename(dist).startswith(allowed + "-") for allowed in allowed_dist_names)
-    ]
+def main(all_packages, recipe_dir, variant):
+    if all_packages:
+        distributions = built_distributions()
+    else:
+        allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir=recipe_dir, variant=variant)
+        distributions = built_distributions(subdirs=allowed_subdirs)
+        distributions = [
+            dist
+            for dist in distributions
+            if any(os.path.basename(dist).startswith(allowed + "-") for allowed in allowed_dist_names)
+        ]
 
     for artifact in sorted(distributions):
         path = Path(artifact)
