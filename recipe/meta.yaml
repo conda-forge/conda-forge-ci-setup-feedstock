@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.9.3" %}
+{% set version = "4.9.4" %}
 {% set build = 0 %}
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -101,6 +101,10 @@ test:
     - mangle_homebrew --help
     - validate_recipe_outputs --help
     - inspect_artifacts --help
+  # this is here to test that downstream test packages
+  # are excluded from validation and inspection
+  downstreams:
+    - ngmix
 
 
 about:

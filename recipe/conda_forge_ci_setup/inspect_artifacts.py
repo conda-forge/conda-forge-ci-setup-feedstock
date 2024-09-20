@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 
 import click
 import conda_build.config
@@ -7,8 +6,8 @@ from conda_package_handling.api import list_contents
 
 from .utils import (
     built_distributions,
+    built_distributions_from_recipe_variant,
     compute_sha256sum,
-    get_built_distribution_names_and_subdirs,
     human_readable_bytes,
 )
 
@@ -37,13 +36,7 @@ def main(all_packages, recipe_dir, variant):
     if all_packages:
         distributions = built_distributions()
     else:
-        allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(recipe_dir=recipe_dir, variant=variant)
-        distributions = built_distributions(subdirs=allowed_subdirs)
-        distributions = [
-            dist
-            for dist in distributions
-            if any(os.path.basename(dist).startswith(allowed + "-") for allowed in allowed_dist_names)
-        ]
+        distributions = built_distributions_from_recipe_variant(recipe_dir=recipe_dir, variant=variant)
 
     for artifact in sorted(distributions):
         path = Path(artifact)
