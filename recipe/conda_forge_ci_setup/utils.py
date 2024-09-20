@@ -89,6 +89,23 @@ def built_distributions(subdirs=()):
     return paths
 
 
+def built_distributions_from_recipe_variant(recipe_dir=None, variant=None, build_tool=None):
+    def _dist_name(dist):
+        return split_pkg(os.path.relpath(dist, conda_build.config.croot))[1]
+
+    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
+        recipe_dir=recipe_dir,
+        variant=variant,
+        build_tool=build_tool,
+    )
+    return [
+        dist
+        for dist in built_distributions(subdirs=allowed_subdirs)
+        if _dist_name(dist) in allowed_dist_names
+    ]
+
+
+
 def split_pkg(pkg):
     if pkg.endswith(".tar.bz2"):
         pkg = pkg[:-len(".tar.bz2")]
