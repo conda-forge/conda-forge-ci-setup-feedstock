@@ -21,9 +21,6 @@ build:
   skip: True
   {% endif %}
   script:
-    - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
-    - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]
-    - COPY "%RECIPE_DIR%\\..\\LICENSE.txt" "%RECIPE_DIR%\\LICENSE.txt"                       # [win]
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
     - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"              # [win]
@@ -112,7 +109,7 @@ about:
   home: https://github.com/conda-forge/conda-forge-ci-setup-feedstock
   summary: A package installed by conda-forge each time a build is run on CI. This package has side-effects to your conda config.
   license: BSD-3-Clause
-  license_file: LICENSE.txt
+  license_file: {{ RECIPE_DIR }}/../LICENSE.txt
 
 extra:
   recipe-maintainers:
