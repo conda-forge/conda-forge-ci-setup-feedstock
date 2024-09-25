@@ -23,9 +23,7 @@ build:
   script:
     # Copy feedstock license file to recipe directory
     - pushd {{ RECIPE_DIR }}
-    - pushd ..
-    - cp LICENSE.txt {{ RECIPE_DIR }}
-    - popd
+    - cp recipe-scripts-license.txt LICENSE.txt
     - popd
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
     - mkdir -p "${PREFIX}/bin"                                                                                           # [unix]
