@@ -1,16 +1,81 @@
 import hashlib
 import os
 
+import conda_build.api
 import conda_build.config
 from conda.base.context import context
+import joblib
 
 try:
     from ruamel_yaml import safe_load
 except ImportError:
     from yaml import safe_load
 
+import rattler_build_conda_compat.render
+
 CONDA_BUILD = "conda-build"
 RATTLER_BUILD = "rattler-build"
+
+os.makedirs(".joblib_cache", exist_ok=True)
+JOBLIB_MEMORY = joblib.Memory(".joblib_cache", verbose=0)
+
+
+@JOBLIB_MEMORY.cache
+def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, build_tool=None):
+    feedstock_root = os.environ.get(
+        "FEEDSTOCK_ROOT",
+        os.getcwd(),
+    )
+    if recipe_dir is None:
+        recipe_dir = os.path.join(feedstock_root, "recipe")
+    if build_tool is None:
+        build_tool = determine_build_tool(feedstock_root)
+    if not variant:
+        if "CONFIG_FILE" in os.environ:
+            variant = [os.environ.get("CONFIG_FILE")]
+        else:
+            variant = [
+                os.path.join(
+                    os.environ.get("CI_SUPPORT", os.path.join(feedstock_root, ".ci_support")),
+                    os.environ.get("CONFIG") + ".yaml"
+                )
+            ]
+
+    additional_config = {}
+    for v in variant:
+        variant_dir, base_name = os.path.split(v)
+        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
+        if os.path.exists(clobber_file):
+            additional_config = {
+                'clobber_sections_file': clobber_file
+            }
+            break
+
+    if build_tool == RATTLER_BUILD:
+        metas = rattler_build_conda_compat.render.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
+    else:
+        metas = conda_build.api.render(
+            recipe_dir,
+            variant_config_files=variant,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
+
+    # Print the skipped distributions
+    skipped_distributions = [m for m, _, _ in metas if m.skip()]
+    for m in skipped_distributions:
+        print("{} configuration was skipped in build/skip.".format(m.name()))
+
+    subdirs = set([m.config.target_subdir for m, _, _ in metas if not m.skip()])
+    return set([m.name() for m, _, _ in metas if not m.skip()]), subdirs
+
 
 def built_distributions(subdirs=()):
     "List conda artifacts in conda-build's root workspace"
@@ -22,6 +87,23 @@ def built_distributions(subdirs=()):
             if path.endswith((".tar.bz2", ".conda")):
                 paths.append(os.path.join(conda_build.config.croot, subdir, path))
     return paths
+
+
+def built_distributions_from_recipe_variant(recipe_dir=None, variant=None, build_tool=None):
+    def _dist_name(dist):
+        return split_pkg(os.path.relpath(dist, conda_build.config.croot))[1]
+
+    allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
+        recipe_dir=recipe_dir,
+        variant=variant,
+        build_tool=build_tool,
+    )
+    return [
+        dist
+        for dist in built_distributions(subdirs=allowed_subdirs)
+        if _dist_name(dist) in allowed_dist_names
+    ]
+
 
 
 def split_pkg(pkg):
@@ -67,3 +149,13 @@ def determine_build_tool(feedstock_root):
                 build_tool = RATTLER_BUILD
 
     return build_tool
+
+
+def is_conda_forge_output_validation_on():
+    feedstock_root = os.environ.get("FEEDSTOCK_ROOT", os.getcwd())
+    ison = False
+    if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
+        with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
+            conda_forge_config = safe_load(f)
+            ison = conda_forge_config.get("conda_forge_output_validation", False)
+    return ison
