@@ -52,9 +52,15 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
             break
 
     if build_tool == RATTLER_BUILD:
+        # load variants from YAML
+        final_variant = {}
+        for v in variant:
+            with open(v) as f:
+                final_variant.update(safe_load(f))
+
         metas = rattler_build_conda_compat.render.render(
             recipe_dir,
-            config=variant,
+            variant=final_variant,
             finalize=False,
             bypass_env_check=True,
             **additional_config
