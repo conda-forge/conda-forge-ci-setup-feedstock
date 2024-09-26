@@ -54,7 +54,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
     if build_tool == RATTLER_BUILD:
         metas = rattler_build_conda_compat.render.render(
             recipe_dir,
-            variants=variant,
+            config=variant,
             finalize=False,
             bypass_env_check=True,
             **additional_config
