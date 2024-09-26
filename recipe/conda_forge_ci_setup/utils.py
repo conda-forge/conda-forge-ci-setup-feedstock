@@ -74,6 +74,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
         print("{} configuration was skipped in build/skip.".format(m.name()))
 
     subdirs = set([m.config.target_subdir for m, _, _ in metas if not m.skip()])
+    subdirs |= set(["noarch"])  # always include noarch
     return set([m.name() for m, _, _ in metas if not m.skip()]), subdirs
 
 
