@@ -3,6 +3,7 @@
 {% set build = 1 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
+{% set c_compiler_version = c_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
 # prioritize non-CUDA variant via build number
 {% set build = build + 100 %}
