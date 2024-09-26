@@ -11,7 +11,7 @@ MINIFORGE_HOME=${MINIFORGE_HOME:-${HOME}/miniforge3}
 ( startgroup "Installing a fresh version of Miniforge" ) 2> /dev/null
 
 MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
-MINIFORGE_FILE="Mambaforge-MacOSX-$(uname -m).sh"
+MINIFORGE_FILE="Miniforge3-MacOSX-$(uname -m).sh"
 curl -L -O "${MINIFORGE_URL}/${MINIFORGE_FILE}"
 rm -rf ${MINIFORGE_HOME}
 bash $MINIFORGE_FILE -b -p ${MINIFORGE_HOME}
@@ -26,7 +26,7 @@ export CONDA_SOLVER="libmamba"
 export CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1
 
 mamba install --update-specs --quiet --yes --channel conda-forge --strict-channel-priority \
-    pip mamba conda-build conda-forge-ci-setup=4 joblib
+    pip mamba conda-build conda-forge-ci-setup=4
 mamba update --update-specs --yes --quiet --channel conda-forge --strict-channel-priority \
     pip mamba conda-build conda-forge-ci-setup=4
 
