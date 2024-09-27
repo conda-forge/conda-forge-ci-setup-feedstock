@@ -4,7 +4,7 @@ import os
 import conda_build.api
 import conda_build.config
 from conda.base.context import context
-from conda_build.variants import combine_specs
+from conda_build.variants import combine_specs, parse_config_file
 import joblib
 
 try:
@@ -53,12 +53,9 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
             break
 
     if build_tool == RATTLER_BUILD:
-        _variants = []
-        for _variant_fname in variant:
-            with open(_variant_fname) as f:
-                _variants.append(safe_load(f))
-        final_variant = combine_specs(_variants, log_output=False)
-
+        # some conda-build magic here
+        with open(variant[-1]) as f:
+            final_variant = safe_load(f)
         extra_args = {}
         if "target_platform" in final_variant:
             target_platform = final_variant["target_platform"][0]
@@ -70,6 +67,14 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
                 }
 
         config = conda_build.config.Config(**extra_args)
+
+        _variants = []
+        for _variant_fname in variant:
+            _variants.append(
+                parse_config_file(_variant_fname, config)
+            )
+        final_variant = combine_specs(_variants, log_output=False)
+
         metas = rattler_build_conda_compat.render.render(
             recipe_dir,
             variants=final_variant,
