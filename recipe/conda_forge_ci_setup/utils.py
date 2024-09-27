@@ -74,6 +74,8 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
                 parse_config_file(_variant_fname, config)
             )
         final_variant = combine_specs(_variants, log_output=False)
+        import pprint
+        print("Final variant is:\n", pprint.pformat(final_variant))
 
         metas = rattler_build_conda_compat.render.render(
             recipe_dir,
