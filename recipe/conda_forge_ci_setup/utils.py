@@ -57,10 +57,29 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
         for v in variant:
             with open(v) as f:
                 final_variant.update(safe_load(f))
+        print("final_variant", final_variant)
+        # print("Variant field", variant)
+        target_platform = final_variant["target_platform"][0]
+        if target_platform != "noarch":
+            platform, arch = target_platform.split("-")
+            extra_args = {
+                "platform": platform,
+                "arch": arch
+            }
 
+        config = conda_build.config.Config(**extra_args)
+        print(config.arch, config.platform, config.host_platform)
+        # config.arch = "64"
+        # config.platform = "linux"
+        # if "target_platform" in final_variant:
+        #     config.platform = final_variant["target_platform"].split("-")[0]
+        #     config.arch = final_variant["target_platform"].split("-")[1]
+        # print("CONFIG", config)
+        # print(config.variant)
         metas = rattler_build_conda_compat.render.render(
             recipe_dir,
-            variant=final_variant,
+            variants=final_variant,
+            config=config,
             finalize=False,
             bypass_env_check=True,
             **additional_config
