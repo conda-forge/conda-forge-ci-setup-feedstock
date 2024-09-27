@@ -52,31 +52,31 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
             break
 
     if build_tool == RATTLER_BUILD:
-        # load variants from YAML
-        final_variant = {}
-        for v in variant:
-            with open(v) as f:
-                final_variant.update(safe_load(f))
+        metas = []
+        for _variant_fname in variant:
+            with open(_variant_fname) as f:
+                final_variant = safe_load(f)
 
-        extra_args = {}
-        if "target_platform" in final_variant:
-            target_platform = final_variant["target_platform"][0]
-            if target_platform != "noarch":
-                platform, arch = target_platform.split("-")
-                extra_args = {
-                    "platform": platform,
-                    "arch": arch
-                }
+            extra_args = {}
+            if "target_platform" in final_variant:
+                target_platform = final_variant["target_platform"][0]
+                if target_platform != "noarch":
+                    platform, arch = target_platform.split("-")
+                    extra_args = {
+                        "platform": platform,
+                        "arch": arch
+                    }
 
-        config = conda_build.config.Config(**extra_args)
-        metas = rattler_build_conda_compat.render.render(
-            recipe_dir,
-            variants=final_variant,
-            config=config,
-            finalize=False,
-            bypass_env_check=True,
-            **additional_config
-        )
+            config = conda_build.config.Config(**extra_args)
+            _metas = rattler_build_conda_compat.render.render(
+                recipe_dir,
+                variants=final_variant,
+                config=config,
+                finalize=False,
+                bypass_env_check=True,
+                **additional_config
+            )
+            metas.extend(_metas)
     else:
         metas = conda_build.api.render(
             recipe_dir,
