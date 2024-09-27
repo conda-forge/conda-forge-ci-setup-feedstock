@@ -4,6 +4,7 @@ import os
 import conda_build.api
 import conda_build.config
 from conda.base.context import context
+from conda_build.variants import combine_specs
 import joblib
 
 try:
@@ -52,31 +53,31 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
             break
 
     if build_tool == RATTLER_BUILD:
-        metas = []
+        _variants = []
         for _variant_fname in variant:
             with open(_variant_fname) as f:
-                final_variant = safe_load(f)
+                _variants.append(safe_load(f))
+        final_variant = combine_specs(_variants, log_output=False)
 
-            extra_args = {}
-            if "target_platform" in final_variant:
-                target_platform = final_variant["target_platform"][0]
-                if target_platform != "noarch":
-                    platform, arch = target_platform.split("-")
-                    extra_args = {
-                        "platform": platform,
-                        "arch": arch
-                    }
+        extra_args = {}
+        if "target_platform" in final_variant:
+            target_platform = final_variant["target_platform"][0]
+            if target_platform != "noarch":
+                platform, arch = target_platform.split("-")
+                extra_args = {
+                    "platform": platform,
+                    "arch": arch
+                }
 
-            config = conda_build.config.Config(**extra_args)
-            _metas = rattler_build_conda_compat.render.render(
-                recipe_dir,
-                variants=final_variant,
-                config=config,
-                finalize=False,
-                bypass_env_check=True,
-                **additional_config
-            )
-            metas.extend(_metas)
+        config = conda_build.config.Config(**extra_args)
+        metas = rattler_build_conda_compat.render.render(
+            recipe_dir,
+            variants=final_variant,
+            config=config,
+            finalize=False,
+            bypass_env_check=True,
+            **additional_config
+        )
     else:
         metas = conda_build.api.render(
             recipe_dir,
