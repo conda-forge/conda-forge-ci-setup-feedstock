@@ -58,6 +58,7 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
             with open(v) as f:
                 final_variant.update(safe_load(f))
 
+        extra_args = {}
         if "target_platform" in final_variant:
             target_platform = final_variant["target_platform"][0]
             if target_platform != "noarch":
