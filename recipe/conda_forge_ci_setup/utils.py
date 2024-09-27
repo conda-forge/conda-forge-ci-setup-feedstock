@@ -68,12 +68,10 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
 
         config = conda_build.config.Config(**extra_args)
 
-        _variants = []
+        specs = {}
         for _variant_fname in variant:
-            _variants.append(
-                parse_config_file(_variant_fname, config)
-            )
-        final_variant = combine_specs(_variants, log_output=False)
+            specs[_variant_fname] = parse_config_file(_variant_fname, config)
+        final_variant = combine_specs(specs, log_output=False)
         import pprint
         print("Final variant is:\n", pprint.pformat(final_variant))
 
