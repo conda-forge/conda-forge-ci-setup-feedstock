@@ -138,6 +138,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/compat/* ${QEMU_LD_PREFIX}/usr/lib/
             popd
             rm -rf ${EXTRACT_DIR}
+            /usr/bin/sudo rm -rf /opt/conda/targets/${CUDA_HOST_PLATFORM_ARCH}-linux
         elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
             echo "cross compiling with cuda == 11.2 and cdt != cos7/8 not supported yet"
             exit 1
