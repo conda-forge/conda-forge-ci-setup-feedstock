@@ -71,7 +71,6 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 declare -a DEVELS=(
                     "cuda_cudart_devel:cuda_cudart"
                     "cuda_driver_devel:cuda_cudart"
-                    "cuda_nvcc:cuda_nvcc"
                     "cuda_nvrtc_devel:cuda_nvrtc"
                     "libcublas_devel:libcublas"
                     "libcufft_devel:libcufft"
