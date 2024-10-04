@@ -62,8 +62,8 @@ def get_built_distribution_names_and_subdirs(recipe_dir=None, variant=None, buil
             if target_platform != "noarch":
                 platform, arch = target_platform.split("-")
                 extra_args = {
-                    "platform": platform,
-                    "arch": arch
+                    "host_platform": platform,
+                    "host_arch": arch
                 }
 
         config = conda_build.config.Config(**extra_args)
