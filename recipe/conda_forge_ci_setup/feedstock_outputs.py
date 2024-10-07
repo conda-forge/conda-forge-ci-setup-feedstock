@@ -12,7 +12,7 @@ from conda_forge_metadata.feedstock_outputs import (
 )
 
 from .utils import (
-    built_distributions,
+    built_distributions_from_recipe_variant,
     compute_sha256sum,
     split_pkg,
     is_conda_forge_output_validation_on,
@@ -136,11 +136,27 @@ def is_valid_feedstock_output(project, outputs):
 
 @click.command()
 @click.argument("feedstock_name", type=str)
-def main(feedstock_name):
+@click.option(
+    '--recipe-dir',
+    type=click.Path(exists=False, file_okay=False, dir_okay=True),
+    default=None,
+    help='the conda recipe directory'
+)
+@click.option(
+    '--variant',
+    '-m',
+    multiple=True,
+    type=click.Path(exists=False, file_okay=True, dir_okay=False),
+    default=(),
+    help="path to conda_build_config.yaml defining your base matrix",
+)
+def main(feedstock_name, recipe_dir, variant):
     """Validate the feedstock outputs."""
 
+
     if is_conda_forge_output_validation_on():
-        distributions = [os.path.relpath(p, conda_build.config.croot) for p in built_distributions()]
+        distributions = built_distributions_from_recipe_variant(recipe_dir=recipe_dir, variant=variant)
+        distributions = [os.path.relpath(p, conda_build.config.croot) for p in distributions]
         results = is_valid_feedstock_output(feedstock_name, distributions)
 
         print("validation results:\n%s" % json.dumps(results, indent=2), flush=True)
