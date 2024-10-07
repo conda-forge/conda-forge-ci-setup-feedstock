@@ -17,8 +17,7 @@ conda config --env --remove-key aggressive_update_packages
 conda config --env --append aggressive_update_packages ca-certificates
 conda config --env --append aggressive_update_packages certifi
 
-# Need strict priority for pypy as defaults is not fixed
-# but ppl can turn this off
+# strict priority by default but ppl can turn this off
 conda config --env --set channel_priority $(cat ./conda-forge.yml | shyaml get-value channel_priority strict || echo strict)
 
 # CONDA_PREFIX might be unset
