@@ -3,29 +3,60 @@
 :: changes to this script, consider a proposal to conda-smithy so that other feedstocks can also
 :: benefit from the improvement.
 
-:: Note: we assume a Miniforge installation is available
-
 :: INPUTS (required environment variables)
 :: CONFIG: name of the .ci_support/*.yaml file for this job
 :: CI: azure, github_actions, or unset
+:: MINIFORGE_HOME: where to install the base conda environment
 :: UPLOAD_PACKAGES: true or false
 :: UPLOAD_ON_BRANCH: true or false
 
 setlocal enableextensions enabledelayedexpansion
 
+FOR %%A IN ("%~dp0.") DO SET "REPO_ROOT=%%~dpA"
+if "%MINIFORGE_HOME%"=="" (
+    set "MINIFORGE_HOME=%REPO_ROOT%\.pixi\envs\default"
+) else (
+    set "PIXI_CACHE_DIR=%MINIFORGE_HOME%"
+)
+:: Remove trailing backslash, if present
+if "%MINIFORGE_HOME:~-1%"=="\" set "MINIFORGE_HOME=%MINIFORGE_HOME:~0,-1%"
+call :start_group "Provisioning base env with pixi"
+echo Installing pixi
+powershell -NoProfile -ExecutionPolicy unrestricted -Command "iwr -useb https://pixi.sh/install.ps1 | iex"
+if !errorlevel! neq 0 exit /b !errorlevel!
+set "PATH=%USERPROFILE%\.pixi\bin;%PATH%"
+echo Installing environment
+if "%PIXI_CACHE_DIR%"=="%MINIFORGE_HOME%" (
+    mkdir "%MINIFORGE_HOME%"
+    copy /Y pixi.toml "%MINIFORGE_HOME%"
+    pushd "%MINIFORGE_HOME%"
+) else (
+    pushd "%REPO_ROOT%"
+)
+move /y pixi.toml pixi.toml.bak
+set "arch=64"
+if "%PROCESSOR_ARCHITECTURE%"=="ARM64" set "arch=arm64"
+powershell -NoProfile -ExecutionPolicy unrestricted -Command "(Get-Content pixi.toml.bak -Encoding UTF8) -replace 'platforms = .*', 'platforms = [''win-%arch%'']' | Out-File pixi.toml -Encoding UTF8"
+pixi install
+if !errorlevel! neq 0 exit /b !errorlevel!
+pixi list
+if !errorlevel! neq 0 exit /b !errorlevel!
+set "ACTIVATE_PIXI=%TMP%\pixi-activate-%RANDOM%.bat"
+pixi shell-hook > "%ACTIVATE_PIXI%"
+if !errorlevel! neq 0 exit /b !errorlevel!
+call "%ACTIVATE_PIXI%"
+if !errorlevel! neq 0 exit /b !errorlevel!
+move /y pixi.toml.bak pixi.toml
+popd
+call :end_group
+
 call :start_group "Configuring conda"
 
 :: Activate the base conda environment
-call activate base
 :: Configure the solver
 set "CONDA_SOLVER=libmamba"
 if !errorlevel! neq 0 exit /b !errorlevel!
 set "CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1"
-
-:: Provision the necessary dependencies to build the recipe later
-echo Installing dependencies
-mamba.exe install pip mamba conda-build conda-forge-ci-setup=4 -c conda-forge --strict-channel-priority --yes
-if !errorlevel! neq 0 exit /b !errorlevel!
 echo Overriding conda-forge-ci-setup with local version
 conda.exe uninstall --quiet --yes --force conda-forge-ci-setup=4
 if !errorlevel! neq 0 exit /b !errorlevel!
@@ -64,8 +95,8 @@ conda-build.exe "recipe" -m .ci_support\%CONFIG%.yaml --suppress-variables %EXTR
 if !errorlevel! neq 0 exit /b !errorlevel!
 
 call :start_group "Inspecting artifacts"
-:: inspect_artifacts was only added in conda-forge-ci-setup 4.6.0
-WHERE inspect_artifacts >nul 2>nul && inspect_artifacts || echo "inspect_artifacts needs conda-forge-ci-setup >=4.6.0"
+:: inspect_artifacts was only added in conda-forge-ci-setup 4.9.4
+WHERE inspect_artifacts >nul 2>nul && inspect_artifacts --recipe-dir ".\recipe" -m .ci_support\%CONFIG%.yaml || echo "inspect_artifacts needs conda-forge-ci-setup >=4.9.4"
 call :end_group
 
 :: Prepare some environment variables for the upload step

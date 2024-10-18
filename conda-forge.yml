@@ -16,3 +16,4 @@ provider:
 remote_ci_setup: 
   - conda-forge-ci-setup=4
 test: native_and_emulated
+conda_install_tool: pixi
