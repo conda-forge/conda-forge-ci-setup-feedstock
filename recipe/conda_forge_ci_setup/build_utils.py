@@ -26,6 +26,32 @@ _global_config = {
     }
 }
 
+cf_allowed_condarc_keys = {
+    "allow_softlinks",
+    "always_copy",
+    "always_softlink",
+    # "conda_build" is handled separately
+    "default_threads",
+    "envvars_force_uppercase",
+    "execute_threads",
+    "extra_safety_checks",
+    "json",
+    "number_channel_notices",
+    "path_conflict",
+    "quiet",
+    "remote_backoff_factor",
+    "remote_connect_timeout_secs",
+    "remote_max_retries",
+    "repodata_use_zst",
+    "report_errors",
+    "safety_checks",
+    "separate_format_cache",
+    "shortcuts",
+    "unsatisfiable_hints",
+    "unsatisfiable_hints_check_depth",
+    "verify_threads",
+}
+
 cf_conda_build_defaults = {"pkg_format": "2", "zstd_compression_level": 19}
 
 DEFAULTS_ALLOWED_FEEDSTOCKS = {
@@ -118,6 +144,17 @@ def apply_cf_yml_condarc_settings(feedstock_root):
     if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
         with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
             repo_config = safe_load(f)
+
+        conda_config_vars = repo_config.get("conda", {})
+        disallowed_keys = conda_config_vars.keys() - cf_allowed_condarc_keys
+        if disallowed_keys:
+            raise RuntimeError(f"""conda-forge.yml's "conda" key had the following disallowed values: {", ".join(disallowed_keys)}""")
+        for k, v in conda_config_vars.items():
+            if v is not None:
+                call([
+                    "conda", "config", "--env", "--set",
+                    f"{k}", str(v)
+                ])
 
         conda_build_config_vars = repo_config.get("conda_build", {})
         for k, v in cf_conda_build_defaults.items():
