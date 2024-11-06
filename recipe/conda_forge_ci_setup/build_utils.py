@@ -113,7 +113,7 @@ def fail_if_travis_not_allowed_for_arch(config_file, feedstock_root):
         raise RuntimeError("Travis CI cannot be used on x86_64 in conda-forge!")
 
 
-def maybe_use_dot_conda(feedstock_root):
+def apply_cf_yml_condarc_settings(feedstock_root):
     """Maybe set the .condarc to use .conda files."""
     if os.path.exists(os.path.join(feedstock_root, "conda-forge.yml")):
         with open(os.path.join(feedstock_root, "conda-forge.yml")) as f:
@@ -142,7 +142,7 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 
     fail_if_travis_not_allowed_for_arch(config_file, feedstock_root)
 
-    maybe_use_dot_conda(feedstock_root)
+    apply_cf_yml_condarc_settings(feedstock_root)
 
     with open(config_file) as f:
         specific_config = safe_load(f)
