@@ -1,7 +1,13 @@
 c_compiler:
-- vs2019
+- gcc
+c_compiler_version:
+- '13'
 c_stdlib:
-- vs
+- sysroot
+c_stdlib_version:
+- '2.17'
+cdt_name:
+- conda
 channel_sources:
 - conda-forge
 channel_targets:
@@ -10,6 +16,8 @@ cuda_compiler:
 - None
 cuda_compiler_version:
 - None
+docker_image:
+- quay.io/condaforge/linux-anvil-x86_64:alma9
 pin_run_as_build:
   python:
     min_pin: x.x
@@ -17,7 +25,9 @@ pin_run_as_build:
 python:
 - 3.9.* *_cpython
 target_platform:
-- win-64
+- linux-ppc64le
 zip_keys:
-- - cuda_compiler
+- - c_compiler_version
+  - cuda_compiler
   - cuda_compiler_version
+  - docker_image

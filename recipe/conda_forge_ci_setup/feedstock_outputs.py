@@ -1,54 +1,37 @@
 import os
-import hashlib
 import json
 import time
 import sys
 
-from conda_forge_metadata.feedstock_outputs import package_to_feedstock
-import conda_build
-import conda_build.config
-import requests
 import click
+import requests
+import conda_build.config
+from conda_forge_metadata.feedstock_outputs import (
+    package_to_feedstock,
+    feedstock_outputs_config,
+)
+
+from .utils import (
+    built_distributions_from_recipe_variant,
+    compute_sha256sum,
+    split_pkg,
+    is_conda_forge_output_validation_on,
+)
 
 
 VALIDATION_ENDPOINT = "https://conda-forge.herokuapp.com"
 STAGING = "cf-staging"
 
 
-def split_pkg(pkg):
-    if pkg.endswith(".tar.bz2"):
-        pkg = pkg[:-len(".tar.bz2")]
-    elif pkg.endswith(".conda"):
-        pkg = pkg[:-len(".conda")]
-    else:
-        raise RuntimeError("Can only process packages that end in .tar.bz2 or .conda!")
-    plat, pkg_name = pkg.split(os.path.sep)
-    name_ver, build = pkg_name.rsplit('-', 1)
-    name, ver = name_ver.rsplit('-', 1)
-    return plat, name, ver, build
-
-
 def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
-
-
-def _compute_sha256sum(pth):
-    h = hashlib.sha256()
-
-    with open(pth, 'rb') as fp:
-        chunk = 0
-        while chunk != b'':
-            chunk = fp.read(1024)
-            h.update(chunk)
-
-    return h.hexdigest()
 
 
 def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True):
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
-        checksums[dist] = _compute_sha256sum(path)
+        checksums[dist] = compute_sha256sum(path)
 
     if "FEEDSTOCK_TOKEN" not in os.environ or os.environ["FEEDSTOCK_TOKEN"] is None:
         print(
@@ -123,19 +106,19 @@ def is_valid_feedstock_output(project, outputs):
             _, o, _, _ = split_pkg(dist)
         except RuntimeError:
             continue
-        
+
         for i in range(3):  # three attempts
             try:
                 registered_feedstocks = package_to_feedstock(o)
-            except requests.HTTPError as exc:
+            except requests.exceptions.HTTPError as exc:
                 if exc.response.status_code == 404:
-                    # no output exists and we can add it
-                    valid[dist] = True
+                    # no output exists so see if we can add it
+                    valid[dist] = feedstock_outputs_config().get("auto_register_all", False)
                     break
                 elif i < 2:
                     # wait and retry
                     time.sleep(1)
-                else:  
+                else:
                     # last attempt, i==2, did not work
                     # This should rarely happen, if ever
                     print(
@@ -153,30 +136,38 @@ def is_valid_feedstock_output(project, outputs):
 
 @click.command()
 @click.argument("feedstock_name", type=str)
-def main(feedstock_name):
+@click.option(
+    '--recipe-dir',
+    type=click.Path(exists=False, file_okay=False, dir_okay=True),
+    default=None,
+    help='the conda recipe directory'
+)
+@click.option(
+    '--variant',
+    '-m',
+    multiple=True,
+    type=click.Path(exists=False, file_okay=True, dir_okay=False),
+    default=(),
+    help="path to conda_build_config.yaml defining your base matrix",
+)
+def main(feedstock_name, recipe_dir, variant):
     """Validate the feedstock outputs."""
 
-    paths = (
-        [
-            os.path.join('noarch', p)
-            for p in os.listdir(os.path.join(conda_build.config.croot, 'noarch'))  # noqa
-        ]
-        + [
-            os.path.join(conda_build.config.subdir, p)
-            for p in os.listdir(os.path.join(conda_build.config.croot, conda_build.config.subdir))  # noqa
-        ])
-    built_distributions = [
-        path
-        for path in paths
-        if (path.endswith('.tar.bz2') or path.endswith(".conda"))
-    ]
 
-    results = is_valid_feedstock_output(feedstock_name, built_distributions)
+    if is_conda_forge_output_validation_on():
+        distributions = built_distributions_from_recipe_variant(recipe_dir=recipe_dir, variant=variant)
+        distributions = [os.path.relpath(p, conda_build.config.croot) for p in distributions]
+        results = is_valid_feedstock_output(feedstock_name, distributions)
 
-    print("validation results:\n%s" % json.dumps(results, indent=2))
-    print("NOTE: Any outputs marked as False are not allowed for this feedstock.")
+        print("validation results:\n%s" % json.dumps(results, indent=2), flush=True)
+        print(
+            "NOTE: Any outputs marked as False are not allowed for this feedstock. "
+            "See https://conda-forge.org/docs/maintainer/infrastructure/#output-validation-and-feedstock-tokens "
+            "for information on how to address this error.",
+            flush=True,
+        )
 
-    # FIXME: removing this for now - we can add extra arguments for us to
-    # compute the output names properly later
-    # if not all(v for v in results.values()):
-    #     sys.exit(1)
+        if not all(v for v in results.values()):
+            sys.exit(1)
+    else:
+        print("Output validation is turned off. Skipping validation.", flush=True)

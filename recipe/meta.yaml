@@ -1,6 +1,7 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.1.1" %}
+{% set version = "4.12.2" %}
 {% set build = 0 %}
+
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
 # prioritize non-CUDA variant via build number
@@ -20,7 +21,12 @@ build:
   skip: True
   {% endif %}
   script:
+    {% if "FEEDSTOCK_ROOT" in os.environ %}                                                  # [linux]
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
+    {% else %}                                                                               # [linux]
+    - echo '${FEEDSTOCK_ROOT} is undefined. Cannot copy license file'                        # [linux]
+    - exit 1                                                                                 # [linux]
+    {% endif %}                                                                              # [linux]
     - cp ${RECIPE_DIR}/../LICENSE.txt ${RECIPE_DIR}/LICENSE.txt                              # [osx]
     - COPY "%RECIPE_DIR%\\..\\LICENSE.txt" "%RECIPE_DIR%\\LICENSE.txt"                       # [win]
     - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"                                                                 # [win]
@@ -45,6 +51,7 @@ build:
     - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
+    - inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main
   ignore_run_exports_from:
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
@@ -54,11 +61,13 @@ requirements:
      # ensure that all variants of cuda_compiler_version are tested
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
+    - {{ stdlib('c') }}                   # [cuda_compiler_version != "None"]
     - python                              # [build_platform != target_platform]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
     - python
     - pip
+    - setuptools
   run:
     - python
     - conda >=23.9
@@ -69,7 +78,6 @@ requirements:
     - click
     - jinja2
     - anaconda-client >=1.11.2
-    - conda-build 3.*
     - shyaml
     - jq  # [unix]
     - requests
@@ -79,7 +87,11 @@ requirements:
     - m2-git  # [win]
     - git     # [unix]
     - libarchive
-    - conda-forge-metadata >=0.4.1
+    - joblib >=0.12
+    - conda-forge-metadata >=0.9.2
+    - conda-package-handling >=2.3.0
+    - rattler-build-conda-compat >=0.0.2,<2.0.0a0
+
   run_constrained:
     - boa >=0.8,<1.0
 
@@ -94,6 +106,11 @@ test:
     - make_build_number --help
     - mangle_homebrew --help
     - validate_recipe_outputs --help
+    - inspect_artifacts --help
+  # this is here to test that downstream test packages
+  # are excluded from validation and inspection
+  downstreams:
+    - ngmix
 
 
 about:

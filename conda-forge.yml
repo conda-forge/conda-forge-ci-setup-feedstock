@@ -13,4 +13,6 @@ github:
 provider:
   linux_aarch64: default
   linux_ppc64le: default
-test_on_native_only: true
+remote_ci_setup: 
+  - conda-forge-ci-setup=4
+test: native_and_emulated

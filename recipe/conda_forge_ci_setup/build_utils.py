@@ -34,19 +34,23 @@ import click
 from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
 
 from .feedstock_outputs import STAGING
-
+from .utils import determine_build_tool, CONDA_BUILD
 
 call = subprocess.check_call
 
 _global_config = {
     "channels": {
-        "sources": ["conda-forge", "defaults"],
+        "sources": ["conda-forge"],
         "targets": [["conda-forge", "main"]],
     }
 }
 
 cf_conda_build_defaults = {"pkg_format": "2", "zstd_compression_level": 19}
 
+DEFAULTS_ALLOWED_FEEDSTOCKS = {
+    "caiman-feedstock",
+    "eis_toolkit-feedstock",
+}
 
 arg_feedstock_root = click.argument(
     "feedstock_root", type=click.Path(exists=True, file_okay=False, dir_okay=True)
@@ -57,7 +61,6 @@ arg_recipe_root = click.argument(
 arg_config_file = click.argument(
     "config_file", type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
-
 
 def update_global_config(feedstock_root):
     """Merge the conda-forge.yml with predefined system defaults"""
@@ -233,9 +236,9 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
 
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
-        allowed_channels = [
-            "conda-forge", "conda-forge/label/\S+", "defaults", "c4aarch64",
-            "c4armv7l"]
+        allowed_channels = ["conda-forge", "conda-forge/label/\S+"]
+        if feedstock_name in DEFAULTS_ALLOWED_FEEDSTOCKS:
+            allowed_channels.append("defaults")
         for source_channel in source_channels.split(","):
             if source_channel.startswith('https://conda-web.anaconda.org/'):
                 source_channel = source_channel[len('https://conda-web.anaconda.org/'):]
@@ -247,6 +250,7 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
                     "Uploading to %s with source channel '%s' "
                     "is not allowed" % ("conda-forge", source_channel))
                 return
+
 
     # get the git sha of the current commit
     git_sha = subprocess.run(
@@ -266,11 +270,15 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
         if validate and owner == "conda-forge":
             retry_upload_or_check(
                 feedstock_name, recipe_root, STAGING, channel,
-                [config_file], validate=True, git_sha=git_sha)
+                [config_file], validate=True, git_sha=git_sha,
+                feedstock_root=feedstock_root,
+            )
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
-                [config_file], validate=False, private_upload=private)
+                [config_file], validate=False, private_upload=private,
+                feedstock_root=feedstock_root,
+            )
 
 
 @click.command()

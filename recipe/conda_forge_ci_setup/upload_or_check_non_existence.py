@@ -11,39 +11,15 @@ import time
 
 from binstar_client.utils import get_server_api
 import binstar_client.errors
-from conda_build.conda_interface import subdir as conda_subdir
-from conda_build.conda_interface import get_index
+from conda.base.context import context
+from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
 
 from .feedstock_outputs import request_copy, split_pkg
+from .utils import determine_build_tool, get_built_distribution_names_and_subdirs
 
-
-def get_built_distribution_names_and_subdirs(recipe_dir, variant):
-    additional_config = {}
-    for v in variant:
-        variant_dir, base_name = os.path.split(v)
-        clobber_file = os.path.join(variant_dir, 'clobber_' + base_name)
-        if os.path.exists(clobber_file):
-            additional_config = {
-                'clobber_sections_file': clobber_file
-            }
-            break
-
-    metas = conda_build.api.render(
-        recipe_dir,
-        variant_config_files=variant,
-        finalize=False,
-        bypass_env_check=True,
-        **additional_config)
-
-    # Print the skipped distributions
-    skipped_distributions = [m for m, _, _ in metas if m.skip()]
-    for m in skipped_distributions:
-        print("{} configuration was skipped in build/skip.".format(m.name()))
-
-    subdirs = set([m.config.target_subdir for m, _, _ in metas if not m.skip()])
-    return set([m.name() for m, _, _ in metas if not m.skip()]), subdirs
+conda_subdir = context.subdir
 
 
 @contextlib.contextmanager
@@ -142,11 +118,14 @@ def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='mai
     else:
         base_fname = fname
 
-    distributions_on_channel = get_index(
-        [channel_url],
-        prepend=False,
-        use_cache=False,
-    )
+    distributions_on_channel = {
+        f"{prec.name}-{prec.version}-{prec.build}": prec
+        for prec in get_index(
+            [channel_url],
+            prepend=False,
+            use_cache=False,
+        )
+    }
 
     on_channel = False
     for ext in [".tar.bz2", ".conda"]:
@@ -175,6 +154,7 @@ def upload_or_check(
     private_upload=False,
     prod_owner="conda-forge",
     comment_on_error=True,
+    feedstock_root=None,
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -190,13 +170,15 @@ def upload_or_check(
 
     cli = get_server_api(token=token)
 
+    build_tool = determine_build_tool(feedstock_root)
+
     allowed_dist_names, allowed_subdirs = get_built_distribution_names_and_subdirs(
-        recipe_dir, variant
+        recipe_dir=recipe_dir, variant=variant, build_tool=build_tool
     )
 
     # The list of built distributions
     paths = set()
-    for subdir in list(allowed_subdirs) + [conda_build.config.subdir, 'noarch']:
+    for subdir in list(allowed_subdirs) + [conda_subdir, 'noarch']:
         if not os.path.exists(os.path.join(conda_build.config.croot, subdir)):
             continue
         for p in os.listdir(os.path.join(conda_build.config.croot, subdir)):
@@ -294,6 +276,7 @@ def retry_upload_or_check(
     validate=False,
     git_sha=None,
     private_upload=False,
+    feedstock_root=None,
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
@@ -304,7 +287,8 @@ def retry_upload_or_check(
                 feedstock, recipe_dir, owner, channel, variant,
                 validate=validate, git_sha=git_sha,
                 comment_on_error=True if i == n_try-1 else False,
-                private_upload=private_upload
+                private_upload=private_upload,
+                feedstock_root=feedstock_root,
             )
             return res
         except Exception as e:
@@ -327,12 +311,17 @@ def retry_upload_or_check(
 @click.option('--variant', '-m', multiple=True,
               type=click.Path(exists=True, file_okay=True, dir_okay=False),
               help="path to conda_build_config.yaml defining your base matrix")
-def main(recipe_dir, owner, channel, variant):
+@click.option('--feedstock-root', '-f',
+              multiple=False,
+              default=None,
+              type=click.Path(exists=True, file_okay=False, dir_okay=True),
+              help="path to feedstock")
+def main(recipe_dir, owner, channel, variant, feedstock_root):
     """
     Upload or check consistency of a built version of a conda recipe with binstar.
     Note: The existence of the BINSTAR_TOKEN environment variable determines
     whether the upload should actually take place."""
-    return retry_upload_or_check(None, recipe_dir, owner, channel, variant)
+    return retry_upload_or_check(None, recipe_dir, owner, channel, variant, feedstock_root=feedstock_root)
 
 
 if __name__ == '__main__':

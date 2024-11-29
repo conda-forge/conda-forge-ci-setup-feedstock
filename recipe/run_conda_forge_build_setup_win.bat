@@ -35,15 +35,15 @@ if "%SET_PAGEFILE%" NEQ "" (
     if "%CI%" == "azure" (
         REM use different drive than CONDA_BLD_PATH-location for pagefile
         if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on D:
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on D:
             REM Inspired by:
             REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
             REM Drive-letter needs to be escaped in quotes
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"D:\""
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"D:\""
         )
         if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 8GB on C:
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 8GB -DiskRoot \"C:\""
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on C:
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"C:\""
         )
     )
 )
@@ -70,6 +70,7 @@ set "PATH=%PATH:C:\Program Files\OpenSSL\bin;=%"
 set "PATH=%PATH:C:\Strawberry\c\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\bin;=%"
 set "PATH=%PATH:C:\Strawberry\perl\site\bin;=%"
+set "PATH=%PATH:C:\mingw64\bin;=%"
 set "PATH=%PATH:c:\tools\php;=%"
 
 :: On azure, there are libcrypto*.dll & libssl*.dll under
@@ -84,6 +85,7 @@ if defined CI (
 
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
 set "PATH=%PATH:ostedtoolcache=%"
+set "PATH=%PATH:xternals\git\mingw=%"
 
 :: Install CUDA drivers if needed
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
@@ -135,6 +137,14 @@ if not "%CUDA_PATH%" == "" (
 )
 echo set "BUILD_PLATFORM=%BUILD_PLATFORM%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+
+if "%HOST_PLATFORM%-%BUILD_PLATFORM%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
+    echo set "CROSSCOMPILING_EMULATOR=1"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+    echo CROSSCOMPILING_EMULATOR:                 >> ".ci_support\%CONFIG%.yaml"
+    echo - 1                                      >> ".ci_support\%CONFIG%.yaml"
+)
+
+call activate base
 
 conda.exe info
 conda.exe config --show-sources

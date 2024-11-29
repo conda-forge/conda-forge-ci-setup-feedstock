@@ -5,12 +5,12 @@ BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 ${BUILD_PLATFORM})
     CUDA_COMPILER_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)
-    CDT_NAME=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cdt_name.0 cos6)
+    GLIBC_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 2.17)
 fi
 
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
 CUDA_COMPILER_VERSION=${CUDA_COMPILER_VERSION:-None}
-CDT_NAME=${CDT_NAME:-cos6}
+GLIBC_VERSION=${GLIBC_VERSION:-2.17}
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
     echo "export CONDA_BUILD_CROSS_COMPILATION=1" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
@@ -20,10 +20,10 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         echo "- ${BUILD_PLATFORM}"   >> ${CI_SUPPORT}/${CONFIG}.yaml
     fi
     if [[ "${BUILD_PLATFORM}" == "linux-64" && "${HOST_PLATFORM}" == linux-* ]]; then
-        mamba create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}
+        mamba create -n sysroot_${HOST_PLATFORM} --yes --quiet sysroot_${HOST_PLATFORM}=${GLIBC_VERSION}
         HOST_PLATFORM_ARCH=${HOST_PLATFORM:6}
         if [[ -f ${RECIPE_ROOT}/yum_requirements.txt ]]; then
-            for pkg in $(cat ${RECIPE_ROOT}/yum_requirements.txt); do
+            cat ${RECIPE_ROOT}/yum_requirements.txt | while read pkg; do
                 if [[ "${pkg}" != "#"* && "${pkg}" != "" ]]; then
                     mamba install "${pkg}-cos7-${HOST_PLATFORM_ARCH}" -n sysroot_${HOST_PLATFORM} --yes --quiet || true
                 fi
@@ -38,9 +38,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         fi
 
 
-        if [[ "${CUDA_COMPILER_VERSION}" == "11.2" || "${CUDA_COMPILER_VERSION}" == "11.8" ]] && [[ "${CDT_NAME}" == "cos8" || "${CDT_NAME}" == "cos7" ]]; then
-            # We use cdt_name=cos7 for rhel8 based nvcc till we figure out
-            # a stable cos8 replacement.
+        if [[ "${CUDA_COMPILER_VERSION}" == "11.2" || "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
             EXTRACT_DIR=$(mktemp -d)
             pushd ${EXTRACT_DIR}
                 if [[ "${HOST_PLATFORM_ARCH}" == "aarch64" ]]; then
@@ -56,7 +54,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                         (*) echo "" ;;
                     esac)
                 if [[ "${CUDA_MANIFEST_VERSION}" == "" ]]; then
-                    echo "cross compiling with cuda not in (11.2, 11.8, 12.0) not supported yet"
+                    echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
                     exit 1
                 fi
                 curl -L https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/version_${CUDA_MANIFEST_VERSION}.json > manifest.json
@@ -136,22 +134,11 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/compat/* ${QEMU_LD_PREFIX}/usr/lib/
             popd
             rm -rf ${EXTRACT_DIR}
-        elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" ]]; then
-            echo "cross compiling with cuda == 11.2 and cdt != cos7/8 not supported yet"
-            exit 1
-        elif [[ "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
-            echo "cross compiling with cuda == 11.8 and cdt != cos7/8 not supported yet"
-            exit 1
-        elif [[ "${CUDA_COMPILER_VERSION}" == "12.0" ]] && [[ "${CDT_NAME}" == "cos7" ]]; then
+        elif [[ "${CUDA_COMPILER_VERSION}" == 12* ]]; then
             # No extra steps necessary for CUDA 12, handled through new packages
             true
-        elif [[ "${CUDA_COMPILER_VERSION}" == "12.0" ]]; then
-            echo "cross compiling with cuda == 12.0 and cdt != cos7 not supported yet"
-            exit 1
         elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
-            # FIXME: can use anaconda.org/nvidia packages to get the includes and libs
-            # for cuda >=11.3.
-            echo "cross compiling with cuda not in (11.2, 11.8, 12.0) not supported yet"
+            echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
             exit 1
         fi
     fi
