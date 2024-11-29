@@ -5,7 +5,7 @@ import subprocess
 import platform
 
 try:
-    from ruamel_yaml import safe_load, safe_dump
+    from ruamel.yaml import safe_load, safe_dump
 except ImportError:
     from yaml import safe_load, safe_dump
 

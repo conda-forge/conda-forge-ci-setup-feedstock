@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.12.2" %}
+{% set version = "4.13.0" %}
 {% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
@@ -81,7 +81,7 @@ requirements:
     - shyaml
     - jq  # [unix]
     - requests
-    - ruamel_yaml
+    - ruamel.yaml
     - pip
     - pyyaml
     - m2-git  # [win]

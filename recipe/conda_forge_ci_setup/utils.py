@@ -8,7 +8,7 @@ from conda_build.variants import combine_specs, parse_config_file
 import joblib
 
 try:
-    from ruamel_yaml import safe_load
+    from ruamel.yaml import safe_load
 except ImportError:
     from yaml import safe_load
 
