@@ -5,12 +5,21 @@ BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 ${BUILD_PLATFORM})
     CUDA_COMPILER_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)
-    GLIBC_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 2.17)
 fi
+
+# When compiling natively we use the docker image's glibc
+# We do the same now when cross-compiling by creating a
+# conda environment for host platform with the same glibc
+# as the docker glibc.
+# For eg: when cross compiling for linux-aarch64 in a
+# docker image with linux-anvil-x86_64:alma9 image, we use
+# glibc=2.28 for QEMU while still building the package for
+# glib=2.17
+DOCKER_GLIBC_VERSION=$(conda info --json | jq -r '.virtual_pkgs[] | select(.[0] == "__glibc")[1]')
+GLIBC_VERSION=${GLIBC_VERSION:-${DOCKER_GLIBC_VERSION}}
 
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
 CUDA_COMPILER_VERSION=${CUDA_COMPILER_VERSION:-None}
-GLIBC_VERSION=${GLIBC_VERSION:-2.17}
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
     echo "export CONDA_BUILD_CROSS_COMPILATION=1" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
@@ -25,7 +34,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         if [[ -f ${RECIPE_ROOT}/yum_requirements.txt ]]; then
             cat ${RECIPE_ROOT}/yum_requirements.txt | while read pkg; do
                 if [[ "${pkg}" != "#"* && "${pkg}" != "" ]]; then
-                    mamba install "${pkg}-cos7-${HOST_PLATFORM_ARCH}" -n sysroot_${HOST_PLATFORM} --yes --quiet || true
+                    mamba install "${pkg}-conda-${HOST_PLATFORM_ARCH}" -n sysroot_${HOST_PLATFORM} --yes --quiet || true
                 fi
             done
         fi
