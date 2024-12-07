@@ -16,7 +16,7 @@ fi
 # glibc=2.28 for QEMU while still building the package for
 # glib=2.17
 DOCKER_GLIBC_VERSION=$(conda info --json | jq -r '.virtual_pkgs[] | select(.[0] == "__glibc")[1]')
-GLIBC_VERSION=${GLIBC_VERSION:-${DOCKER_GLIBC_VERSION}}
+GLIBC_VERSION=${DOCKER_GLIBC_VERSION:-2.17}
 
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
 CUDA_COMPILER_VERSION=${CUDA_COMPILER_VERSION:-None}
