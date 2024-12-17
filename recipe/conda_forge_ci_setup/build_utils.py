@@ -236,7 +236,7 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
 
     upload_to_conda_forge = any(owner == "conda-forge" for owner, _ in channels)
     if upload_to_conda_forge and "channel_sources" in specific_config:
-        allowed_channels = ["conda-forge", "conda-forge/label/\S+"]
+        allowed_channels = ["conda-forge", r"conda-forge/label/\S+"]
         if feedstock_name in DEFAULTS_ALLOWED_FEEDSTOCKS:
             allowed_channels.append("defaults")
         for source_channel in source_channels.split(","):
