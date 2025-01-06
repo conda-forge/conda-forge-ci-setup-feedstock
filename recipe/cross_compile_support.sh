@@ -29,15 +29,15 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         echo "- ${BUILD_PLATFORM}"   >> ${CI_SUPPORT}/${CONFIG}.yaml
     fi
     if [[ "${BUILD_PLATFORM}" == "linux-64" && "${HOST_PLATFORM}" == linux-* ]]; then
-        micromamba create -n sysroot_${HOST_PLATFORM} --root-prefix ~/.conda --yes --quiet \
-            --override-channels --channel conda-forge --strict-channel-priority \
+        micromamba create -p /opt/conda/envs/sysroot_${HOST_PLATFORM} --root-prefix ~/.conda \
+            --yes --quiet --override-channels --channel conda-forge --strict-channel-priority \
             sysroot_${HOST_PLATFORM}=${GLIBC_VERSION}
         HOST_PLATFORM_ARCH=${HOST_PLATFORM:6}
         if [[ -f ${RECIPE_ROOT}/yum_requirements.txt ]]; then
             cat ${RECIPE_ROOT}/yum_requirements.txt | while read pkg; do
                 if [[ "${pkg}" != "#"* && "${pkg}" != "" ]]; then
-                    micromamba install -n sysroot_${HOST_PLATFORM} --yes --quiet \
-                    --override-channels --channel conda-forge --strict-channel-priority \
+                    micromamba install -p /opt/conda/envs/sysroot_${HOST_PLATFORM} --root-prefix ~/.conda \
+                    --yes --quiet --override-channels --channel conda-forge --strict-channel-priority \
                     "${pkg}-conda-${HOST_PLATFORM_ARCH}" || true
                 fi
             done
