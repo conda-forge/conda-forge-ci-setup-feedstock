@@ -49,6 +49,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
             echo "CROSSCOMPILING_EMULATOR: " >> ${CI_SUPPORT}/${CONFIG}.yaml
             echo "- /usr/bin/qemu-${HOST_PLATFORM_ARCH}-static"  >> ${CI_SUPPORT}/${CONFIG}.yaml
         fi
+        /usr/bin/qemu-${HOST_PLATFORM_ARCH}-static --version
 
 
         if [[ "${CUDA_COMPILER_VERSION}" == "11.2" || "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
