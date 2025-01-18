@@ -42,7 +42,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 fi
             done
         fi
-        export QEMU_LD_PREFIX=$(find ${CONDA_PREFIX}/envs/sysroot_${HOST_PLATFORM} -name sysroot | head -1)
+        export QEMU_LD_PREFIX=$(find /opt/conda/envs/sysroot_${HOST_PLATFORM} -name sysroot | head -1)
         if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
             echo "CMAKE_CROSSCOMPILING_EMULATOR: " >> ${CI_SUPPORT}/${CONFIG}.yaml
             echo "- /usr/bin/qemu-${HOST_PLATFORM_ARCH}-static"  >> ${CI_SUPPORT}/${CONFIG}.yaml
