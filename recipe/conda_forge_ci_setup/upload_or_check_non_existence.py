@@ -76,15 +76,19 @@ def built_distribution_already_exists(cli, name, version, fname, owner):
     return exists
 
 
-def upload(token_fn, path, owner, channels, private_upload=False, force_metadata_update=True):
-    cmd = ['anaconda', '--quiet', '--show-traceback', '-t', token_fn,
-           'upload', path, '--user={}'.format(owner),
-           '--channel={}'.format(channels)]
-    if private_upload:
-        cmd.append("--private")
-    if force_metadata_update:
-        cmd.append("--force-metadata-update")
-    subprocess.check_call(cmd,  env=os.environ)
+def upload(token_fn, path, owner, channels, private_upload=False, force_metadata_update=True, package_repo="anaconda"):
+    if package_repo == "anaconda":
+        cmd = ['anaconda', '--quiet', '--show-traceback', '-t', token_fn,
+               'upload', path, '--user={}'.format(owner),
+               '--channel={}'.format(channels)]
+        if private_upload:
+            cmd.append("--private")
+        if force_metadata_update:
+            cmd.append("--force-metadata-update")
+        subprocess.check_call(cmd,  env=os.environ)
+    if package_repo == "prifix":
+        cmd = ['rattler-build', 'upload', 'prefix', '-c', 'channels', path]
+        subprocess.check_call(cmd,  env=os.environ)
 
 
 def delete_dist(token_fn, path, owner, channels):
@@ -155,6 +159,7 @@ def upload_or_check(
     prod_owner="conda-forge",
     comment_on_error=True,
     feedstock_root=None,
+    package_repo="anaconda",
 ):
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
@@ -215,7 +220,7 @@ def upload_or_check(
                         elif not built_distribution_already_exists(
                             cli, name, version, path, owner
                         ):
-                            upload(token_fn, path, owner, channel)
+                            upload(token_fn, path, owner, channel, package_repo=package_repo)
                             break
                         else:
                             print(
@@ -229,7 +234,7 @@ def upload_or_check(
                             "re-uploading.".format(path, owner)
                         )
                         delete_dist(token_fn, path, owner, channel)
-                        upload(token_fn, path, owner, channel)
+                        upload(token_fn, path, owner, channel, package_repo=package_repo)
 
                     if need_copy:
                         to_copy_paths.append(path)
@@ -250,7 +255,7 @@ def upload_or_check(
                     if not built_distribution_already_exists(
                         cli, name, version, path, owner
                     ):
-                        upload(token_fn, path, owner, channel, private_upload=private_upload)
+                        upload(token_fn, path, owner, channel, private_upload=private_upload, package_repo=package_repo)
                     else:
                         print(
                             'Distribution {} already exists for {}'.format(path, owner))
@@ -277,6 +282,7 @@ def retry_upload_or_check(
     git_sha=None,
     private_upload=False,
     feedstock_root=None,
+    package_repo="anaconda",
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
@@ -289,6 +295,7 @@ def retry_upload_or_check(
                 comment_on_error=True if i == n_try-1 else False,
                 private_upload=private_upload,
                 feedstock_root=feedstock_root,
+                package_repo=package_repo,
             )
             return res
         except Exception as e:
@@ -316,12 +323,14 @@ def retry_upload_or_check(
               default=None,
               type=click.Path(exists=True, file_okay=False, dir_okay=True),
               help="path to feedstock")
-def main(recipe_dir, owner, channel, variant, feedstock_root):
+@click.option('--package-repo', default='anaconda',
+              help="The package repository to upload to (default: anaconda)")
+def main(recipe_dir, owner, channel, variant, feedstock_root, package_repo):
     """
     Upload or check consistency of a built version of a conda recipe with binstar.
     Note: The existence of the BINSTAR_TOKEN environment variable determines
     whether the upload should actually take place."""
-    return retry_upload_or_check(None, recipe_dir, owner, channel, variant, feedstock_root=feedstock_root)
+    return retry_upload_or_check(None, recipe_dir, owner, channel, variant, feedstock_root=feedstock_root, package_repo=package_repo)
 
 
 if __name__ == '__main__':

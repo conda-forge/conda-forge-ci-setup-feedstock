@@ -205,7 +205,8 @@ def setup_conda_rc(feedstock_root, recipe_root, config_file):
 @click.option("--validate", is_flag=True)
 @click.option("--private", is_flag=True)
 @click.option("--feedstock-name", type=str, default=None)
-def upload_package(feedstock_root, recipe_root, config_file, validate, private, feedstock_name):
+@click.option("--package-repo", type=str, default="anaconda", help="Repository to upload the package to (default: anaconda).")
+def upload_package(feedstock_root, recipe_root, config_file, validate, private, feedstock_name, package_repo):
     if feedstock_name is None and validate:
         raise RuntimeError("You must supply the --feedstock-name option if validating!")
     if feedstock_name and "/" in feedstock_name:
@@ -272,12 +273,14 @@ def upload_package(feedstock_root, recipe_root, config_file, validate, private, 
                 feedstock_name, recipe_root, STAGING, channel,
                 [config_file], validate=True, git_sha=git_sha,
                 feedstock_root=feedstock_root,
+                package_repo=package_repo,
             )
         else:
             retry_upload_or_check(
                 feedstock_name, recipe_root, owner, channel,
                 [config_file], validate=False, private_upload=private,
                 feedstock_root=feedstock_root,
+                package_repo=package_repo
             )
 
 
