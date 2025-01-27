@@ -86,7 +86,7 @@ def upload(token_fn, path, owner, channels, private_upload=False, force_metadata
         if force_metadata_update:
             cmd.append("--force-metadata-update")
         subprocess.check_call(cmd,  env=os.environ)
-    if package_repo == "prifix":
+    if package_repo == "prefix":
         cmd = ['rattler-build', 'upload', 'prefix', '-c', 'channels', path]
         subprocess.check_call(cmd,  env=os.environ)
 
