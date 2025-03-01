@@ -23,7 +23,7 @@ conda.exe config --set channel_priority %channel_priority%
 
 :: Set the conda-build working directory to a smaller path
 if "%CONDA_BLD_PATH%" == "" (
-    set "CONDA_BLD_PATH=C:\\bld\\"
+    set "CONDA_BLD_PATH=C:\bld"
 )
 
 :: Increase pagefile size, cf. https://github.com/conda-forge/conda-forge-ci-setup-feedstock/issues/155
@@ -34,17 +34,21 @@ set EntryPointPath=%ThisScriptsDirectory%SetPageFileSize.ps1
 if "%SET_PAGEFILE%" NEQ "" (
     if "%CI%" == "azure" (
         REM use different drive than CONDA_BLD_PATH-location for pagefile
-        if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on D:
-            REM Inspired by:
-            REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
-            REM Drive-letter needs to be escaped in quotes
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"D:\""
+        if "%CONDA_BLD_PATH:~0,2%" == "C:" (
+            set PAGEFILE_DRIVE="D:"
         )
-        if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on C:
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"C:\""
+        else if "%CONDA_BLD_PATH:~0,2%" == "D:" (
+            set PAGEFILE_DRIVE="C:"
         )
+        else (
+            REM Default to the larger drive
+            set PAGEFILE_DRIVE="C:"
+        )
+        echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on %PAGEFILE_DRIVE%
+        REM Inspired by:
+        REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
+        REM Drive-letter needs to be escaped in quotes
+        PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"%PAGEFILE_DRIVE%""
     )
 )
 
