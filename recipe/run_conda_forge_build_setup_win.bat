@@ -87,27 +87,24 @@ if defined CI (
 set "PATH=%PATH:ostedtoolcache=%"
 set "PATH=%PATH:xternals\git\mingw=%"
 
-:: Install CUDA drivers if needed
+:: Extract `CUDA_VERSION` from config
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
 <.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
 <cuda.version set /p CUDA_VERSION=
 del cuda.version
-if not "%CUDA_VERSION%" == "None" (
-    if "%CUDA_VERSION:~0,2%" == "12" (
-        :: Don't call install_cuda, as we'll get CUDA packages from CF
-        set "CUDA_PATH="
-    ) else (
-        call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
-        if errorlevel 1 (
-            echo Could not install CUDA
-            exit 1
-        )
-        :: We succeeded! Export paths
-        set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
-        set "PATH=%PATH%;%CUDA_PATH%\bin"
+
+:: Install CUDA 11 Toolkit
+if "%CUDA_VERSION:~0,2%" == "11" (
+    call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
+    if errorlevel 1 (
+        echo Could not install CUDA
+        exit 1
     )
+    :: We succeeded! Export paths
+    set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
+    set "PATH=%PATH%;%CUDA_PATH%\bin"
 )
-:: /CUDA
+:: /CUDA 11
 
 conda.exe info --json | shyaml get-value platform > build_platform.txt
 set /p BUILD_PLATFORM=<build_platform.txt
