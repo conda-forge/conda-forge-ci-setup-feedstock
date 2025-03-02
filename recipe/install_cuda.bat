@@ -217,18 +217,18 @@ goto cuda_common
 ::We expect this CUDA_PATH
 set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
 
-echo Downloading CUDA version %CUDA_VERSION% installer from %CUDA_INSTALLER_URL%
-echo Expected MD5: %CUDA_INSTALLER_CHECKSUM%
+echo Downloading CUDA version %CUDA_VERSION% installer from %CUDA_NETWORK_INSTALLER_URL%
+echo Expected MD5: %CUDA_NETWORK_INSTALLER_CHECKSUM%
 
 :: Download installer
 set "CUDA_INSTALLER_EXE=C:\Program Files\cuda_installer.exe"
-curl --retry 3 -k -L %CUDA_INSTALLER_URL% --output "%CUDA_INSTALLER_EXE%"
+curl --retry 3 -k -L %CUDA_NETWORK_INSTALLER_URL% --output "%CUDA_INSTALLER_EXE%"
 if errorlevel 1 (
     echo Problem downloading installer...
     exit /b 1
 )
 :: Check md5
-openssl md5 "%CUDA_INSTALLER_EXE%" | findstr %CUDA_INSTALLER_CHECKSUM%
+openssl md5 "%CUDA_INSTALLER_EXE%" | findstr %CUDA_NETWORK_INSTALLER_CHECKSUM%
 if errorlevel 1 (
     echo Checksum does not match!
     exit /b 1
