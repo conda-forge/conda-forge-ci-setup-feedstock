@@ -217,48 +217,52 @@ goto cuda_common
 ::We expect this CUDA_PATH
 set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
 
-echo Downloading CUDA version %CUDA_VERSION% installer from %CUDA_INSTALLER_URL%
-echo Expected MD5: %CUDA_INSTALLER_CHECKSUM%
+echo Downloading CUDA version %CUDA_VERSION% installer from %CUDA_NETWORK_INSTALLER_URL%
+echo Expected MD5: %CUDA_NETWORK_INSTALLER_CHECKSUM%
 
 :: Download installer
-curl --retry 3 -k -L %CUDA_INSTALLER_URL% --output cuda_installer.exe
+set "CUDA_INSTALLER_EXE=C:\Program Files\cuda_installer.exe"
+curl --retry 3 -k -L %CUDA_NETWORK_INSTALLER_URL% --output "%CUDA_INSTALLER_EXE%"
 if errorlevel 1 (
     echo Problem downloading installer...
     exit /b 1
 )
 :: Check md5
-openssl md5 cuda_installer.exe | findstr %CUDA_INSTALLER_CHECKSUM%
+openssl md5 "%CUDA_INSTALLER_EXE%" | findstr %CUDA_NETWORK_INSTALLER_CHECKSUM%
 if errorlevel 1 (
     echo Checksum does not match!
     exit /b 1
 )
 :: Run installer
-start /wait cuda_installer.exe -s %CUDA_COMPONENTS%
+start "CUDA Toolkit Install" /wait "%CUDA_INSTALLER_EXE%" -n -s %CUDA_COMPONENTS%
 if errorlevel 1 (
     echo Problem installing CUDA toolkit...
     exit /b 1
 )
-del cuda_installer.exe
+del "%CUDA_INSTALLER_EXE%"
+set "CUDA_INSTALLER_EXE="
 
 :: If patches are needed, download and apply
 if not "%CUDA_PATCH_URL%"=="" (
     echo This version requires an additional patch
-    curl --retry 3 -k -L %CUDA_PATCH_URL% --output cuda_patch.exe
+    set "CUDA_PATCH_EXE=C:\Program Files\cuda_patch.exe"
+    curl --retry 3 -k -L %CUDA_PATCH_URL% --output "%CUDA_PATCH_EXE%"
     if errorlevel 1 (
         echo Problem downloading patch installer...
         exit /b 1
     )
-    openssl md5 cuda_patch.exe | findstr %CUDA_PATCH_CHECKSUM%
+    openssl md5 "%CUDA_PATCH_EXE%" | findstr %CUDA_PATCH_CHECKSUM%
     if errorlevel 1 (
         echo Checksum does not match!
         exit /b 1
     )
-    start /wait cuda_patch.exe -s
+    start "CUDA Patch Install" /wait "%CUDA_PATCH_EXE%" -n -s
     if errorlevel 1 (
         echo Problem running patch installer...
         exit /b 1
     )
-    del cuda_patch.exe
+    del "%CUDA_PATCH_EXE%"
+    set "CUDA_PATCH_EXE="
 )
 
 :: This should exist by now!

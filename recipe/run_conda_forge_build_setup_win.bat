@@ -87,31 +87,24 @@ if defined CI (
 set "PATH=%PATH:ostedtoolcache=%"
 set "PATH=%PATH:xternals\git\mingw=%"
 
-:: Install CUDA drivers if needed
+:: Extract `CUDA_VERSION` from config
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
 <.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
 <cuda.version set /p CUDA_VERSION=
 del cuda.version
-if not "%CUDA_VERSION%" == "None" (
-    if "%CUDA_VERSION:~0,2%" == "12" (
-        :: Don't call install_cuda, as we'll get CUDA packages from CF
-        set "CUDA_PATH="
-        set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
-        :: Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
-        echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-    ) else (
-        call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
-        if errorlevel 1 (
-            echo Could not install CUDA
-            exit 1
-        )
-        :: We succeeded! Export paths
-        set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
-        set "PATH=%PATH%;%CUDA_PATH%\bin"
-        set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
+
+:: Install CUDA 11 Toolkit
+if "%CUDA_VERSION:~0,2%" == "11" (
+    call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
+    if errorlevel 1 (
+        echo Could not install CUDA
+        exit 1
     )
+    :: We succeeded! Export paths
+    set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
+    set "PATH=%PATH%;%CUDA_PATH%\bin"
 )
-:: /CUDA
+:: /CUDA 11
 
 conda.exe info --json | shyaml get-value platform > build_platform.txt
 set /p BUILD_PLATFORM=<build_platform.txt
@@ -129,11 +122,17 @@ echo set "CONDA_BLD_PATH=%CONDA_BLD_PATH%"         > "%CONDA_PREFIX%\etc\conda\a
 echo set "CPU_COUNT=%CPU_COUNT%"                  >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "PYTHONUNBUFFERED=%PYTHONUNBUFFERED%"    >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "PATH=%PATH%"                            >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+:: Set paths for CUDA 11 Toolkit
 if not "%CUDA_PATH%" == "" (
     echo set "CUDA_PATH=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
     echo set "CUDA_HOME=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-    :: Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
-    echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+)
+:: Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
+if defined CUDA_VERSION (
+    if not "%CUDA_VERSION%" == "None" (
+        set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
+        echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+    )
 )
 echo set "BUILD_PLATFORM=%BUILD_PLATFORM%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
