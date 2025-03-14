@@ -9,6 +9,7 @@ if "%CPU_COUNT%" == "" (
 if "%CPU_COUNT%" == "" (
     set "CPU_COUNT=2"
 )
+echo "CPU_COUNT=%CPU_COUNT%"
 
 set PYTHONUNBUFFERED=1
 
