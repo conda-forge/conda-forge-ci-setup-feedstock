@@ -18,11 +18,12 @@ export "CONDA_BLD_PATH=${FEEDSTOCK_ROOT}/build_artifacts"
 set +u
 
 # Don't set the number of CPUs for some CI systems
+# GH Actions runners might be self-hosted. MS-hosted ones have 4. Leave it alone.
 if [[ "${CI}" == "drone" || "${CI}" == "github_actions" ]]; then
     unset CPU_COUNT
 else
     # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
-    # 2 cores available on TravisCI workers: https://docs.travis-ci.com/user/reference/overview/
+    # 2 cores available on Azure workers: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
     # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
     export CPU_COUNT="${CPU_COUNT:-2}"
 fi

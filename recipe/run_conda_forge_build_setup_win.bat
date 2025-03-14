@@ -1,7 +1,15 @@
 
 :: 2 cores available on Appveyor workers: https://www.appveyor.com/docs/build-environment/#build-vm-configurations
+:: 2 cores available on Azure workers: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
+:: GH Actions runners might be self-hosted. MS-hosted ones have 4. Leave it alone.
 :: CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-set CPU_COUNT=2
+if "%CI%" == "github_actions" (
+    set "CPU_COUNT="
+) else (
+    if "%CPU_COUNT%" == "" (
+        set CPU_COUNT=2
+    )
+)
 
 set PYTHONUNBUFFERED=1
 
