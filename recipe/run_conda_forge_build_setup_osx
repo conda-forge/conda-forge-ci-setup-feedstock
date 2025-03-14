@@ -1,14 +1,8 @@
 #!/bin/bash
 
-# CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-# Don't set the number of CPUs for some CI systems
-# GH Actions runners might be self-hosted. MS-hosted ones have 4. Leave it alone.
-if [[ "${CI}" == "github_actions" ]]; then
-  unset CPU_COUNT
-else
 # 3 cores available on Azure workers: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
-  export CPU_COUNT="${CPU_COUNT:-3}"
-fi
+# CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
+export CPU_COUNT="${CPU_COUNT:-$(sysctl -n hw.activecpu || echo 3)}"
 
 export PYTHONUNBUFFERED=1
 
