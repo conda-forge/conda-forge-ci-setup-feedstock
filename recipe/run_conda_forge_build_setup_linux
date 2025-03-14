@@ -20,9 +20,13 @@ set +u
 # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
 # 2 cores available on Azure workers: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
 # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-if [[ "$CI" == "github_actions" ]]; then  # Self-hosted runners might misreport available CPUs
+if [[ "$CI" == "github_actions" ]]; then
+    # Self-hosted runners might misreport available CPUs
     unset CPU_COUNT
 else
+    # Note that some virtualization environments might be configured in a way
+    # that nproc reports the host CPU number, not the guest. In that case,
+    # set CPU_COUNT manually to the right number before running this script
     export CPU_COUNT="${CPU_COUNT:-$(nproc || echo 2)}"
 fi
 
