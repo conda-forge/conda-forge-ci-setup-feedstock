@@ -1,16 +1,3 @@
-
-:: 2 cores available on Appveyor workers: https://www.appveyor.com/docs/build-environment/#build-vm-configurations
-:: 2 cores available on Azure workers: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
-:: CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-:: Try with native var first; if that doesn't work, set it to 2.
-if "%CPU_COUNT%" == "" (
-    set "CPU_COUNT=%NUMBER_OF_PROCESSORS%"
-)
-if "%CPU_COUNT%" == "" (
-    set "CPU_COUNT=2"
-)
-echo "CPU_COUNT=%CPU_COUNT%"
-
 set PYTHONUNBUFFERED=1
 
 conda.exe config --set show_channel_urls true
