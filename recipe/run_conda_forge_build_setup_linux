@@ -17,18 +17,18 @@ export "CONDA_BLD_PATH=${FEEDSTOCK_ROOT}/build_artifacts"
 
 set +u
 
-# 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
-# 2 cores available on Azure workers: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
 # CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-if [[ "$CI" == "github_actions" ]]; then
-    # Self-hosted runners might misreport available CPUs
-    unset CPU_COUNT
-else
-    # Note that some virtualization environments might be configured in a way
-    # that nproc reports the host CPU number, not the guest. In that case,
-    # set CPU_COUNT manually to the right number before running this script
-    export CPU_COUNT="${CPU_COUNT:-$(nproc || echo 2)}"
-fi
+# If absent, it will be autodetected. Note that some virtualization environments might be
+# configured in a way that Python reports the host CPU number, not the guest. We provide some
+# overrides based on known properties of CI providers.
+case "$CI" in
+    travis|azure|circle)
+        # Azure Linux workers have 2 cores: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
+        # Travis CI Linux workers have 2 cores: https://docs.travis-ci.com/user/reference/overview/#virtualization-environment-vs-operating-system 
+        # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
+        export CPU_COUNT="${CPU_COUNT:-2}"
+    ;;
+esac
 
 # strict priority by default but ppl can turn this off
 conda config --env --set channel_priority $(cat ${FEEDSTOCK_ROOT}/conda-forge.yml | shyaml get-value channel_priority strict || echo strict)
