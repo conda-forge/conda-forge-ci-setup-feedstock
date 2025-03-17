@@ -21,6 +21,8 @@ build:
   skip: True
   {% endif %}
   script:
+    - echo "CPU Count = $CPU_COUNT"   # [unix]
+    - echo "CPU Count = %CPU_COUNT%"  # [win]
     {% if "FEEDSTOCK_ROOT" in os.environ %}                                                  # [linux]
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
     {% else %}                                                                               # [linux]
