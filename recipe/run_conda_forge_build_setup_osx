@@ -20,8 +20,7 @@ conda config --env --set channel_priority $(cat ./conda-forge.yml | shyaml get-v
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
 
 mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
-echo "export CPU_COUNT='${CPU_COUNT}'"                                    > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'" > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 if [[ "${OSX_SDK_DIR:-}" == "" ]]; then
   if [[ "${CI:-}" == "" ]]; then
