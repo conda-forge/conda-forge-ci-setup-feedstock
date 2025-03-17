@@ -1,6 +1,6 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.14.4" %}
-{% set build = 1 %}
+{% set version = "4.14.5" %}
+{% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
 {% if cuda_compiler_version == "None" %}
@@ -21,6 +21,8 @@ build:
   skip: True
   {% endif %}
   script:
+    - echo "CPU Count = $CPU_COUNT"   # [unix]
+    - echo "CPU Count = %CPU_COUNT%"  # [win]
     {% if "FEEDSTOCK_ROOT" in os.environ %}                                                  # [linux]
     - cp {{ os.environ["FEEDSTOCK_ROOT"] }}/LICENSE.txt ${RECIPE_DIR}/LICENSE.txt            # [linux]
     {% else %}                                                                               # [linux]
