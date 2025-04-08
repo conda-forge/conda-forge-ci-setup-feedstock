@@ -58,11 +58,11 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
     )
 
     try:
+        r.raise_for_status()
         results = r.json()
     except Exception as e:
         print(
-            "ERROR getting output validation information "
-            "from the webservice as json:"
+            "ERROR failure in output copy from cf-staging to conda-forge:"
             "\n    error: %s\n    response text: %s" % (
                 repr(e),
                 r.text,
