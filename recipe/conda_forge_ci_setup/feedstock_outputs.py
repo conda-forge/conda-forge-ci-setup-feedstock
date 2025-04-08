@@ -62,12 +62,16 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
     except Exception as e:
         print(
             "ERROR getting output validation information "
-            "from the webservice:",
-            repr(e)
+            "from the webservice as json:"
+            "\n    error: %s\n    response text: %s" % (
+                repr(e),
+                r.text,
+            ),
+            flush=True,
         )
         results = {}
 
-    print("copy results:\n%s" % json.dumps(results, indent=2))
+    print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
 
     return r.status_code == 200
 
