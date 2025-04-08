@@ -35,10 +35,32 @@ def get_temp_token(token):
 
 
 def built_distribution_already_exists(cli, name, version, fname, owner, channel):
-    """
-    Checks to see whether the built recipe (aka distribution) already
+    """Checks to see whether the built recipe (aka distribution) already
     exists on the owner/user's binstar account.
 
+    NOTE: This function uses older nomeclature regarding conda channels and labels.
+    Namely the `owner` is what we now call a `channel` and the `channel` is what we
+    now call a `label`.
+
+    Parameters
+    ----------
+    cli : binstar_client.utils.get_server_api
+        The binstar client
+    name : str
+        The name of the package
+    version : str
+        The version of the package
+    fname : str
+        The path to the built distribution
+    owner : str
+        The owner/user of the binstar account.
+    channel : str
+        The channel to check for the distribution.
+
+    Returns
+    -------
+    bool
+        Whether the distribution already exists on the binstar account.
     """
     folder, basename = os.path.split(fname)
     _, platform = os.path.split(folder)
