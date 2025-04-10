@@ -105,7 +105,6 @@ def request_copy(
     try:
         r.raise_for_status()
         results = r.json()
-        print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
     except Exception as e:
         print(
             "ERROR failure in output copy from cf-staging to conda-forge:"
@@ -119,7 +118,7 @@ def request_copy(
         results = {"copied": {o: None for o in checksums.keys()}}
         for polling_attempt in range(num_polling_attempts):
             print("polling attempt %d of %d" % (polling_attempt+1, num_polling_attempts), flush=True)
-            time.sleep(2.0 * 1.25**polling_attempt)
+            time.sleep(max(2.0 * 2**polling_attempt, 10))  # wait at least 10 seconds
             for o in checksums:
                 if results["copied"][o] is None:
                     val = _check_dist_with_label_and_hash_on_prod(dist, channel, "sha256", checksums[o])
@@ -129,6 +128,7 @@ def request_copy(
             if all(v is not None for v in results["copied"].values()):
                 break
 
+    print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
     return (r.status_code == 200) or all(v and v is not None for v in results["copied"].values())
 
 
