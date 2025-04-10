@@ -106,7 +106,10 @@ def built_distributions(subdirs=()):
         subdirs = context.subdir, "noarch"
     paths = []
     for subdir in subdirs:
-        for path in os.listdir(os.path.join(conda_build.config.croot, subdir)):
+        subdir_path = os.path.join(conda_build.config.croot, subdir)
+        if not subdir_path.is_dir():
+            continue
+        for path in os.listdir(subdir_path):
             if path.endswith((".tar.bz2", ".conda")):
                 paths.append(os.path.join(conda_build.config.croot, subdir, path))
     return paths
