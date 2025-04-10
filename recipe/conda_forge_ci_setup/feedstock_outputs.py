@@ -34,7 +34,7 @@ def _unix_dist_path(path):
 
 
 @functools.lru_cache(maxsize=1)
-def _get_ac_api(timeout=5):
+def _get_ac_api(timeout=10):
     if "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
     elif "BINSTAR_TOKEN" in os.environ:
