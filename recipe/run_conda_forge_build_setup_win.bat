@@ -140,7 +140,7 @@ echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\a
 
 CONDA_SKIP_TESTS=0
 
-if "%HOST_PLATFORM%" == "%BUILD_PLATFORM%" (
+if NOT "%HOST_PLATFORM%" == "%BUILD_PLATFORM%" (
     set CONDA_SKIP_TESTS=1
 )
 
