@@ -34,7 +34,7 @@ def _unix_dist_path(path):
 
 
 @functools.lru_cache(maxsize=1)
-def _get_ac_api(timeout=10):
+def _get_ac_api(timeout=30):
     if "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
     elif "BINSTAR_TOKEN" in os.environ:
@@ -67,7 +67,7 @@ def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
         else:
             return False
     except (BinstarError, requests.exceptions.ReadTimeout):
-        return None
+        return False
 
 
 def request_copy(
@@ -115,21 +115,19 @@ def request_copy(
             flush=True,
         )
         print("polling anaconda.org to see if copy completes in the background...", flush=True)
-        results = {"copied": {o: None for o in checksums.keys()}}
+        results = {"copied": {o: False for o in checksums.keys()}}
         for polling_attempt in range(num_polling_attempts):
             print("polling attempt %d of %d" % (polling_attempt+1, num_polling_attempts), flush=True)
             time.sleep(max(2.0 * 2**polling_attempt, 10))  # wait at least 10 seconds
             for o in checksums:
-                if results["copied"][o] is None:
-                    val = _check_dist_with_label_and_hash_on_prod(dist, channel, "sha256", checksums[o])
-                    if val is not None:
-                        results["copied"][o] = val
+                if not results["copied"][o]:
+                    results["copied"][o] = _check_dist_with_label_and_hash_on_prod(dist, channel, "sha256", checksums[o])
 
-            if all(v is not None for v in results["copied"].values()):
+            if all(v for v in results["copied"].values()):
                 break
 
     print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
-    return (r.status_code == 200) or all(v and v is not None for v in results["copied"].values())
+    return (r.status_code == 200) or all(v for v in results["copied"].values())
 
 
 def is_valid_feedstock_output(project, outputs):
