@@ -138,11 +138,21 @@ if not "%CUDA_PATH%" == "" (
 echo set "BUILD_PLATFORM=%BUILD_PLATFORM%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 
+CONDA_BUILD_SKIP_TESTS=0
+
+if NOT "%HOST_PLATFORM%" == "%BUILD_PLATFORM%" (
+    set CONDA_BUILD_SKIP_TESTS=1
+)
+
 if "%HOST_PLATFORM%-%BUILD_PLATFORM%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
     echo set "CROSSCOMPILING_EMULATOR=1"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
     echo CROSSCOMPILING_EMULATOR:                 >> ".ci_support\%CONFIG%.yaml"
     echo - 1                                      >> ".ci_support\%CONFIG%.yaml"
+    set CONDA_BUILD_SKIP_TESTS=0
 )
+
+echo CONDA_BUILD_SKIP_TESTS:                      >> ".ci_support\%CONFIG%.yaml"
+echo - %CONDA_BUILD_SKIP_TESTS%                   >> ".ci_support\%CONFIG%.yaml"
 
 call activate base
 
