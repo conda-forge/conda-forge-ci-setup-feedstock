@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
@@ -160,7 +161,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
 fi
 
 if [[ "${HOST_PLATFORM}" == "linux-64" && "${MICROARCH_LEVEL_NEEDED:-}" == "4" ]]; then
-  MICROARCH_LEVEL=$(python ${CONDA_PREFIX}/bin/get_x86_64_level.py)
+  MICROARCH_LEVEL=$(python ${SCRIPT_DIR}/get_x86_64_level.py)
   if [[ "$MICROARCH_LEVEL" != "4" ]]; then
     curl -L -O https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-lin.tar.xz
     mkdir -p ~/.sde
