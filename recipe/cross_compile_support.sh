@@ -5,6 +5,7 @@ BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 ${BUILD_PLATFORM})
     CUDA_COMPILER_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)
+    MICROARCH_LEVEL_NEEDED=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value microarch_level.0 1)
 fi
 
 # When compiling natively we use the docker image's glibc
@@ -156,4 +157,20 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
             exit 1
         fi
     fi
+fi
+
+if [[ "${HOST_PLATFORM}" == "linux-64" && "${MICROARCH_LEVEL_NEEDED:-}" == "4" ]]; then
+  MICROARCH_LEVEL=$(python ${CONDA_PREFIX}/bin/get_x86_64_level.py)
+  if [[ "$MICROARCH_LEVEL" != "4" ]]; then
+    curl -L -O https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-lin.tar.xz
+    mkdir -p ~/.sde
+    tar -xvf sde-external-9.53.0-2025-03-16-lin.tar.xz -C ~/.sde --strip-components=1
+    echo "TEST_LAUNCHER:"                                                     >> ${CI_SUPPORT}/${CONFIG}.yaml
+    echo "$HOME/.sde/sde64 -cpuid_in $HOME/.sde/misc/cpuid/skx/cpuid.def -- " >> ${CI_SUPPORT}/${CONFIG}.yaml
+    echo "CMAKE_TEST_LAUNCHER:"                                               >> ${CI_SUPPORT}/${CONFIG}.yaml
+    echo "$HOME/.sde/sde64 -cpuid_in $HOME/.sde/misc/cpuid/skx/cpuid.def -- " >> ${CI_SUPPORT}/${CONFIG}.yaml
+
+    # TODO: figure out how to set this for only host environment and not build env
+    export CONDA_OVERRIDE_ARCHSPEC=x86_64_v4
+  fi
 fi
