@@ -165,7 +165,7 @@ if [[ "${HOST_PLATFORM}" == "linux-64" && "${MICROARCH_LEVEL_NEEDED:-}" == "4" ]
   if [[ "$MICROARCH_LEVEL" != "4" ]]; then
     curl -L -O https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-lin.tar.xz
     mkdir -p ~/.sde
-    tar -xvf sde-external-9.53.0-2025-03-16-lin.tar.xz -C ~/.sde --strip-components=1
+    tar -xf sde-external-9.53.0-2025-03-16-lin.tar.xz -C ~/.sde --strip-components=1
     echo "TEST_LAUNCHER:"                                                         >> ${CI_SUPPORT}/${CONFIG}.yaml
     echo "- '$HOME/.sde/sde64 -cpuid_in $HOME/.sde/misc/cpuid/skx/cpuid.def -- '" >> ${CI_SUPPORT}/${CONFIG}.yaml
     echo "CMAKE_TEST_LAUNCHER:"                                                   >> ${CI_SUPPORT}/${CONFIG}.yaml
