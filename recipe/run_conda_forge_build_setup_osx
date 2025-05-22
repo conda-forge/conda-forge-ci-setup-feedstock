@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# 2 core available on Travis CI OS X workers: https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
-# CPU_COUNT is passed through conda build: https://github.com/conda/conda-build/pull/1149
-export CPU_COUNT="${CPU_COUNT:-2}"
-
 export PYTHONUNBUFFERED=1
 
 conda config --env --set show_channel_urls true
@@ -24,8 +20,7 @@ conda config --env --set channel_priority $(cat ./conda-forge.yml | shyaml get-v
 export CONDA_PREFIX="${CONDA_PREFIX:-$(conda info --json | jq -r .root_prefix)}"
 
 mkdir -p "${CONDA_PREFIX}/etc/conda/activate.d"
-echo "export CPU_COUNT='${CPU_COUNT}'"                                    > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'"                      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
+echo "export PYTHONUNBUFFERED='${PYTHONUNBUFFERED}'" > "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
 if [[ "${OSX_SDK_DIR:-}" == "" ]]; then
   if [[ "${CI:-}" == "" ]]; then
