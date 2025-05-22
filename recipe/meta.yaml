@@ -69,7 +69,6 @@ requirements:
     - python
     - pip
     - setuptools
-    - x86_64-microarch-level {{ microarch_level }}  # [linux and x86_64]
   run:
     - python
     - conda >=23.9
