@@ -34,7 +34,6 @@ import click
 from conda_forge_ci_setup.upload_or_check_non_existence import retry_upload_or_check
 
 from .feedstock_outputs import STAGING
-from .utils import determine_build_tool, CONDA_BUILD
 
 call = subprocess.check_call
 

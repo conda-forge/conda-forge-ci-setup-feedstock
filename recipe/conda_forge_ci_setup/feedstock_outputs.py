@@ -1,15 +1,21 @@
 import os
+import functools
 import json
 import time
 import sys
+import hmac
+import urllib
 
 import click
 import requests
+import requests.exceptions
 import conda_build.config
 from conda_forge_metadata.feedstock_outputs import (
     package_to_feedstock,
     feedstock_outputs_config,
 )
+from binstar_client import BinstarError
+from binstar_client.utils import get_server_api
 
 from .utils import (
     built_distributions_from_recipe_variant,
@@ -27,7 +33,46 @@ def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
 
 
-def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True):
+@functools.lru_cache(maxsize=1)
+def _get_ac_api(timeout=30):
+    if "STAGING_BINSTAR_TOKEN" in os.environ:
+        token = os.environ["STAGING_BINSTAR_TOKEN"]
+    elif "BINSTAR_TOKEN" in os.environ:
+        token = os.environ["BINSTAR_TOKEN"]
+    else:
+        raise RuntimeError("No anaconda.org token found!")
+
+    ac = get_server_api(token=token)
+    ac.session.request = functools.partial(ac.session.request, timeout=timeout)
+    return ac
+
+
+def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
+    try:
+        _, name, version, _ = split_pkg(dist)
+    except RuntimeError:
+        print("could not parse dist for existence check: %s" % dist, flush=True)
+        return False
+
+    try:
+        ac = _get_ac_api()
+        data = ac.distribution(
+            "conda-forge",
+            name,
+            version,
+            basename=urllib.parse.quote(dist, safe=""),
+        )
+        if label in data.get("labels", []) and hmac.compare_digest(data[hash_type], hash_value):
+            return True
+        else:
+            return False
+    except (BinstarError, requests.exceptions.ReadTimeout):
+        return False
+
+
+def request_copy(
+    feedstock, dists, channel, git_sha=None, comment_on_error=True, num_polling_attempts=5
+):
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
@@ -58,18 +103,31 @@ def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True)
     )
 
     try:
+        r.raise_for_status()
         results = r.json()
     except Exception as e:
         print(
-            "ERROR getting output validation information "
-            "from the webservice:",
-            repr(e)
+            "ERROR failure in output copy from cf-staging to conda-forge:"
+            "\n    error: %s\n    response text: %s" % (
+                repr(e),
+                r.text,
+            ),
+            flush=True,
         )
-        results = {}
+        print("polling anaconda.org to see if copy completes in the background...", flush=True)
+        results = {"copied": {o: False for o in checksums.keys()}}
+        for polling_attempt in range(num_polling_attempts):
+            print("polling attempt %d of %d" % (polling_attempt+1, num_polling_attempts), flush=True)
+            time.sleep(max(2.0 * 2**polling_attempt, 10))  # wait at least 10 seconds
+            for o in checksums:
+                if not results["copied"][o]:
+                    results["copied"][o] = _check_dist_with_label_and_hash_on_prod(dist, channel, "sha256", checksums[o])
 
-    print("copy results:\n%s" % json.dumps(results, indent=2))
+            if all(v for v in results["copied"].values()):
+                break
 
-    return r.status_code == 200
+    print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
+    return (r.status_code == 200) or all(v for v in results["copied"].values())
 
 
 def is_valid_feedstock_output(project, outputs):

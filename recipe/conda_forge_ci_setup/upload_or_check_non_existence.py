@@ -12,7 +12,6 @@ import time
 from binstar_client.utils import get_server_api
 import binstar_client.errors
 from conda.base.context import context
-from conda.core.index import get_index
 import conda_build.api
 import conda_build.config
 
@@ -35,11 +34,33 @@ def get_temp_token(token):
         print(f"Failed to remove temporary directroy '{dn}'")
 
 
-def built_distribution_already_exists(cli, name, version, fname, owner):
-    """
-    Checks to see whether the built recipe (aka distribution) already
+def built_distribution_already_exists(cli, name, version, fname, owner, channel):
+    """Checks to see whether the built recipe (aka distribution) already
     exists on the owner/user's binstar account.
 
+    NOTE: This function uses older nomeclature regarding conda channels and labels.
+    Namely the `owner` is what we now call a `channel` and the `channel` is what we
+    now call a `label`.
+
+    Parameters
+    ----------
+    cli : binstar_client.utils.get_server_api
+        The binstar client
+    name : str
+        The name of the package
+    version : str
+        The version of the package
+    fname : str
+        The path to the built distribution
+    owner : str
+        The owner/user of the binstar account.
+    channel : str
+        The channel to check for the distribution.
+
+    Returns
+    -------
+    bool
+        Whether the distribution already exists on the binstar account.
     """
     folder, basename = os.path.split(fname)
     _, platform = os.path.split(folder)
@@ -59,7 +80,7 @@ def built_distribution_already_exists(cli, name, version, fname, owner):
         except binstar_client.errors.NotFound:
             dist_info = {}
 
-        exists = exists or bool(dist_info)
+        exists = exists or (bool(dist_info) and channel in dist_info.get('labels', ()))
         # Unfortunately, we cannot check the md5 quality of the built distribution, as
         # this will depend on fstat information such as modification date (because
         # distributions are tar files). Therefore we can only assume that the distribution
@@ -99,48 +120,6 @@ def delete_dist(token_fn, path, owner, channels):
         ],
         env=os.environ
     )
-
-
-def distribution_exists_on_channel(binstar_cli, meta, fname, owner, channel='main'):
-    """
-    Determine whether a distribution exists on a specific channel.
-
-    Note from @pelson: As far as I can see, there is no easy way to do this on binstar.
-
-    """
-    channel_url = '/'.join([owner, 'label', channel])
-    fname = os.path.basename(fname)
-
-    if fname.endswith(".tar.bz2"):
-        base_fname = fname[:-8]
-    elif fname.endswith(".conda"):
-        base_fname = fname[:-6]
-    else:
-        base_fname = fname
-
-    distributions_on_channel = {
-        f"{prec.name}-{prec.version}-{prec.build}": prec
-        for prec in get_index(
-            [channel_url],
-            prepend=False,
-            use_cache=False,
-        )
-    }
-
-    on_channel = False
-    for ext in [".tar.bz2", ".conda"]:
-        _fname = base_fname + ext
-        try:
-            _on_channel = (
-                distributions_on_channel[_fname]['subdir']
-                == conda_subdir
-            )
-        except KeyError:
-            _on_channel = False
-
-        on_channel = on_channel or _on_channel
-
-    return on_channel
 
 
 def upload_or_check(
@@ -207,13 +186,13 @@ def upload_or_check(
                     for i in range(0, 5):
                         time.sleep(i*15)
                         if built_distribution_already_exists(
-                            cli, name, version, path, prod_owner
+                            cli, name, version, path, prod_owner, channel,
                         ):
                             # package already in production
                             need_copy = False
                             break
                         elif not built_distribution_already_exists(
-                            cli, name, version, path, owner
+                            cli, name, version, path, owner, channel,
                         ):
                             upload(token_fn, path, owner, channel)
                             break
@@ -248,7 +227,7 @@ def upload_or_check(
             else:
                 for name, version, path in built_distributions:
                     if not built_distribution_already_exists(
-                        cli, name, version, path, owner
+                        cli, name, version, path, owner, channel,
                     ):
                         upload(token_fn, path, owner, channel, private_upload=private_upload)
                     else:
@@ -257,7 +236,7 @@ def upload_or_check(
                 return True
     else:
         for name, version, path in built_distributions:
-            if not built_distribution_already_exists(cli, name, version, path, owner):
+            if not built_distribution_already_exists(cli, name, version, path, owner, channel):
                 print(
                     "Distribution {} is new for {}, but no upload is taking place "
                     "because the BINSTAR_TOKEN/STAGING_BINSTAR_TOKEN "

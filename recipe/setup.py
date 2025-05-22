@@ -1,4 +1,5 @@
 import os
+from ast import literal_eval
 from setuptools import setup, find_packages
 
 __version__ = "0.0.1"
@@ -12,7 +13,7 @@ if os.path.exists(pth):
     with open(pth, "r") as fp:
         for line in fp.readlines():
             if line.startswith("{% set version"):
-                __version__ = eval(
+                __version__ = literal_eval(
                     line
                     .strip()
                     .split("=")[1]

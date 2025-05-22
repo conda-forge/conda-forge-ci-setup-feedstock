@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.14.5" %}
+{% set version = "4.19.0" %}
 {% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
