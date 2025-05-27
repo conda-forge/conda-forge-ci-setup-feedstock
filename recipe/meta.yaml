@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.19.0" %}
+{% set version = "4.20.0" %}
 {% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
@@ -39,6 +39,7 @@ build:
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
     - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"                                         # [unix]
     - cp "${RECIPE_DIR}/cross_compile_support.sh" "${PREFIX}/bin/cross_compile_support.sh"                               # [unix]
+    - cp "${RECIPE_DIR}/get_x86_64_level.py" "${PREFIX}/bin/get_x86_64_level.py"                                         # [unix]
     - COPY "%RECIPE_DIR%\\install_cuda.bat" "%SCRIPTS%\\install_cuda.bat"                                                # [win]
     - cd "%RECIPE_DIR%"   # [win]
     - cd "${RECIPE_DIR}"  # [unix]
