@@ -150,6 +150,7 @@ echo - %CONDA_BUILD_SKIP_TESTS%                   >> ".ci_support\%CONFIG%.yaml"
 
 call activate base
 
+@echo on
 conda.exe info
 conda.exe config --show-sources
 conda.exe list --show-channel-urls
