@@ -154,3 +154,4 @@ call activate base
 conda.exe info
 conda.exe config --show-sources
 conda.exe list --show-channel-urls
+@echo off
