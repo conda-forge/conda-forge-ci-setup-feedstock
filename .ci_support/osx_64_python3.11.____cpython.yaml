@@ -7,7 +7,7 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- None
+- cuda-nvcc
 cuda_compiler_version:
 - None
 macos_machine:

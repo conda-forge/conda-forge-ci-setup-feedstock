@@ -1,23 +1,20 @@
-c_compiler:
-- vs2019
-c_stdlib:
-- vs
+cdt_name:
+- conda
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- nvcc
+- cuda-nvcc
 cuda_compiler_version:
-- '11.8'
+- None
+docker_image:
+- quay.io/condaforge/linux-anvil-x86_64:alma9
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.12.* *_cpython
+- 3.13.* *_cp313
 target_platform:
-- win-64
-zip_keys:
-- - cuda_compiler
-  - cuda_compiler_version
+- linux-ppc64le
