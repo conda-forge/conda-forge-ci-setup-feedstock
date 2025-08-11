@@ -53,8 +53,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
         fi
         /usr/bin/qemu-${HOST_PLATFORM_ARCH}-static --version
 
-
-        if [[ "${CUDA_COMPILER_VERSION}" == "11.2" || "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
+        if [[ "${CUDA_COMPILER_VERSION}" = "None" ]] || [[ "${CUDA_COMPILER_VERSION:0:2}" -ge 12 ]]; then
+          true;
+        elif [[ "${CUDA_COMPILER_VERSION}" == "11.2" || "${CUDA_COMPILER_VERSION}" == "11.8" ]]; then
             EXTRACT_DIR=$(mktemp -d)
             pushd ${EXTRACT_DIR}
                 if [[ "${HOST_PLATFORM_ARCH}" == "aarch64" ]]; then
@@ -150,12 +151,9 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/compat/* ${QEMU_LD_PREFIX}/usr/lib/
             popd
             rm -rf ${EXTRACT_DIR}
-        elif [[ "${CUDA_COMPILER_VERSION:0:2}" -ge 12 ]]; then
-            # No extra steps necessary for CUDA 12+, handled through new packages
-            true
-        elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
-            echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
-            exit 1
+        else
+            echo "cross compiling with cuda "${CUDA_COMPILER_VERSION}" not supported yet. CUDA 12+ is best supported.";
+            exit 1;
         fi
     fi
 fi
