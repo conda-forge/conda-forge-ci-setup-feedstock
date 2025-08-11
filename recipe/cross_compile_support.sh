@@ -150,8 +150,8 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 mv ./usr/local/cuda-${CUDA_COMPILER_VERSION}/compat/* ${QEMU_LD_PREFIX}/usr/lib/
             popd
             rm -rf ${EXTRACT_DIR}
-        elif [[ "${CUDA_COMPILER_VERSION}" == 12* ]]; then
-            # No extra steps necessary for CUDA 12, handled through new packages
+        elif [[ "${CUDA_COMPILER_VERSION:0:2}" -ge 12 ]]; then
+            # No extra steps necessary for CUDA 12+, handled through new packages
             true
         elif [[ "${CUDA_COMPILER_VERSION}" != "None" ]]; then
             echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
