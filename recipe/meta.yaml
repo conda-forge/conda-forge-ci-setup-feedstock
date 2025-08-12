@@ -17,9 +17,6 @@ source:
 
 build:
   number: {{ build }}
-  {% if cuda_compiler_version.startswith("12") %}
-  skip: True
-  {% endif %}
   script:
     - echo "CPU Count = $CPU_COUNT"   # [unix]
     - echo "CPU Count = %CPU_COUNT%"  # [win]
