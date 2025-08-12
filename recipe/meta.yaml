@@ -17,6 +17,8 @@ source:
 
 build:
   number: {{ build }}
+  # For cuda support, building with one version is enough
+  skip: true  # [cuda_compiler_version not in ("None", cuda_compiler_version_min)]
   script:
     - echo "CPU Count = $CPU_COUNT"   # [unix]
     - echo "CPU Count = %CPU_COUNT%"  # [win]
