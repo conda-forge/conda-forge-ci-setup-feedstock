@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.21.2" %}
+{% set version = "4.21.3" %}
 {% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
@@ -17,9 +17,8 @@ source:
 
 build:
   number: {{ build }}
-  {% if cuda_compiler_version.startswith("12") %}
-  skip: True
-  {% endif %}
+  # For cuda support, building with one version is enough
+  skip: true  # [cuda_compiler_version not in ("None", cuda_compiler_version_min)]
   script:
     - echo "CPU Count = $CPU_COUNT"   # [unix]
     - echo "CPU Count = %CPU_COUNT%"  # [win]
@@ -58,12 +57,14 @@ build:
   ignore_run_exports_from:
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
+    - {{ compiler('cxx') }}               # [cuda_compiler_version != "None"]
 
 requirements:
   build:
      # ensure that all variants of cuda_compiler_version are tested
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
+    - {{ compiler('cxx') }}               # [cuda_compiler_version != "None"]
     - {{ stdlib('c') }}                   # [cuda_compiler_version != "None"]
     - python                              # [build_platform != target_platform]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]

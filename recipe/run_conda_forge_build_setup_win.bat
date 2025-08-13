@@ -88,7 +88,7 @@ for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
 <cuda.version set /p CUDA_VERSION=
 del cuda.version
 if not "%CUDA_VERSION%" == "None" (
-    if "%CUDA_VERSION:~0,2%" == "12" (
+    if "%CUDA_VERSION:~0,2%" GEQ "12" (
         :: Don't call install_cuda, as we'll get CUDA packages from CF
         set "CUDA_PATH="
         set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
