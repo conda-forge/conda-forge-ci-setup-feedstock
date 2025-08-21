@@ -71,8 +71,8 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                         (*) echo "" ;;
                     esac)
                 if [[ "${CUDA_MANIFEST_VERSION}" == "" ]]; then
-                    echo 'cross compiling with cuda not in (11.2, 11.8, 12.*) not supported yet'
-                    exit 1
+                    echo "cross compiling with cuda "${CUDA_COMPILER_VERSION}" not supported yet. CUDA 12+ is best supported.";
+                    exit 1;
                 fi
                 curl -L https://developer.download.nvidia.com/compute/cuda/repos/rhel8/${CUDA_HOST_PLATFORM_ARCH}/version_${CUDA_MANIFEST_VERSION}.json > manifest.json
                 # packages for which we also need to install the -devel version
