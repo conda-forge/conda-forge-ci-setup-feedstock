@@ -106,9 +106,13 @@ def built_distributions(subdirs=()):
         subdirs = context.subdir, "noarch"
     paths = []
     for subdir in subdirs:
-        for path in os.listdir(os.path.join(conda_build.config.croot, subdir)):
+        subdir_path = os.path.join(conda_build.config.croot, subdir)
+        # Workaround for https://github.com/conda-forge/conda-forge-ci-setup-feedstock/issues/394
+        if not os.path.exists(subdir_path):
+            os.makedirs(subdir_path)
+        for path in os.listdir(subdir_path):
             if path.endswith((".tar.bz2", ".conda")):
-                paths.append(os.path.join(conda_build.config.croot, subdir, path))
+                paths.append(os.path.join(subdir_path, path))
     return paths
 
 
