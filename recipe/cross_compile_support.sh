@@ -44,6 +44,7 @@ if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
                 fi
             done
         fi
+        micromamba list -p /opt/conda/envs/sysroot_${HOST_PLATFORM}
         export QEMU_LD_PREFIX=$(find /opt/conda/envs/sysroot_${HOST_PLATFORM} -name sysroot | head -1)
         if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
             echo "CMAKE_CROSSCOMPILING_EMULATOR: " >> ${CI_SUPPORT}/${CONFIG}.yaml
