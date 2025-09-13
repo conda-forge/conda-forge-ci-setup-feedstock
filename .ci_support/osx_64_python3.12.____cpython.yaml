@@ -1,7 +1,7 @@
 MACOSX_DEPLOYMENT_TARGET:
 - '10.13'
 MACOSX_SDK_VERSION:
-- '10.13'
+- '15.5'
 channel_sources:
 - conda-forge
 channel_targets:
