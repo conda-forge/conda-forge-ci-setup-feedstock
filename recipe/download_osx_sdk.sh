@@ -60,9 +60,10 @@ if [[ "1" == "1" ]]; then
     mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
     if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
-        # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder
-        ls -ll
-        cd MacOSX${MACOSX_SDK_VERSION}.sdk
+        # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder;
+        # github names the folder in the tarball based on the hash of the commit we're using; rename for ease of use
+        mv macos-sdk-* repo
+        cd repo
         mv MacOSX${MACOSX_SDK_VERSION}.sdk/* "$(dirname "$CONDA_BUILD_SYSROOT")"
     else
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
