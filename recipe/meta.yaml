@@ -17,6 +17,8 @@ source:
 
 build:
   number: {{ build }}
+  # debug
+  skip: true  # [not (osx and py==312)]
   # For cuda support, building with one version is enough
   skip: true  # [cuda_compiler_version not in ("None", cuda_compiler_version_min)]
   script:
