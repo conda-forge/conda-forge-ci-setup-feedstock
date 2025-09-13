@@ -26,7 +26,7 @@ export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
 if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     echo "Downloading ${MACOSX_SDK_VERSION} sdk"
 
-    if [[ MACOSX_SDK_VERSION == "15.5" ]]; then
+    if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         # not all versions get tagged, see https://github.com/alexey-lysiuk/macos-sdk/issues/2
         url="https://github.com/alexey-lysiuk/macos-sdk/archive/e96f557d53a0282abc7c93a76a802605b20e4282.tar.gz"
     elif [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -gt 11 ]]; then
@@ -58,7 +58,7 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
         esac)
     echo "${sdk_sha256} *MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz" | shasum -a 256 -c
     mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
-    if [[ MACOSX_SDK_VERSION == "15.5" ]]; then
+    if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
         # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder
         cd MacOSX${MACOSX_SDK_VERSION}
