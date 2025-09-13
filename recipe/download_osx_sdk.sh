@@ -61,8 +61,8 @@ if [[ "1" == "1" ]]; then
     if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
         # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder
-        cd MacOSX${MACOSX_SDK_VERSION}
-        mv MacOSX${MACOSX_SDK_VERSION}/* "$(dirname "$CONDA_BUILD_SYSROOT")"
+        cd MacOSX${MACOSX_SDK_VERSION}.sdk
+        mv MacOSX${MACOSX_SDK_VERSION}.sdk/* "$(dirname "$CONDA_BUILD_SYSROOT")"
     else
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
     fi
