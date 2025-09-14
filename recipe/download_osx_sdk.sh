@@ -58,6 +58,8 @@ if [[ "1" == "1" ]]; then
         esac)
     echo "${sdk_sha256} *MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz" | shasum -a 256 -c
     mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
+    ls -ll $(dirname "$CONDA_BUILD_SYSROOT")
+    rm -rf $CONDA_BUILD_SYSROOT
     if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
         # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder;
