@@ -60,6 +60,7 @@ if [[ "1" == "1" ]]; then
     mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
     if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder;
+        mkdir repo
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C repo
         ls -ll
         pushd repo
