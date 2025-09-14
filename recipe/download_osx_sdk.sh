@@ -57,16 +57,17 @@ if [[ "1" == "1" ]]; then
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
     echo "${sdk_sha256} *MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz" | shasum -a 256 -c
-    mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
     if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz
         # we've downloaded the whole https://github.com/alexey-lysiuk/macos-sdk repo, go into the right folder;
         # github names the folder in the tarball based on the hash of the commit we're using; rename for ease of use
         mv macos-sdk-* repo
         pushd repo
+        mkdir -p "$CONDA_BUILD_SYSROOT"
         mv MacOSX${MACOSX_SDK_VERSION}.sdk/* "$CONDA_BUILD_SYSROOT"
         popd
     else
+        mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
     fi
     ls -ll $CONDA_BUILD_SYSROOT
