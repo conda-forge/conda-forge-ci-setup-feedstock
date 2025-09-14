@@ -69,6 +69,7 @@ if [[ "1" == "1" ]]; then
     else
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
     fi
+    ls -ll $CONDA_BUILD_SYSROOT
 fi
 
 if [ ! -z "$CONFIG" ]; then
