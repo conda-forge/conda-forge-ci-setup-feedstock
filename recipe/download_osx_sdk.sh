@@ -23,7 +23,7 @@ fi
 
 export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
 
-if [[ "1" == "1" ]]; then
+if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     echo "Downloading ${MACOSX_SDK_VERSION} sdk"
 
     if [[ "${MACOSX_SDK_VERSION:-0}" == "15.5" ]]; then
@@ -69,7 +69,6 @@ if [[ "1" == "1" ]]; then
     else
         tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
     fi
-    ls -ll $CONDA_BUILD_SYSROOT
 fi
 
 if [ ! -z "$CONFIG" ]; then
