@@ -23,7 +23,7 @@ fi
 
 export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
 
-if [[ "1" == "1" ]]; then
+if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     echo "Downloading ${MACOSX_SDK_VERSION} sdk"
 
     if [[ "${MACOSX_SDK_VERSION:-0}" == "currently_unused" ]]; then
