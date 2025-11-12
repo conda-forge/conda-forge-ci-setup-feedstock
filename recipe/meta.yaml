@@ -100,6 +100,8 @@ requirements:
     - boa >=0.8,<1.0
 
 test:
+  files:
+    - test_osx_sdk.sh  # [osx and py==313]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
