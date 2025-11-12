@@ -111,6 +111,7 @@ test:
     - mangle_homebrew --help
     - validate_recipe_outputs --help
     - inspect_artifacts --help
+    - bash test_osx_sdk.sh  # [osx and py==313]
   # this is here to test that downstream test packages
   # are excluded from validation and inspection
   downstreams:

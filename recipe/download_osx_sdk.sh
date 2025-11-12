@@ -34,6 +34,7 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     fi
     curl -L --output MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz "${url}"
     sdk_sha256=$(
+        # IMPORTANT: When adding new versions, update test_osx_sdk.sh too!
         case "${MACOSX_SDK_VERSION}" in
             # https://github.com/joseluisq/macosx-sdks/blob/master/macosx_sdks.json:
             ("26.0") echo "07ccaa2891454713c3a230dd87283f76124193309d9a7617ebee45354c9302d2" ;;
@@ -67,6 +68,9 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
     echo "${sdk_sha256} *MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz" | shasum -a 256 -c
+    if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
+        exit 0
+    fi
     mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
     rm -rf $CONDA_BUILD_SYSROOT
