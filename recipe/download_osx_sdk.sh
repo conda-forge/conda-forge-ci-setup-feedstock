@@ -76,6 +76,10 @@ if [[ 1 == 1 ]]; then
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
     rm -rf $CONDA_BUILD_SYSROOT
     tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
+    if [[ "$MACOSX_SDK_VERSION" == 13.0 ]]; then
+        # 13.0 is packaged as MacOSX13.sdk instead of MacOSX13.0.sdk; fix that
+        mv "$(dirname "$CONDA_BUILD_SYSROOT")"/MacOSX13.sdk "$CONDA_BUILD_SYSROOT"
+    fi
 fi
 
 if [ ! -z "$CONFIG" ]; then
