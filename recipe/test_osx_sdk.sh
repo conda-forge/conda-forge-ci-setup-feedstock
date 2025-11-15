@@ -3,25 +3,12 @@ set -e
 
 # Keep it in sync with the case block in download_osx_sdk.sh
 versions=(
-    "26.0"
-    "15.5"
-    "15.4"
-    "15.2"
-    "15.1"
-    "15.0"
-    "14.5"
-    "14.4"
-    "14.2"
-    "14.0"
-    "13.3"
-    "13.1"
-    "13.0"
-    "12.3"
-    "12.1"
-    "12.0"
-    "11.3"
-    "11.1"
-    "11.0"
+    "26"
+    "15"
+    "14"
+    "13"
+    "12"
+    "11"
     "10.15"
     "10.14"
     "10.13"
@@ -35,7 +22,8 @@ for version in "${versions[@]}"; do
   echo "Testing SDK download for $version ..."
   export MACOSX_SDK_VERSION="${version}"
   export OSX_SDK_DIR=$(mktemp -d)
-  bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
+  # bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
+  bash "recipe/download_osx_sdk.sh"
   rm -rf $OSX_SDK_DIR
   rm "MacOSX${version}.sdk.tar.xz"
   unset MACOS_SDK_VERSION
