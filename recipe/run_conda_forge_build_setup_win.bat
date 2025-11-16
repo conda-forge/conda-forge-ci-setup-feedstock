@@ -78,6 +78,18 @@ if defined CI (
     DEL C:\Windows\System32\msmpires.dll || (Echo Ignoring failure to delete C:\Windows\System32\msmpires.dll)
 )
 
+:: MSVC vendors clang, which gets picked up before our own compilers, so we delete it
+:: Additionally, the chocolatey-based installation of LLVM in the images may bring in yet another LLVM, c.f.
+:: https://github.com/actions/runner-images/blob/main/images/windows/scripts/build/Install-LLVM.ps1
+:: and the end of `chocolateyinstall.ps1` in https://community.chocolatey.org/packages/llvm/20.1.8#files
+if defined CI (
+    RMDIR /s /q "C:\Program Files\LLVM" || (Echo Ignoring failure to delete C:\Program Files\LLVM)
+    RMDIR /s /q "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm" ^
+        || (Echo Ignoring failure to delete C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm)
+    RMDIR /s /q "C:\Program Files\Microsoft Visual Studio\2026\Enterprise\VC\Tools\Llvm" ^
+        || (Echo Ignoring failure to delete C:\Program Files\Microsoft Visual Studio\2026\Enterprise\VC\Tools\Llvm)
+)
+
 :: Make paths like C:\hostedtoolcache\windows\Ruby\2.5.7\x64\bin garbage
 set "PATH=%PATH:ostedtoolcache=%"
 set "PATH=%PATH:xternals\git\mingw=%"
