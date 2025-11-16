@@ -18,39 +18,37 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
 fi
 
 if [[ "${MACOSX_SDK_VERSION:-0}" == "0" ]]; then
-    export MACOSX_SDK_VERSION=$MACOSX_DEPLOYMENT_TARGET
+    export MACOSX_SDK_VERSION="$MACOSX_DEPLOYMENT_TARGET"
 fi
 
-export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${MACOSX_SDK_VERSION}.sdk"
+if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 11 ]]; then
+    # From v11 onwards, we only support the last minor release in each major series,
+    # which is equivalent to patch releases in the 10.x series.
+    actual_macosx_sdk_version=$(
+        case "${MACOSX_SDK_VERSION}" in
+            (26|26.*) echo "26.0" ;;
+            (15|15.*) echo "15.5" ;;
+            (14|14.*) echo "14.5" ;;
+            (13|13.*) echo "13.3" ;;
+            (12|12.*) echo "12.3" ;;
+            (11|11.*) echo "11.3" ;;
+            (*) echo "Unsupported SDK version (${MACOSX_SDK_VERSION}), please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
+        esac
+    )
+    # We used to rely on `alexey-lysiuk/macos-sdk`, but this other repo has more versions
+    sdk_dl_url="https://github.com/joseluisq/macosx-sdks/releases/download/${actual_macosx_sdk_version}/MacOSX${actual_macosx_sdk_version}.sdk.tar.xz"
+else
+    actual_macosx_sdk_version="${MACOSX_SDK_VERSION}"
+    sdk_dl_url="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${actual_macosx_sdk_version}.sdk.tar.xz"
+fi
 
+export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${actual_macosx_sdk_version}.sdk"
 if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
-    echo "Downloading macOS ${MACOSX_SDK_VERSION} SDK"
-
-    if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 11 ]]; then
-        # From v11 onwards, we only support the last minor release in each major series,
-        # which is equivalent to patch releases in the 10.x series.
-        macosx_sdk_version_to_download=$(
-            case "${MACOSX_SDK_VERSION}" in
-                (26|26.*) echo "26.0" ;;
-                (15|15.*) echo "15.5" ;;
-                (14|14.*) echo "14.5" ;;
-                (13|13.*) echo "13.3" ;;
-                (12|12.*) echo "12.3" ;;
-                (11|11.*) echo "11.3" ;;
-                (*) echo "Unsupported SDK version (${MACOSX_SDK_VERSION}), please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
-            esac
-        )
-        # We used to rely on `alexey-lysiuk/macos-sdk`, but this other repo has more versions
-        url="https://github.com/joseluisq/macosx-sdks/releases/download/${macosx_sdk_version_to_download}/MacOSX${macosx_sdk_version_to_download}.sdk.tar.xz"
-    else
-        macosx_sdk_version_to_download="${MACOSX_SDK_VERSION}"
-        url="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${macosx_sdk_version_to_download}.sdk.tar.xz"
-    fi
-    echo "... from URL $url"
-    curl -L --output MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz "${url}"
+    echo "Downloading macOS ${MACOSX_SDK_VERSION} SDK from ${sdk_dl_url}"
+    curl -L --output "MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" "${sdk_dl_url}"
     sdk_sha256=$(
         # IMPORTANT: When adding new versions, update test_osx_sdk.sh too!
-        case "${macosx_sdk_version_to_download}" in
+        case "${actual_macosx_sdk_version}" in
             # https://github.com/joseluisq/macosx-sdks/blob/master/macosx_sdks.json:
             ("26.0") echo "07ccaa2891454713c3a230dd87283f76124193309d9a7617ebee45354c9302d2" ;;
             ("15.5") echo "c15cf0f3f17d714d1aa5a642da8e118db53d79429eb015771ba816aa7c6c1cbd" ;;
@@ -69,14 +67,16 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             ("10.9") echo "fcf88ce8ff0dd3248b97f4eb81c7909f2cc786725de277f4d05a2b935cc49de0" ;;
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
-    echo "${sdk_sha256} *MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz" | shasum -a 256 -c
+    echo "${sdk_sha256} *MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" | shasum -a 256 -c
     if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
+        rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
         exit 0
     fi
-    mkdir -p "$(dirname "$CONDA_BUILD_SYSROOT")"
+    sysroot_parent="$(dirname "$CONDA_BUILD_SYSROOT")"
+    mkdir -p "$sysroot_parent"
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
-    rm -rf $CONDA_BUILD_SYSROOT
-    tar -xf MacOSX${MACOSX_SDK_VERSION}.sdk.tar.xz -C "$(dirname "$CONDA_BUILD_SYSROOT")"
+    rm -rf "$CONDA_BUILD_SYSROOT"
+    tar -xf MacOSX${actual_macosx_sdk_version}.sdk.tar.xz -C "$sysroot_parent"
 fi
 
 if [ ! -z "$CONFIG" ]; then

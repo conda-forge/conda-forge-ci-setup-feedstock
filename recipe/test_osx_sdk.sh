@@ -22,9 +22,9 @@ for version in "${versions[@]}"; do
   echo "Testing SDK download for $version ..."
   export MACOSX_SDK_VERSION="${version}"
   export OSX_SDK_DIR=$(mktemp -d)
-  bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
+  # bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
+  bash "recipe/download_osx_sdk.sh"
   rm -rf $OSX_SDK_DIR
-  rm "MacOSX${version}.sdk.tar.xz"
   unset MACOS_SDK_VERSION
   unset OSX_SDK_DIR
   sleep 1
