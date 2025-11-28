@@ -132,7 +132,7 @@ if not "%CUDA_PATH%" == "" (
 echo set "BUILD_PLATFORM=%BUILD_PLATFORM%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 
-CONDA_BUILD_SKIP_TESTS=0
+set CONDA_BUILD_SKIP_TESTS=0
 
 if NOT "%HOST_PLATFORM%" == "%BUILD_PLATFORM%" (
     set CONDA_BUILD_SKIP_TESTS=1
