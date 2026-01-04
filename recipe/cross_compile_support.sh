@@ -4,9 +4,18 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 BUILD_PLATFORM=$(conda info --json | jq -r .platform)
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-    HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 ${BUILD_PLATFORM})
+    HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value host_platform.0 None)
+    TARGET_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 None)
     CUDA_COMPILER_VERSION=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_compiler_version.0 None)
     MICROARCH_LEVEL_NEEDED=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value microarch_level.0 1)
+    if [ "${HOST_PLATFORM}" = "None" ]; then
+      if [ "${TARGET_PLATFORM}" = "None" ]; then
+        TARGET_PLATFORM=${BUILD_PLATFORM}
+      fi
+      HOST_PLATFORM=${TARGET_PLATFORM}
+    elif [ "${TARGET_PLATFORM}" = "None" ]; then
+      TARGET_PLATFORM=${HOST_PLATFORM}
+    fi
 fi
 
 # When compiling natively we use the docker image's glibc
@@ -21,6 +30,7 @@ DOCKER_GLIBC_VERSION=$(conda info --json | jq -r '.virtual_pkgs[] | select(.[0] 
 GLIBC_VERSION=${DOCKER_GLIBC_VERSION:-2.17}
 
 HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
+TARGET_PLATFORM=${TARGET_PLATFORM:-${BUILD_PLATFORM}}
 CUDA_COMPILER_VERSION=${CUDA_COMPILER_VERSION:-None}
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
