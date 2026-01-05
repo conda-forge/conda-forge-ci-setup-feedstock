@@ -21,8 +21,8 @@ if [[ "${MACOSX_SDK_VERSION:-0}" == "0" ]]; then
     export MACOSX_SDK_VERSION="$MACOSX_DEPLOYMENT_TARGET"
 fi
 
-if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 11 ]]; then
-    # Download from @joseluisq for macOS 11+
+if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 12 ]]; then
+    # Download from @joseluisq for macOS 12+
     actual_macosx_sdk_version=$(
         case "${MACOSX_SDK_VERSION}" in
             (26) echo "26.0" ;;
@@ -35,16 +35,21 @@ if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 11 ]]; then
             (13.*) echo "${MACOSX_SDK_VERSION}" ;;
             (12) echo "12.3" ;;
             (12.*) echo "${MACOSX_SDK_VERSION}" ;;
-            (11) echo "11.3" ;;
-            (11.*) echo "${MACOSX_SDK_VERSION}" ;;
             (*) echo "Unsupported SDK version (${MACOSX_SDK_VERSION}), please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac
     )
     # We used to rely on `alexey-lysiuk/macos-sdk`, but this other repo has more versions
     sdk_dl_url="https://github.com/joseluisq/macosx-sdks/releases/download/${actual_macosx_sdk_version}/MacOSX${actual_macosx_sdk_version}.sdk.tar.xz"
 else
-    # For macOS 10.x rely on @phracker
-    actual_macosx_sdk_version="${MACOSX_SDK_VERSION}"
+    # For macOS 10.x and 11.x rely on @phracker
+    actual_macosx_sdk_version=$(
+        case "${MACOSX_SDK_VERSION}" in
+            (11) echo "11.3" ;;
+            (11.*) echo "${MACOSX_SDK_VERSION}" ;;
+            (10.*) echo "${MACOSX_SDK_VERSION}" ;;
+            (*) echo "Unsupported SDK version (${MACOSX_SDK_VERSION}), please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
+        esac
+    )
     sdk_dl_url="https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX${actual_macosx_sdk_version}.sdk.tar.xz"
 fi
 
@@ -72,11 +77,11 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             ("12.3") echo "3abd261ceb483c44295a6623fdffe5d44fc4ac2c872526576ec5ab5ad0f6e26c" ;;
             ("12.1") echo "a1a6d4340faa7d2744f1fc63b093226da90681288507446b98795a26a6ade4bb" ;;
             ("12.0") echo "ac07f28c09e6a3b09a1c01f1535ee71abe8017beaedd09181c8f08936a510ffd" ;;
-            ("11.3") echo "9adc1373d3879e1973d28ad9f17c9051b02931674a3ec2a2498128989ece2cb1" ;;
-            ("11.1") echo "68797baaacb52f56f713400de306a58a7ca00b05c3dc6d58f0a8283bcac721f8" ;;
-            ("11.0") echo "d3feee3ef9c6016b526e1901013f264467bb927865a03422a9cb925991cc9783" ;;
             # https://github.com/phracker/MacOSX-SDKs/releases/tag/11.3:
             # Ran `openssl sha256` manually on the files there on 2024-04-02.
+            ("11.3") echo "cd4f08a75577145b8f05245a2975f7c81401d75e9535dcffbb879ee1deefcbf4" ;;
+            ("11.1") echo "68797baaacb52f56f713400de306a58a7ca00b05c3dc6d58f0a8283bcac721f8" ;;
+            ("11.0") echo "d3feee3ef9c6016b526e1901013f264467bb927865a03422a9cb925991cc9783" ;;
             ("10.15") echo "ac75d9e0eb619881f5aa6240689fce862dcb8e123f710032b7409ff5f4c3d18b" ;;
             ("10.14") echo "123dcd2e02051bed8e189581f6eea1b04eddd55a80f98960214421404aa64b72" ;;
             ("10.13") echo "1d2984acab2900c73d076fbd40750035359ee1abe1a6c61eafcd218f68923a5a" ;;
