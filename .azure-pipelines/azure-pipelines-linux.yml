@@ -24,6 +24,10 @@ jobs:
         CONFIG: linux_64_cuda_compiler_version12.9python3.13.____cp313
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
+      linux_64_cuda_compiler_version12.9python3.14.____cp314:
+        CONFIG: linux_64_cuda_compiler_version12.9python3.14.____cp314
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
       linux_64_cuda_compiler_versionNonepython3.10.____cpython:
         CONFIG: linux_64_cuda_compiler_versionNonepython3.10.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -38,6 +42,10 @@ jobs:
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
       linux_64_cuda_compiler_versionNonepython3.13.____cp313:
         CONFIG: linux_64_cuda_compiler_versionNonepython3.13.____cp313
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
+      linux_64_cuda_compiler_versionNonepython3.14.____cp314:
+        CONFIG: linux_64_cuda_compiler_versionNonepython3.14.____cp314
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
       linux_aarch64_cuda_compiler_version12.9python3.10.____cpython:
@@ -56,6 +64,10 @@ jobs:
         CONFIG: linux_aarch64_cuda_compiler_version12.9python3.13.____cp313
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
+      linux_aarch64_cuda_compiler_version12.9python3.14.____cp314:
+        CONFIG: linux_aarch64_cuda_compiler_version12.9python3.14.____cp314
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
       linux_aarch64_cuda_compiler_versionNonepython3.10.____cpython:
         CONFIG: linux_aarch64_cuda_compiler_versionNonepython3.10.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -72,6 +84,10 @@ jobs:
         CONFIG: linux_aarch64_cuda_compiler_versionNonepython3.13.____cp313
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
+      linux_aarch64_cuda_compiler_versionNonepython3.14.____cp314:
+        CONFIG: linux_aarch64_cuda_compiler_versionNonepython3.14.____cp314
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
       linux_ppc64le_python3.10.____cpython:
         CONFIG: linux_ppc64le_python3.10.____cpython
         UPLOAD_PACKAGES: 'True'
@@ -86,6 +102,10 @@ jobs:
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
       linux_ppc64le_python3.13.____cp313:
         CONFIG: linux_ppc64le_python3.13.____cp313
+        UPLOAD_PACKAGES: 'True'
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
+      linux_ppc64le_python3.14.____cp314:
+        CONFIG: linux_ppc64le_python3.14.____cp314
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-x86_64:alma9
   timeoutInMinutes: 360
