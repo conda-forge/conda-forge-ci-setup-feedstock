@@ -92,10 +92,6 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
     echo "${sdk_sha256} *MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" | shasum -a 256 -c
-    if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
-        rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
-        exit 0
-    fi
     sysroot_parent="$(dirname "$CONDA_BUILD_SYSROOT")"
     mkdir -p "$sysroot_parent"
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
@@ -112,6 +108,19 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     fi
 fi
 
+if [[ -d "${CONDA_BUILD_SYSROOT}" ]]; then
+   echo "Found CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
+else
+   echo "Missing CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
+   exit 1
+fi
+
+if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
+    rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
+    # files below are not writable during testing
+    exit 0
+fi
+
 if [ ! -z "$CONFIG" ]; then
    echo "" >> ${CI_SUPPORT}/${CONFIG}.yaml
    echo "CONDA_BUILD_SYSROOT:" >> ${CI_SUPPORT}/${CONFIG}.yaml
@@ -121,10 +130,3 @@ fi
 
 echo "export CONDA_BUILD_SYSROOT='${CONDA_BUILD_SYSROOT}'"                >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export MACOSX_DEPLOYMENT_TARGET='${MACOSX_DEPLOYMENT_TARGET}'"      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-
-if [[ -d "${CONDA_BUILD_SYSROOT}" ]]; then
-   echo "Found CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
-else
-   echo "Missing CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
-   exit 1
-fi
