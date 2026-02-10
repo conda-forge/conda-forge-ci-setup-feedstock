@@ -25,7 +25,7 @@ if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 12 ]]; then
     # Download from @joseluisq for macOS 12+
     actual_macosx_sdk_version=$(
         case "${MACOSX_SDK_VERSION}" in
-            (26) echo "26.0" ;;
+            (26) echo "26.1" ;;
             (26.*) echo "${MACOSX_SDK_VERSION}" ;;
             (15) echo "15.5" ;;
             (15.*) echo "${MACOSX_SDK_VERSION}" ;;
@@ -61,6 +61,7 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
         # IMPORTANT: When adding new versions, update test_osx_sdk.sh too!
         case "${actual_macosx_sdk_version}" in
             # https://github.com/joseluisq/macosx-sdks/blob/master/macosx_sdks.json:
+            ("26.1") echo "beee7212d265a6d2867d0236cc069314b38d5fb3486a6515734e76fa210c784c" ;;
             ("26.0") echo "07ccaa2891454713c3a230dd87283f76124193309d9a7617ebee45354c9302d2" ;;
             ("15.5") echo "c15cf0f3f17d714d1aa5a642da8e118db53d79429eb015771ba816aa7c6c1cbd" ;;
             ("15.4") echo "a0b7b66912ac0da0e45b304a332bacdbe58ca172220820d425edb28213962f81" ;;
