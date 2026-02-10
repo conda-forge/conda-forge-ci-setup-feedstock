@@ -97,6 +97,7 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
     rm -rf "$CONDA_BUILD_SYSROOT"
     tar -xf MacOSX${actual_macosx_sdk_version}.sdk.tar.xz -C "$sysroot_parent"
+    rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
     echo "unpacked SDK into ${sysroot_parent}:"
     ls ${sysroot_parent}
 
@@ -116,7 +117,6 @@ else
 fi
 
 if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
-    rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
     # files below are not writable during testing
     exit 0
 fi
