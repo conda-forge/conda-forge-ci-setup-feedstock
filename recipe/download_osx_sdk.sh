@@ -25,7 +25,7 @@ if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 12 ]]; then
     # Download from @joseluisq for macOS 12+
     actual_macosx_sdk_version=$(
         case "${MACOSX_SDK_VERSION}" in
-            (26) echo "26.0" ;;
+            (26) echo "26.1" ;;
             (26.*) echo "${MACOSX_SDK_VERSION}" ;;
             (15) echo "15.5" ;;
             (15.*) echo "${MACOSX_SDK_VERSION}" ;;
@@ -61,6 +61,7 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
         # IMPORTANT: When adding new versions, update test_osx_sdk.sh too!
         case "${actual_macosx_sdk_version}" in
             # https://github.com/joseluisq/macosx-sdks/blob/master/macosx_sdks.json:
+            ("26.1") echo "beee7212d265a6d2867d0236cc069314b38d5fb3486a6515734e76fa210c784c" ;;
             ("26.0") echo "07ccaa2891454713c3a230dd87283f76124193309d9a7617ebee45354c9302d2" ;;
             ("15.5") echo "c15cf0f3f17d714d1aa5a642da8e118db53d79429eb015771ba816aa7c6c1cbd" ;;
             ("15.4") echo "a0b7b66912ac0da0e45b304a332bacdbe58ca172220820d425edb28213962f81" ;;
@@ -92,15 +93,33 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
     echo "${sdk_sha256} *MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" | shasum -a 256 -c
-    if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
-        rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
-        exit 0
-    fi
     sysroot_parent="$(dirname "$CONDA_BUILD_SYSROOT")"
     mkdir -p "$sysroot_parent"
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
     rm -rf "$CONDA_BUILD_SYSROOT"
     tar -xf MacOSX${actual_macosx_sdk_version}.sdk.tar.xz -C "$sysroot_parent"
+    rm "MacOSX${actual_macosx_sdk_version}"*".sdk.tar.xz"
+    echo "unpacked SDK into ${sysroot_parent}:"
+    ls ${sysroot_parent}
+
+    if [[ "${actual_macosx_sdk_version}" == "13.0" ]]; then
+        # archive content as unpacked is missing the .0
+        mv ${sysroot_parent}/MacOSX13.sdk ${sysroot_parent}/MacOSX13.0.sdk
+        echo "corrected SDK path in ${sysroot_parent}:"
+        ls ${sysroot_parent}
+    fi
+fi
+
+if [[ -d "${CONDA_BUILD_SYSROOT}" ]]; then
+   echo "Found CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
+else
+   echo "Missing CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
+   exit 1
+fi
+
+if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
+    # files below are not writable during testing
+    exit 0
 fi
 
 if [ ! -z "$CONFIG" ]; then
@@ -112,10 +131,3 @@ fi
 
 echo "export CONDA_BUILD_SYSROOT='${CONDA_BUILD_SYSROOT}'"                >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 echo "export MACOSX_DEPLOYMENT_TARGET='${MACOSX_DEPLOYMENT_TARGET}'"      >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-
-if [[ -d "${CONDA_BUILD_SYSROOT}" ]]; then
-   echo "Found CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
-else
-   echo "Missing CONDA_BUILD_SYSROOT: ${CONDA_BUILD_SYSROOT}"
-   exit 1
-fi

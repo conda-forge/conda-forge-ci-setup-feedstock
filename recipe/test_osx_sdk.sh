@@ -4,6 +4,7 @@ set -e
 # Keep it in sync with the case block in download_osx_sdk.sh
 versions=(
     "26"
+    "26.1"
     "26.0"
     "15"
     "15.5"
