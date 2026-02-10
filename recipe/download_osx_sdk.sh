@@ -101,6 +101,15 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
     rm -rf "$CONDA_BUILD_SYSROOT"
     tar -xf MacOSX${actual_macosx_sdk_version}.sdk.tar.xz -C "$sysroot_parent"
+    echo "unpacked SDK into ${sysroot_parent}:"
+    ls ${sysroot_parent}
+
+    if [[ "${actual_macosx_sdk_version}" == "13.0" ]]; then
+        # archive content as unpacked is missing the .0
+        mv ${sysroot_parent}/MacOSX13.sdk ${sysroot_parent}/MacOSX13.0.sdk
+        echo "corrected SDK path in ${sysroot_parent}:"
+        ls ${sysroot_parent}
+    fi
 fi
 
 if [ ! -z "$CONFIG" ]; then
