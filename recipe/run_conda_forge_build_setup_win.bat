@@ -18,7 +18,7 @@ conda.exe config --set channel_priority %channel_priority%
 
 :: Set the conda-build working directory to a smaller path
 if "%CONDA_BLD_PATH%" == "" (
-    set "CONDA_BLD_PATH=C:\\bld\\"
+    set "CONDA_BLD_PATH=C:\bld"
 )
 
 :: Increase pagefile size, cf. https://github.com/conda-forge/conda-forge-ci-setup-feedstock/issues/155
@@ -29,16 +29,17 @@ set EntryPointPath=%ThisScriptsDirectory%SetPageFileSize.ps1
 if "%SET_PAGEFILE%" NEQ "" (
     if "%CI%" == "azure" (
         REM use different drive than CONDA_BLD_PATH-location for pagefile
-        if "%CONDA_BLD_PATH%" == "C:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on D:
+        set PageFileDrive=
+        if /i "%CONDA_BLD_PATH%" == "C:\bld" set "PageFileDrive=D:"
+        if /i "%CONDA_BLD_PATH%" == "C:\\bld\\" set "PageFileDrive=D:"
+        if /i "%CONDA_BLD_PATH%" == "D:\bld" set "PageFileDrive=C:"
+        if /i "%CONDA_BLD_PATH%" == "D:\\bld\\" set "PageFileDrive=C:"
+        if not "%PageFileDrive" == "" (
+            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB in %PageFileDrive%
             REM Inspired by:
             REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
             REM Drive-letter needs to be escaped in quotes
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"D:\""
-        )
-        if "%CONDA_BLD_PATH%" == "D:\\bld\\" (
-            echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB on C:
-            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"C:\""
+            PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%EntryPointPath%' -MinimumSize 8GB -MaximumSize 16GB -DiskRoot \"%PageFileDrive%\""
         )
     )
 )
