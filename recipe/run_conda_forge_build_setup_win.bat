@@ -25,16 +25,18 @@ if "%CONDA_BLD_PATH%" == "" (
 :: Both in the recipe and in the final package, this script is co-located with SetPageFileSize.ps1, see meta.yaml
 set ThisScriptsDirectory=%~dp0
 set EntryPointPath=%ThisScriptsDirectory%SetPageFileSize.ps1
+REM use different drive than CONDA_BLD_PATH-location for pagefile
+set PageFileDrive=
+if /i "%CONDA_BLD_PATH%" == "C:\bld" set "PageFileDrive=D:"
+if /i "%CONDA_BLD_PATH%" == "C:\bld\" set "PageFileDrive=D:"
+if /i "%CONDA_BLD_PATH%" == "C:\\bld\\" set "PageFileDrive=D:"
+if /i "%CONDA_BLD_PATH%" == "D:\bld" set "PageFileDrive=C:"
+if /i "%CONDA_BLD_PATH%" == "D:\bld\" set "PageFileDrive=C:"
+if /i "%CONDA_BLD_PATH%" == "D:\\bld\\" set "PageFileDrive=C:"
 :: Only run if SET_PAGEFILE is set; EntryPointPath needs to be set outside if-condition when not using EnableDelayedExpansion.
 if "%SET_PAGEFILE%" NEQ "" (
     if "%CI%" == "azure" (
-        REM use different drive than CONDA_BLD_PATH-location for pagefile
-        set PageFileDrive=
-        if /i "%CONDA_BLD_PATH%" == "C:\bld" set "PageFileDrive=D:"
-        if /i "%CONDA_BLD_PATH%" == "C:\\bld\\" set "PageFileDrive=D:"
-        if /i "%CONDA_BLD_PATH%" == "D:\bld" set "PageFileDrive=C:"
-        if /i "%CONDA_BLD_PATH%" == "D:\\bld\\" set "PageFileDrive=C:"
-        if not "%PageFileDrive" == "" (
+        if not "%PageFileDrive%" == "" (
             echo CONDA_BLD_PATH=%CONDA_BLD_PATH%; Setting pagefile size to 16GB in %PageFileDrive%
             REM Inspired by:
             REM https://blog.danskingdom.com/allow-others-to-run-your-powershell-scripts-from-a-batch-file-they-will-love-you-for-it/
