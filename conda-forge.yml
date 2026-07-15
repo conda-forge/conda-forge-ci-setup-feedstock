@@ -13,7 +13,8 @@ github:
 provider:
   linux_aarch64: default
   linux_ppc64le: default
-  win_arm64: default
+  win_64: github_actions
+  win_arm64: github_actions
 remote_ci_setup:
 - conda-forge-ci-setup=4
 test: native_and_emulated
