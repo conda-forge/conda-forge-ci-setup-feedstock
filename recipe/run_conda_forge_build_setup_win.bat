@@ -115,9 +115,24 @@ conda.exe info --json | shyaml get-value platform > build_platform.txt
 set /p BUILD_PLATFORM=<build_platform.txt
 del build_platform.txt
 
-cat .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 %BUILD_PLATFORM% > host_platform.txt
+cat .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
 set /p HOST_PLATFORM=<host_platform.txt
 del host_platform.txt
+
+cat .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
+set /p TARGET_PLATFORM=<target_platform.txt
+del target_platform.txt
+
+if "%HOST_PLATFORM%-%TARGET_PLATFORM%" == "None-None" (
+    set HOST_PLATFORM=%BUILD_PLATFORM%
+    set TARGET_PLATFORM=%BUILD_PLATFORM%
+)
+if "%HOST_PLATFORM%" == "None" (
+    set HOST_PLATFORM=%TARGET_PLATFORM%
+)
+if "%TARGET_PLATFORM%" == "None" (
+    set TARGET_PLATFORM=%HOST_PLATFORM%
+)
 
 type .ci_support\%CONFIG%.yaml
 

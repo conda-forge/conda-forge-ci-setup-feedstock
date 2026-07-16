@@ -16,6 +16,9 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     elif [ "${TARGET_PLATFORM}" = "None" ]; then
       TARGET_PLATFORM=${HOST_PLATFORM}
     fi
+else
+    HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
+    TARGET_PLATFORM=${TARGET_PLATFORM:-${BUILD_PLATFORM}}
 fi
 
 # When compiling natively we use the docker image's glibc
@@ -29,8 +32,6 @@ fi
 DOCKER_GLIBC_VERSION=$(conda info --json | jq -r '.virtual_pkgs[] | select(.[0] == "__glibc")[1]')
 GLIBC_VERSION=${DOCKER_GLIBC_VERSION:-2.17}
 
-HOST_PLATFORM=${HOST_PLATFORM:-${BUILD_PLATFORM}}
-TARGET_PLATFORM=${TARGET_PLATFORM:-${BUILD_PLATFORM}}
 CUDA_COMPILER_VERSION=${CUDA_COMPILER_VERSION:-None}
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]]; then
