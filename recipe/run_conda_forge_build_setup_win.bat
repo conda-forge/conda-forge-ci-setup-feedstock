@@ -111,9 +111,11 @@ if not "%CUDA_VERSION%" == "None" (
 )
 :: /CUDA
 
-conda.exe info --json | shyaml get-value platform > build_platform.txt
-set /p BUILD_PLATFORM=<build_platform.txt
-del build_platform.txt
+if [%BUILD_PLATFORM%]==[] (
+    conda.exe info --json | shyaml get-value platform > build_platform.txt
+    set /p BUILD_PLATFORM=<build_platform.txt
+    del build_platform.txt
+)
 
 cat .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
 set /p HOST_PLATFORM=<host_platform.txt
