@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BUILD_PLATFORM=$(conda info --json | jq -r .platform)
+BUILD_PLATFORM=${BUILD_PLATFORM:-$(conda info --json | jq -r .platform)}
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     HOST_PLATFORM=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value host_platform.0 None)
