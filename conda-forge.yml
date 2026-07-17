@@ -1,5 +1,3 @@
-azure:
-  free_disk_space: true
 build_platform:
   linux_aarch64: linux_64
   linux_ppc64le: linux_64
@@ -16,3 +14,5 @@ provider:
 remote_ci_setup:
 - conda-forge-ci-setup=4
 test: native_and_emulated
+workflow_settings: 
+  free_disk_space: quick
