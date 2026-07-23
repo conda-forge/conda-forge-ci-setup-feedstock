@@ -7,7 +7,7 @@ cuda_compiler:
 cuda_compiler_version:
 - None
 docker_image:
-- quay.io/condaforge/linux-anvil-x86_64:alma9
+- quay.io/condaforge/linux-anvil-x86_64:alma10
 pin_run_as_build:
   python:
     min_pin: x.x
