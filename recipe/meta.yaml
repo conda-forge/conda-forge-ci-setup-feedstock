@@ -99,7 +99,6 @@ requirements:
   run_constrained:
     - boa >=0.8,<1.0
 
-{% if target_platform != "win-arm64" %}
 test:
   files:
     - test_osx_sdk.sh  # [osx and py==313]
@@ -119,7 +118,6 @@ test:
   # are excluded from validation and inspection
   downstreams:
     - ngmix
-{% endif %}
 
 about:
   home: https://github.com/conda-forge/conda-forge-ci-setup-feedstock
