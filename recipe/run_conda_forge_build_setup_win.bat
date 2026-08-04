@@ -87,8 +87,8 @@ set "PATH=%PATH:xternals\git\mingw=%"
 
 :: Install CUDA drivers if needed
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
-<.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
-<cuda.version set /p CUDA_VERSION=
+type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_compiler_version.0 None > cuda.version
+set /p CUDA_VERSION=<cuda.version
 del cuda.version
 if not "%CUDA_VERSION%" == "None" (
     if "%CUDA_VERSION:~0,2%" GEQ "12" (
@@ -110,7 +110,7 @@ if not "%CUDA_VERSION%" == "None" (
     )
 
     :: Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI systems without GPUs
-    cat .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
+    type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
     set /p CUDA_ARCH_VERSION=<cuda_arch.version
     del cuda_arch.version
     if not "%CUDA_ARCH_VERSION%" == "None" (
@@ -126,11 +126,11 @@ if [%BUILD_PLATFORM%]==[] (
     del build_platform.txt
 )
 
-cat .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
+type .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
 set /p HOST_PLATFORM=<host_platform.txt
 del host_platform.txt
 
-cat .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
+type .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
 set /p TARGET_PLATFORM=<target_platform.txt
 del target_platform.txt
 
