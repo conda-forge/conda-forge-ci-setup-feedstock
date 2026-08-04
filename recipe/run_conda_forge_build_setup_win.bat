@@ -108,6 +108,15 @@ if not "%CUDA_VERSION%" == "None" (
         set "PATH=%PATH%;%CUDA_PATH%\bin"
         set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
     )
+
+    :: Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI systems without GPUs
+    cat .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
+    set /p CUDA_ARCH_VERSION=<cuda_arch.version
+    del cuda_arch.version
+    if not "%CUDA_ARCH_VERSION%" == "None" (
+        set "CONDA_OVERRIDE_CUDA_ARCH=%CUDA_ARCH_VERSION%"
+        echo set "CONDA_OVERRIDE_CUDA_ARCH=%CONDA_OVERRIDE_CUDA_ARCH%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+    )
 )
 :: /CUDA
 
