@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.24.4" %}
+{% set version = "4.26.1" %}
 {% set build = 1 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
@@ -120,7 +120,6 @@ test:
   # are excluded from validation and inspection
   downstreams:
     - ngmix
-
 
 about:
   home: https://github.com/conda-forge/conda-forge-ci-setup-feedstock

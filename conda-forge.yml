@@ -1,9 +1,5 @@
-azure:
-  free_disk_space: true
 build_platform:
-  linux_aarch64: linux_64
   linux_ppc64le: linux_64
-  osx_arm64: osx_64
 conda_build:
   pkg_format: '2'
 conda_forge_output_validation: true
@@ -13,8 +9,10 @@ github:
 provider:
   linux_aarch64: default
   linux_ppc64le: default
-  win_64: github_actions
-  win_arm64: github_actions
+  osx_arm64: default
+  win_arm64: default
 remote_ci_setup:
 - conda-forge-ci-setup=4
 test: native_and_emulated
+workflow_settings: 
+  free_disk_space: quick

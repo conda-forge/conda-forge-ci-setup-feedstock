@@ -87,8 +87,8 @@ set "PATH=%PATH:xternals\git\mingw=%"
 
 :: Install CUDA drivers if needed
 for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
-<.ci_support\%CONFIG%.yaml shyaml get-value cuda_compiler_version.0 None > cuda.version
-<cuda.version set /p CUDA_VERSION=
+type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_compiler_version.0 None > cuda.version
+set /p CUDA_VERSION=<cuda.version
 del cuda.version
 if not "%CUDA_VERSION%" == "None" (
     if "%CUDA_VERSION:~0,2%" GEQ "12" (
@@ -108,16 +108,44 @@ if not "%CUDA_VERSION%" == "None" (
         set "PATH=%PATH%;%CUDA_PATH%\bin"
         set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
     )
+
+    :: Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI systems without GPUs
+    type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
+    set /p CUDA_ARCH_VERSION=<cuda_arch.version
+    del cuda_arch.version
+    if not "%CUDA_ARCH_VERSION%" == "None" (
+        set "CONDA_OVERRIDE_CUDA_ARCH=%CUDA_ARCH_VERSION%"
+        echo set "CONDA_OVERRIDE_CUDA_ARCH=%CONDA_OVERRIDE_CUDA_ARCH%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+    )
 )
 :: /CUDA
 
-conda.exe info --json | shyaml get-value platform > build_platform.txt
-set /p BUILD_PLATFORM=<build_platform.txt
-del build_platform.txt
+if [%BUILD_PLATFORM%]==[] (
+    conda.exe info --json | shyaml get-value platform > build_platform.txt
+    set /p BUILD_PLATFORM=<build_platform.txt
+    del build_platform.txt
+)
 
-cat .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 %BUILD_PLATFORM% > host_platform.txt
+type .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
 set /p HOST_PLATFORM=<host_platform.txt
 del host_platform.txt
+
+type .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
+set /p TARGET_PLATFORM=<target_platform.txt
+del target_platform.txt
+
+:: if neither host nor target platform is set, inherit build_platform for both;
+:: if one is unset (but not both), inherit the value from the other
+if "%HOST_PLATFORM%-%TARGET_PLATFORM%" == "None-None" (
+    set HOST_PLATFORM=%BUILD_PLATFORM%
+    set TARGET_PLATFORM=%BUILD_PLATFORM%
+)
+if "%HOST_PLATFORM%" == "None" (
+    set HOST_PLATFORM=%TARGET_PLATFORM%
+)
+if "%TARGET_PLATFORM%" == "None" (
+    set TARGET_PLATFORM=%HOST_PLATFORM%
+)
 
 type .ci_support\%CONFIG%.yaml
 
