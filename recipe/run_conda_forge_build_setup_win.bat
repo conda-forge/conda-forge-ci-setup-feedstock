@@ -90,6 +90,9 @@ for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
 type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_compiler_version.0 None > cuda.version
 set /p CUDA_VERSION=<cuda.version
 del cuda.version
+type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
+set /p CUDA_ARCH_VERSION=<cuda_arch.version
+del cuda_arch.version
 if not "%CUDA_VERSION%" == "None" (
     if "%CUDA_VERSION:~0,2%" GEQ "12" (
         :: Don't call install_cuda, as we'll get CUDA packages from CF
@@ -110,9 +113,6 @@ if not "%CUDA_VERSION%" == "None" (
     )
 
     :: Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI systems without GPUs
-    type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
-    set /p CUDA_ARCH_VERSION=<cuda_arch.version
-    del cuda_arch.version
     if not "%CUDA_ARCH_VERSION%" == "None" (
         set "CONDA_OVERRIDE_CUDA_ARCH=%CUDA_ARCH_VERSION%"
         echo set "CONDA_OVERRIDE_CUDA_ARCH=%CONDA_OVERRIDE_CUDA_ARCH%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
