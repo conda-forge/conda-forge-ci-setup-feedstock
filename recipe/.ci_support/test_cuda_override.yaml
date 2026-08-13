@@ -1,0 +1,4 @@
+cuda_compiler_version:
+- '12.9'
+cuda_arch_version:
+- '9.0'
