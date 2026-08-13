@@ -44,6 +44,7 @@ build:
     - cd "${RECIPE_DIR}"  # [unix]
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
     - echo "${RECIPE_DIR}"
+    - echo "Hey conda-smithy, don't prune {{ cuda_compiler_version_min }} from the variant files!"
   entry_points:
     - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
     - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
