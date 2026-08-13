@@ -103,9 +103,14 @@ requirements:
 test:
   files:
     - test_osx_sdk.sh  # [osx and py==313]
+    - test_cuda_override_win.bat            # [win and cuda_compiler_version != "None"]
+    - test_cuda_override_linux.sh           # [linux and cuda_compiler_version != "None"]
+    - .ci_support/test_cuda_override.yaml   # [(win or linux) and cuda_compiler_version != "None"]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
+    - call test_cuda_override_win.bat                                            # [win and cuda_compiler_version != "None"]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
+    - bash test_cuda_override_linux.sh                                           # [linux and cuda_compiler_version != "None"]
     - ff_ci_pr_build --help
     - upload_or_check_non_existence --help
     - setup_conda_rc --help
