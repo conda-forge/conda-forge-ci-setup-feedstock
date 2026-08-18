@@ -120,33 +120,44 @@ if not "%CUDA_VERSION%" == "None" (
 )
 :: /CUDA
 
-if [%build_platform%]==[] (
-    conda.exe info --json | shyaml get-value platform > build_platform.txt
-    set /p build_platform=<build_platform.txt
-    del build_platform.txt
-)
+REM windows lowercase env variables passed through python os.environ
+REM become upper case variables because of the conda-build passes
+REM through environment variables. We avoid using these variable names
+REM by using the cf_ prefix
 
-REM unlike unix we use lowercase to avoid issues with passing
-REM these variables to bash
 type .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
-set /p host_platform=<host_platform.txt
+set /p cf_host_platform=<host_platform.txt
 del host_platform.txt
 
+if [%cf_build_platform%]==[] (
+    if [%build_platform%]==[] (
+        conda.exe info --json | shyaml get-value platform > build_platform.txt
+        set /p cf_build_platform=<build_platform.txt
+        del build_platform.txt
+        REM for backwards compat. Remove when conda-smithy doesn't use this anymore
+        set build_platform=%cf_build_platform%
+    ) else (
+        set cf_build_platform=%build_platform%
+    )
+    REM for backwards compat. Remove when conda-smithy doesn't use this anymore
+    set host_platform=%cf_build_platform%
+)
+
 type .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
-set /p target_platform=<target_platform.txt
+set /p cf_target_platform=<target_platform.txt
 del target_platform.txt
 
 :: if neither host nor target platform is set, inherit build_platform for both;
 :: if one is unset (but not both), inherit the value from the other
-if "%host_platform%-%target_platform%" == "None-None" (
-    set host_platform=%build_platform%
-    set target_platform=%build_platform%
+if "%cf_host_platform%-%cf_target_platform%" == "None-None" (
+    set cf_host_platform=%cf_build_platform%
+    set cf_target_platform=%cf_build_platform%
 )
-if "%host_platform%" == "None" (
-    set host_platform=%target_platform%
+if "%cf_host_platform%" == "None" (
+    set cf_host_platform=%cf_target_platform%
 )
-if "%target_platform%" == "None" (
-    set target_platform=%host_platform%
+if "%cf_target_platform%" == "None" (
+    set cf_target_platform=%cf_host_platform%
 )
 
 type .ci_support\%CONFIG%.yaml
@@ -162,16 +173,18 @@ if not "%CUDA_PATH%" == "" (
     :: Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
     echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 )
-echo set "build_platform=%build_platform%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-echo set "host_platform=%host_platform%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+REM these are set for persistency across scripts
+echo set "cf_build_platform=%cf_build_platform%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+echo set "cf_host_platform=%cf_host_platform%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+echo set "cf_target_platform=%cf_target_platform%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 
 set CONDA_BUILD_SKIP_TESTS=0
 
-if NOT "%host_platform%" == "%build_platform%" (
+if NOT "%cf_host_platform%" == "%cf_build_platform%" (
     set CONDA_BUILD_SKIP_TESTS=1
 )
 
-if "%host_platform%-%build_platform%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
+if "%cf_host_platform%-%cf_build_platform%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
     echo set "CROSSCOMPILING_EMULATOR=1"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
     echo CROSSCOMPILING_EMULATOR:                 >> ".ci_support\%CONFIG%.yaml"
     echo - 1                                      >> ".ci_support\%CONFIG%.yaml"
