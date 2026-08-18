@@ -176,7 +176,7 @@ if not "%CUDA_PATH%" == "" (
 REM these are set for persistency across scripts
 echo set "cf_build_platform=%cf_build_platform%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "cf_host_platform=%cf_host_platform%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-echo set "cf_target_platform=%cf_target_platform%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+echo set "cf_target_platform=%cf_target_platform%"      >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 
 set CONDA_BUILD_SKIP_TESTS=0
 
