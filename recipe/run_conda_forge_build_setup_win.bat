@@ -120,31 +120,33 @@ if not "%CUDA_VERSION%" == "None" (
 )
 :: /CUDA
 
-if [%BUILD_PLATFORM%]==[] (
+if [%build_platform%]==[] (
     conda.exe info --json | shyaml get-value platform > build_platform.txt
-    set /p BUILD_PLATFORM=<build_platform.txt
+    set /p build_platform=<build_platform.txt
     del build_platform.txt
 )
 
+REM unlike unix we use lowercase to avoid issues with passing
+REM these variables to bash
 type .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
-set /p HOST_PLATFORM=<host_platform.txt
+set /p host_platform=<host_platform.txt
 del host_platform.txt
 
 type .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
-set /p TARGET_PLATFORM=<target_platform.txt
+set /p target_platform=<target_platform.txt
 del target_platform.txt
 
 :: if neither host nor target platform is set, inherit build_platform for both;
 :: if one is unset (but not both), inherit the value from the other
-if "%HOST_PLATFORM%-%TARGET_PLATFORM%" == "None-None" (
-    set HOST_PLATFORM=%BUILD_PLATFORM%
-    set TARGET_PLATFORM=%BUILD_PLATFORM%
+if "%host_platform%-%target_platform%" == "None-None" (
+    set host_platform=%build_platform%
+    set target_platform=%build_platform%
 )
-if "%HOST_PLATFORM%" == "None" (
-    set HOST_PLATFORM=%TARGET_PLATFORM%
+if "%host_platform%" == "None" (
+    set host_platform=%target_platform%
 )
-if "%TARGET_PLATFORM%" == "None" (
-    set TARGET_PLATFORM=%HOST_PLATFORM%
+if "%target_platform%" == "None" (
+    set target_platform=%host_platform%
 )
 
 type .ci_support\%CONFIG%.yaml
@@ -160,16 +162,16 @@ if not "%CUDA_PATH%" == "" (
     :: Export CONDA_OVERRIDE_CUDA to allow __cuda to be detected on CI systems without GPUs
     echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%" >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 )
-echo set "BUILD_PLATFORM=%BUILD_PLATFORM%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-echo set "HOST_PLATFORM=%HOST_PLATFORM%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+echo set "build_platform=%build_platform%"        >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
+echo set "host_platform=%host_platform%"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 
 set CONDA_BUILD_SKIP_TESTS=0
 
-if NOT "%HOST_PLATFORM%" == "%BUILD_PLATFORM%" (
+if NOT "%host_platform%" == "%build_platform%" (
     set CONDA_BUILD_SKIP_TESTS=1
 )
 
-if "%HOST_PLATFORM%-%BUILD_PLATFORM%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
+if "%host_platform%-%build_platform%-%PROCESSOR_ARCHITECTURE%" == "win-arm64-win-64-ARM64" (
     echo set "CROSSCOMPILING_EMULATOR=1"          >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
     echo CROSSCOMPILING_EMULATOR:                 >> ".ci_support\%CONFIG%.yaml"
     echo - 1                                      >> ".ci_support\%CONFIG%.yaml"
