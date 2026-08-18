@@ -121,7 +121,7 @@ if not "%CUDA_VERSION%" == "None" (
 :: /CUDA
 
 REM windows lowercase env variables passed through python os.environ
-REM become upper case variables because of the conda-build passes
+REM become upper case variables because of the way conda-build passes
 REM through environment variables. We avoid using these variable names
 REM by using the cf_ prefix
 
