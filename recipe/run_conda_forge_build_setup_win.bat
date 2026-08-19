@@ -125,23 +125,22 @@ REM become upper case variables because of the way conda-build passes
 REM through environment variables. We avoid using these variable names
 REM by using the cf_ prefix
 
-type .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
-set /p cf_host_platform=<host_platform.txt
-del host_platform.txt
-
 if [%cf_build_platform%]==[] (
     if [%build_platform%]==[] (
         conda.exe info --json | shyaml get-value platform > build_platform.txt
         set /p cf_build_platform=<build_platform.txt
-        del build_platform.txt
         REM for backwards compat. Remove when conda-smithy doesn't use this anymore
-        set build_platform=%cf_build_platform%
+        set /p build_platform=<build_platform.txt
+        del build_platform.txt
     ) else (
         set cf_build_platform=%build_platform%
     )
-    REM for backwards compat. Remove when conda-smithy doesn't use this anymore
-    set host_platform=%cf_build_platform%
+    set need_backcompat=1
 )
+
+type .ci_support\%CONFIG%.yaml | shyaml get-value host_platform.0 None > host_platform.txt
+set /p cf_host_platform=<host_platform.txt
+del host_platform.txt
 
 type .ci_support\%CONFIG%.yaml | shyaml get-value target_platform.0 None > target_platform.txt
 set /p cf_target_platform=<target_platform.txt
@@ -159,6 +158,17 @@ if "%cf_host_platform%" == "None" (
 if "%cf_target_platform%" == "None" (
     set cf_target_platform=%cf_host_platform%
 )
+
+if [%need_backcompat%]==[1] (
+    REM for backwards compat. Remove when conda-smithy doesn't use this anymore
+    set host_platform=%cf_host_platform%
+)
+
+echo "cf_build_platform: %cf_build_platform%"
+echo "cf_host_platform: %cf_host_platform%"
+echo "cf_target_platform: %cf_target_platform%"
+echo "build_platform: %build_platform%"
+echo "host_platform: %host_platform%"
 
 type .ci_support\%CONFIG%.yaml
 
