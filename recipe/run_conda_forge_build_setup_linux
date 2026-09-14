@@ -95,8 +95,14 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${SCRIPT_DIR}/cross_compile_support.sh
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
+    csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 0)
     mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 0)
     msv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 0)
+    if [[ "${mdt}" != "0" && "${csv}" == "0" ]]; then
+        echo "ERROR: config has MACOSX_DEPLOYMENT_TARGET but no c_stdlib_version."
+        echo "       Add {{ stdlib('c') }} to the recipe and rerender."
+        exit 1
+    fi
     if [[ "${mdt}" != "0" || "${msv}" != "0" ]]; then
         OSX_SDK_DIR=$(mktemp -d)
         source ${SCRIPT_DIR}/download_osx_sdk.sh
