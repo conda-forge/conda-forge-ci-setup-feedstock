@@ -10,6 +10,8 @@ cuda_compiler:
 - cuda-nvcc
 cuda_compiler_version:
 - None
+cuda_compiler_version_min:
+- None
 macos_machine:
 - x86_64-apple-darwin13.4.0
 pin_run_as_build:
