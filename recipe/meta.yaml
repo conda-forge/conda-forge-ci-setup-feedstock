@@ -107,6 +107,7 @@ test:
     - test_cuda_override_win.bat            # [win and cuda_compiler_version != "None"]
     - test_cuda_override_linux.sh           # [linux and cuda_compiler_version != "None"]
     - .ci_support/test_cuda_override.yaml   # [(win or linux) and cuda_compiler_version != "None"]
+    - .ci_support/test_cuda_override_default.yaml  # [(win or linux) and cuda_compiler_version != "None"]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
     - call test_cuda_override_win.bat                                            # [win and cuda_compiler_version != "None"]

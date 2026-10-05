@@ -90,7 +90,7 @@ for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
 type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_compiler_version.0 None > cuda.version
 set /p CUDA_VERSION=<cuda.version
 del cuda.version
-type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 None > cuda_arch.version
+type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 999.0 > cuda_arch.version
 set /p CUDA_ARCH_VERSION=<cuda_arch.version
 del cuda_arch.version
 if not "%CUDA_VERSION%" == "None" (
@@ -110,9 +110,11 @@ if not "%CUDA_VERSION%" == "None" (
         set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
     )
 
-    if not "%CUDA_ARCH_VERSION%" == "None" (
-        set "CONDA_OVERRIDE_CUDA_ARCH=%CUDA_ARCH_VERSION%"
-    )
+    REM Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI
+    REM systems without GPUs. Like __glibc, the default is set high, so that dependencies
+    REM requiring any arch can be installed; 999.0 is a placeholder, not a claim about the
+    REM hardware.
+    set "CONDA_OVERRIDE_CUDA_ARCH=%CUDA_ARCH_VERSION%"
 )
 :: /CUDA
 
