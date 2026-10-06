@@ -121,7 +121,7 @@ def request_copy(
             time.sleep(max(2.0 * 2**polling_attempt, 10))  # wait at least 10 seconds
             for o in checksums:
                 if not results["copied"][o]:
-                    results["copied"][o] = _check_dist_with_label_and_hash_on_prod(dist, channel, "sha256", checksums[o])
+                    results["copied"][o] = _check_dist_with_label_and_hash_on_prod(o, channel, "sha256", checksums[o])
 
             if all(v for v in results["copied"].values()):
                 break
