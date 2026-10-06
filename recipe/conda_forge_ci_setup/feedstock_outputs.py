@@ -1,10 +1,7 @@
 import os
-import functools
 import json
 import time
 import sys
-import hmac
-import urllib
 
 import click
 import requests
@@ -14,8 +11,6 @@ from conda_forge_metadata.feedstock_outputs import (
     package_to_feedstock,
     feedstock_outputs_config,
 )
-from binstar_client import BinstarError
-from binstar_client.utils import get_server_api
 
 from .utils import (
     built_distributions_from_recipe_variant,
@@ -33,46 +28,93 @@ def _unix_dist_path(path):
     return "/".join(path.split(os.sep)[-2:])
 
 
-@functools.lru_cache(maxsize=1)
-def _get_ac_api(timeout=30):
-    if "STAGING_BINSTAR_TOKEN" in os.environ:
-        token = os.environ["STAGING_BINSTAR_TOKEN"]
-    elif "BINSTAR_TOKEN" in os.environ:
-        token = os.environ["BINSTAR_TOKEN"]
-    else:
-        raise RuntimeError("No anaconda.org token found!")
-
-    ac = get_server_api(token=token)
-    ac.session.request = functools.partial(ac.session.request, timeout=timeout)
-    return ac
+# how long to wait for a copy queued with /feedstock-outputs/copy-async, and
+# how often to ask about it
+ASYNC_COPY_TIMEOUT = 30 * 60
+ASYNC_COPY_POLL_INTERVAL = 10
 
 
-def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
-    try:
-        _, name, version, _ = split_pkg(dist)
-    except RuntimeError:
-        print("could not parse dist for existence check: %s" % dist, flush=True)
-        return False
+def _failed_copy(outputs, errors):
+    return {"errors": errors, "copied": {o: False for o in outputs}}
 
-    try:
-        ac = _get_ac_api()
-        data = ac.distribution(
-            "conda-forge",
-            name,
-            version,
-            basename=urllib.parse.quote(dist, safe=""),
-        )
-        if label in data.get("labels", []) and hmac.compare_digest(data[hash_type], hash_value):
-            return True
+
+def _request_copy_async(headers, json_data):
+    """Copy through /feedstock-outputs/copy-async and wait for it to finish.
+
+    The webservice replies as soon as it has queued the copy, so a copy that
+    waits behind others is not mistaken for one that failed. Sending the
+    request again is always safe: it joins the copy already queued, and an
+    output already on conda-forge counts as copied.
+
+    Returns the copy's final status.
+    """
+    url = "%s/feedstock-outputs/copy-async" % VALIDATION_ENDPOINT
+    outputs = json_data["outputs"]
+    deadline = time.time() + ASYNC_COPY_TIMEOUT
+    copy_id = None
+    while time.time() < deadline:
+        if copy_id is None:
+            try:
+                r = requests.post(url, headers=headers, json=json_data, timeout=60)
+            except requests.exceptions.RequestException as e:
+                print("could not queue the copy, trying again: %r" % e, flush=True)
+                time.sleep(ASYNC_COPY_POLL_INTERVAL)
+                continue
+
+            if r.status_code == 404:
+                return _failed_copy(
+                    outputs, ["the webservice has no /feedstock-outputs/copy-async"]
+                )
+            if r.status_code == 400:
+                try:
+                    status = r.json()
+                except ValueError:
+                    status = {}
+                failed = _failed_copy(outputs, [status.get("message", r.text)])
+                return {**failed, **status}
+            if r.status_code != 202:
+                print(
+                    "could not queue the copy (HTTP %d), trying again" % r.status_code,
+                    flush=True,
+                )
+                time.sleep(ASYNC_COPY_POLL_INTERVAL)
+                continue
+
+            status = r.json()
+            copy_id = status["id"]
         else:
-            return False
-    except (BinstarError, requests.exceptions.ReadTimeout):
-        return False
+            time.sleep(ASYNC_COPY_POLL_INTERVAL)
+            try:
+                r = requests.get("%s/%s" % (url, copy_id), timeout=60)
+            except requests.exceptions.RequestException as e:
+                print("could not check on copy %s: %r" % (copy_id, e), flush=True)
+                continue
+
+            if r.status_code == 404:
+                # the webservice restarted and forgot it
+                print("copy %s is unknown, queuing it again" % copy_id, flush=True)
+                copy_id = None
+                continue
+            if r.status_code != 200:
+                print(
+                    "could not check on copy %s (HTTP %d)" % (copy_id, r.status_code),
+                    flush=True,
+                )
+                continue
+
+            status = r.json()
+
+        print("copy %s is %s" % (copy_id, status["state"]), flush=True)
+        if status["state"] in ("done", "failed"):
+            return status
+
+    return _failed_copy(
+        outputs,
+        ["gave up waiting for the copy after %d minutes" % (ASYNC_COPY_TIMEOUT // 60)],
+    )
 
 
-def request_copy(
-    feedstock, dists, channel, git_sha=None, comment_on_error=True, num_polling_attempts=5
-):
+def request_copy(feedstock, dists, channel, git_sha=None, comment_on_error=True):
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
@@ -96,38 +138,10 @@ def request_copy(
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
-    r = requests.post(
-        "%s/feedstock-outputs/copy" % VALIDATION_ENDPOINT,
-        headers=headers,
-        json=json_data,
-    )
 
-    try:
-        r.raise_for_status()
-        results = r.json()
-    except Exception as e:
-        print(
-            "ERROR failure in output copy from cf-staging to conda-forge:"
-            "\n    error: %s\n    response text: %s" % (
-                repr(e),
-                r.text,
-            ),
-            flush=True,
-        )
-        print("polling anaconda.org to see if copy completes in the background...", flush=True)
-        results = {"copied": {o: False for o in checksums.keys()}}
-        for polling_attempt in range(num_polling_attempts):
-            print("polling attempt %d of %d" % (polling_attempt+1, num_polling_attempts), flush=True)
-            time.sleep(max(2.0 * 2**polling_attempt, 10))  # wait at least 10 seconds
-            for o in checksums:
-                if not results["copied"][o]:
-                    results["copied"][o] = _check_dist_with_label_and_hash_on_prod(o, channel, "sha256", checksums[o])
-
-            if all(v for v in results["copied"].values()):
-                break
-
+    results = _request_copy_async(headers, json_data)
     print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
-    return (r.status_code == 200) or all(v for v in results["copied"].values())
+    return all(results["copied"].values())
 
 
 def is_valid_feedstock_output(project, outputs):
