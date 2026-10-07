@@ -130,6 +130,31 @@ def request_copy(
     return (r.status_code == 200) or all(v for v in results["copied"].values())
 
 
+# transient errors worth retrying
+_RETRY_EXCEPTIONS = (
+    requests.exceptions.HTTPError,
+    requests.exceptions.ConnectionError,
+    requests.exceptions.Timeout,
+    requests.exceptions.ChunkedEncodingError,
+)
+
+
+def _is_valid_output(feedstock, output_name):
+    """Test if a single output is allowed for a feedstock.
+
+    Raises requests exceptions on HTTP and network errors.
+    """
+    try:
+        registered_feedstocks = package_to_feedstock(output_name, timeout=30)
+    except requests.exceptions.HTTPError as exc:
+        if exc.response.status_code == 404:
+            # no output exists so see if we can add it
+            return feedstock_outputs_config().get("auto_register_all", False)
+        raise
+    # make sure feedstock is ok
+    return feedstock in registered_feedstocks
+
+
 def is_valid_feedstock_output(project, outputs):
     """Test if feedstock outputs are valid (i.e., the outputs are allowed for that
     feedstock). Optionally register them if they do not exist.
@@ -167,16 +192,18 @@ def is_valid_feedstock_output(project, outputs):
 
         for i in range(3):  # three attempts
             try:
-                registered_feedstocks = package_to_feedstock(o)
-            except requests.exceptions.HTTPError as exc:
-                if exc.response.status_code == 404:
-                    # no output exists so see if we can add it
-                    valid[dist] = feedstock_outputs_config().get("auto_register_all", False)
-                    break
-                elif i < 2:
+                valid[dist] = _is_valid_output(feedstock, o)
+                break
+            except _RETRY_EXCEPTIONS as exc:
+                if i < 2:
                     # wait and retry
-                    time.sleep(1)
-                else:
+                    print(
+                        f"WARNING: Failed to get feedstock data (attempt {i + 1} of 3), "
+                        f"retrying. {type(exc)}: {exc}",
+                        flush=True,
+                    )
+                    time.sleep(5 * (i + 1))
+                elif isinstance(exc, requests.exceptions.HTTPError):
                     # last attempt, i==2, did not work
                     # This should rarely happen, if ever
                     print(
@@ -184,10 +211,10 @@ def is_valid_feedstock_output(project, outputs):
                         f"Failed to get feedstock data. {type(exc)}: {exc}"
                     )
                     valid[dist] = False
-            else:
-                # make sure feedstock is ok
-                valid[dist] = feedstock in registered_feedstocks
-                break
+                else:
+                    # network is down: fail loudly instead of reporting
+                    # the output as not allowed for this feedstock
+                    raise
 
     return valid
 
