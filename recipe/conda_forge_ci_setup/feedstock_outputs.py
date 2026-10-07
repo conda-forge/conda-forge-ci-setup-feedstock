@@ -109,6 +109,8 @@ def request_copy(
     except Exception as e:
         poll_for_copy = True  # poll if request or json parsing fails
     else:
+        # any status code besides 200 indicates
+        # that we need to poll for copy to finish
         if r.status_code == 200:
             poll_for_copy = False
         else:
