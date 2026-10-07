@@ -105,6 +105,7 @@ def request_copy(
 
     try:
         r.raise_for_status()
+        results = r.json()
     except Exception as e:
         poll_for_copy = True
     else:
@@ -113,9 +114,7 @@ def request_copy(
         else:
             poll_for_copy = True
 
-    if not poll_for_copy:
-        results = r.json()
-    else:
+    if poll_for_copy:
         print(
             "ERROR failure in output copy from cf-staging to conda-forge:"
             "\n    error: %s\n    response text: %s" % (
