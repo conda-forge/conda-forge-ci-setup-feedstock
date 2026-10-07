@@ -107,7 +107,7 @@ def request_copy(
         r.raise_for_status()
         results = r.json()
     except Exception as e:
-        poll_for_copy = True
+        poll_for_copy = True  # poll if request or json parsing fails
     else:
         if r.status_code == 200:
             poll_for_copy = False
