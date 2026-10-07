@@ -108,6 +108,14 @@ def request_copy(
         results = r.json()
     except Exception as e:
         poll_for_copy = True  # poll if request or json parsing fails
+        print(
+            "ERROR failure in output copy from cf-staging to conda-forge:"
+            "\n    error: %s\n    response text: %s" % (
+                repr(e),
+                r.text,
+            ),
+            flush=True,
+        )
     else:
         # any status code besides 200 indicates
         # that we need to poll for copy to finish
@@ -117,14 +125,6 @@ def request_copy(
             poll_for_copy = True
 
     if poll_for_copy:
-        print(
-            "ERROR failure in output copy from cf-staging to conda-forge:"
-            "\n    error: %s\n    response text: %s" % (
-                repr(e),
-                r.text,
-            ),
-            flush=True,
-        )
         print("polling anaconda.org to see if copy completes in the background...", flush=True)
         results = {"copied": {o: False for o in checksums.keys()}}
         for polling_attempt in range(num_polling_attempts):
