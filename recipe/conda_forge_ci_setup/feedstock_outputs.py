@@ -93,6 +93,7 @@ def request_copy(
         "comment_on_error": comment_on_error,
         "hash_type": "sha256",
         "provider": os.environ.get("CI", None),
+        "async", True,
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
@@ -104,8 +105,17 @@ def request_copy(
 
     try:
         r.raise_for_status()
-        results = r.json()
     except Exception as e:
+        poll_for_copy = True
+    else:
+        if r.status_code == 200:
+            poll_for_copy = False
+        else:
+            poll_for_copy = True
+
+    if not poll_for_copy:
+        results = r.json()
+    else:
         print(
             "ERROR failure in output copy from cf-staging to conda-forge:"
             "\n    error: %s\n    response text: %s" % (
