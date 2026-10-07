@@ -93,7 +93,7 @@ def request_copy(
         "comment_on_error": comment_on_error,
         "hash_type": "sha256",
         "provider": os.environ.get("CI", None),
-        "async", True,
+        "async": True,
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
