@@ -263,4 +263,3 @@ Feedstock Maintainers
 =====================
 
 * [@conda-forge/core](https://github.com/orgs/conda-forge/teams/core/)
-
