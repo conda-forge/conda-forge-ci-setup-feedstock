@@ -56,7 +56,6 @@ fi
 export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX${actual_macosx_sdk_version}.sdk"
 if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
     echo "Downloading macOS ${MACOSX_SDK_VERSION} SDK from ${sdk_dl_url}"
-    curl -L --output "MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" "${sdk_dl_url}"
     sdk_sha256=$(
         # IMPORTANT: When adding new versions, update test_osx_sdk.sh too!
         case "${actual_macosx_sdk_version}" in
@@ -92,7 +91,26 @@ if [[ ! -d ${CONDA_BUILD_SYSROOT} ]]; then
             ("10.9") echo "fcf88ce8ff0dd3248b97f4eb81c7909f2cc786725de277f4d05a2b935cc49de0" ;;
             (*) echo "Unknown version & hash, please update conda-forge-ci-setup's download_osx_sdk.sh" ;;
         esac)
-    echo "${sdk_sha256} *MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" | shasum -a 256 -c
+    if [[ ! "${sdk_sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+        echo "ERROR: ${sdk_sha256}"
+        exit 1
+    fi
+    # GitHub downloads from CI runners are flaky (DNS, timeouts, stalls, HTML
+    # error pages), so retry both the download and the checksum verification.
+    # Only use curl options that the older curl in Linux CI images supports.
+    for attempt in 1 2 3; do
+        if curl -L --fail --retry 3 --connect-timeout 30 --speed-limit 1024 --speed-time 60 \
+                --output "MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" "${sdk_dl_url}" \
+            && echo "${sdk_sha256} *MacOSX${actual_macosx_sdk_version}.sdk.tar.xz" | shasum -a 256 -c; then
+            break
+        elif [[ ${attempt} -eq 3 ]]; then
+            echo "ERROR: Failed to download macOS SDK from ${sdk_dl_url}"
+            exit 1
+        fi
+        echo "Download of macOS SDK failed (attempt ${attempt}), retrying in $((attempt * 10))s"
+        sleep $((attempt * 10))
+    done
+    unset attempt
     sysroot_parent="$(dirname "$CONDA_BUILD_SYSROOT")"
     mkdir -p "$sysroot_parent"
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
