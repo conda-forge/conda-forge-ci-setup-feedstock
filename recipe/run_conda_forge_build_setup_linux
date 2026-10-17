@@ -24,7 +24,7 @@ set +u
 case "$CI" in
     travis|azure|circle)
         # Azure Linux workers have 2 cores: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
-        # Travis CI Linux workers have 2 cores: https://docs.travis-ci.com/user/reference/overview/#virtualization-environment-vs-operating-system 
+        # Travis CI Linux workers have 2 cores: https://docs.travis-ci.com/user/reference/overview/#virtualization-environment-vs-operating-system
         # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
         export CPU_COUNT="${CPU_COUNT:-2}"
     ;;
@@ -83,12 +83,12 @@ if [[ "$CUDA_VERSION" != "None" ]]; then
     export CONDA_OVERRIDE_CUDA="${CUDA_VERSION}"
     echo "export CONDA_OVERRIDE_CUDA='${CONDA_OVERRIDE_CUDA}'" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 
-    # Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI systems without GPUs
-    CUDA_ARCH_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_arch_version.0 None)"
-    if [[ "$CUDA_ARCH_VERSION" != "None" ]]; then
-        export CONDA_OVERRIDE_CUDA_ARCH="${CUDA_ARCH_VERSION}"
-        echo "export CONDA_OVERRIDE_CUDA_ARCH='${CONDA_OVERRIDE_CUDA_ARCH}'" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
-    fi
+    # Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI systems
+    # without GPUs. Like __glibc, the default is set high, so that dependencies requiring
+    # any arch can be installed; 999.0 is a placeholder, not a claim about the hardware.
+    CUDA_ARCH_VERSION="$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cuda_arch_version.0 999.0)"
+    export CONDA_OVERRIDE_CUDA_ARCH="${CUDA_ARCH_VERSION}"
+    echo "export CONDA_OVERRIDE_CUDA_ARCH='${CONDA_OVERRIDE_CUDA_ARCH}'" >> "${CONDA_PREFIX}/etc/conda/activate.d/conda-forge-ci-setup-activate.sh"
 fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
