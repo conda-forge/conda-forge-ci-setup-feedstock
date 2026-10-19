@@ -2,10 +2,10 @@ set -e
 
 # We don't change the default here to a newer SDK to ensure that old, non-rerendered feedstock keep working.
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-    csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 0)
-    mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 0)
-    msv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 0)
-    if [[ "${mdt}" != "0" && "${csv}" == "0" ]]; then
+    csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 "")
+    mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 "")
+    msv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 "")
+    if [[ -n "${mdt}" && -z "${csv}" ]]; then
         echo "ERROR: config has MACOSX_DEPLOYMENT_TARGET but no c_stdlib_version."
         echo "       Add {{ stdlib('c') }} to the recipe and rerender."
         exit 1
