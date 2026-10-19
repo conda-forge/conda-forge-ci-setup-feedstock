@@ -2,18 +2,20 @@ set -e
 
 # We don't change the default here to a newer SDK to ensure that old, non-rerendered feedstock keep working.
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-    csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 0)
-    mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 0)
-    msv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 0)
-    if [[ "${mdt}" != "0" && "${csv}" == "0" ]]; then
+    csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 "")
+    mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 "")
+    msv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 "")
+    if [[ -n "${mdt}" && -z "${csv}" ]]; then
         echo "ERROR: config has MACOSX_DEPLOYMENT_TARGET but no c_stdlib_version."
         echo "       Add {{ stdlib('c') }} to the recipe and rerender."
         exit 1
     fi
 fi
 
-export MACOSX_DEPLOYMENT_TARGET=${csv:-10.9}
-export MACOSX_SDK_VERSION=${msv:-${MACOSX_DEPLOYMENT_TARGET}}
+# Config values win; otherwise keep what the caller exported (test_osx_sdk.sh
+# exports MACOSX_SDK_VERSION without a config file).
+export MACOSX_DEPLOYMENT_TARGET=${csv:-${MACOSX_DEPLOYMENT_TARGET:-10.9}}
+export MACOSX_SDK_VERSION=${msv:-${MACOSX_SDK_VERSION:-${MACOSX_DEPLOYMENT_TARGET}}}
 
 if [[ $(echo "${MACOSX_SDK_VERSION}" | cut -d "." -f 1) -ge 12 ]]; then
     # Download from @joseluisq for macOS 12+
