@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.29.2" %}
+{% set version = "4.30.0" %}
 {% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
@@ -111,7 +111,6 @@ test:
     - .ci_support/test_osx_sdk_stdlib.yaml     # [unix]
     - .ci_support/test_osx_sdk_pinned.yaml     # [unix]
     - .ci_support/test_osx_sdk_mdt_only.yaml   # [unix]
-    - .ci_support/test_osx_sdk_mdt_and_compiler_version.yaml  # [unix]
     - test_cuda_override_win.bat            # [win and cuda_compiler_version != "None"]
     - test_cuda_override_linux.sh           # [linux and cuda_compiler_version != "None"]
     - .ci_support/test_cuda_override.yaml   # [(win or linux) and cuda_compiler_version != "None"]
