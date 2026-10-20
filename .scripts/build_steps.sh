@@ -9,23 +9,17 @@
 
 set -xeuo pipefail
 export FEEDSTOCK_ROOT="${FEEDSTOCK_ROOT:-/home/conda/feedstock_root}"
-# ensure absolute path
-FEEDSTOCK_ROOT=$(cd "${FEEDSTOCK_ROOT}"; pwd)
 source ${FEEDSTOCK_ROOT}/.scripts/logging_utils.sh
 
 
 ( endgroup "Start Docker" ) 2> /dev/null
 
-( startgroup "Configuring build environment" ) 2> /dev/null
+( startgroup "Configuring conda" ) 2> /dev/null
 
-MINIFORGE_HOME=/opt/conda
 export PYTHONUNBUFFERED=1
 export RECIPE_ROOT="${RECIPE_ROOT:-/home/conda/recipe_root}"
-# ensure absolute path
-RECIPE_ROOT=$(cd "${RECIPE_ROOT}"; pwd)
 export CI_SUPPORT="${FEEDSTOCK_ROOT}/.ci_support"
 export CONFIG_FILE="${CI_SUPPORT}/${CONFIG}.yaml"
-export PIXI_CACHE_DIR="${MINIFORGE_HOME}"
 export RATTLER_CACHE_DIR="${FEEDSTOCK_ROOT}/build_artifacts/pkg_cache"
 
 cat >~/.condarc <<CONDARC
@@ -34,45 +28,29 @@ conda-build:
   root-dir: ${FEEDSTOCK_ROOT}/build_artifacts
 pkgs_dirs:
   - ${FEEDSTOCK_ROOT}/build_artifacts/pkg_cache
-  - ${MINIFORGE_HOME}/pkgs
+  - /opt/conda/pkgs
 solver: libmamba
 
 CONDARC
-
-( endgroup "Configuring build environment" ) 2> /dev/null
-
-( startgroup "Provisioning base env with micromamba" ) 2> /dev/null
-
-MAMBA_ROOT_PREFIX=~/.conda
-MICROMAMBA_EXE=micromamba
-
-echo Creating environment
-mv "${MINIFORGE_HOME}"/conda-meta/history "${MINIFORGE_HOME}"/conda-meta/history.$(date +%Y-%m-%d-%H-%M-%S)
-echo > "${MINIFORGE_HOME}"/conda-meta/history
-"${MICROMAMBA_EXE}" install --yes --root-prefix "${MAMBA_ROOT_PREFIX}" --prefix "${MINIFORGE_HOME}" \
-    --override-channels --channel conda-forge --strict-channel-priority \
+mv /opt/conda/conda-meta/history /opt/conda/conda-meta/history.$(date +%Y-%m-%d-%H-%M-%S)
+echo > /opt/conda/conda-meta/history
+micromamba install --root-prefix ~/.conda --prefix /opt/conda \
+    --yes --override-channels --channel conda-forge --strict-channel-priority \
     pip  python=3.14 conda-build conda-forge-ci-setup=4
-
-( endgroup "Provisioning base env with micromamba" ) 2> /dev/null
-
-( startgroup "Configuring conda" ) 2> /dev/null
 export CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1
 
-
-echo Overriding conda-forge-ci-setup with local version
 conda uninstall --quiet --yes --force conda-forge-ci-setup=4
-pip install --no-deps "${RECIPE_ROOT}"
-
-# Set basic configuration
-echo Setting up configuration
+pip install --no-deps "${RECIPE_ROOT}/."
+# set up the condarc
 setup_conda_rc "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
 
-# Linux-specific setup
-echo Running build setup
 # Overriding global run_conda_forge_build_setup_linux with local copy.
 source ${RECIPE_ROOT}/run_conda_forge_build_setup_linux
 
 
+
+# make the build number clobber
+make_build_number "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]] && [[ "${HOST_PLATFORM}" != linux-* ]] && [[ "${BUILD_WITH_CONDA_DEBUG:-0}" != 1 ]]; then
     EXTRA_CB_OPTIONS="${EXTRA_CB_OPTIONS:-} --no-test"
@@ -82,8 +60,7 @@ fi
 ( endgroup "Configuring conda" ) 2> /dev/null
 
 if [[ -f "${FEEDSTOCK_ROOT}/LICENSE.txt" ]]; then
-    echo Copying feedstock license
-    cp "${FEEDSTOCK_ROOT}/LICENSE.txt" "${RECIPE_ROOT}/recipe-scripts-license.txt"
+  cp "${FEEDSTOCK_ROOT}/LICENSE.txt" "${RECIPE_ROOT}/recipe-scripts-license.txt"
 fi
 
 if [[ "${BUILD_WITH_CONDA_DEBUG:-0}" == 1 ]]; then
@@ -95,49 +72,48 @@ if [[ "${BUILD_WITH_CONDA_DEBUG:-0}" == 1 ]]; then
     #   - none vs. --target-platform
     CONDA_SUBDIR="${BUILD_PLATFORM}" conda debug \
         "${RECIPE_ROOT}" \
-        -m "${CONFIG_FILE}" \
+        -m "${CI_SUPPORT}/${CONFIG}.yaml" \
         ${EXTRA_CB_OPTIONS:-} \
         ${BUILD_OUTPUT_ID:+--output-id "${BUILD_OUTPUT_ID}"} \
         --clobber-file "${CI_SUPPORT}/clobber_${CONFIG}.yaml"
 
     # Drop into an interactive shell
     /bin/bash
-fi
+else
+    # differences between conda-build vs. rattler-build
+    #   - recipe is positional vs. --recipe "${RECIPE_ROOT}"
+    #   - --suppress-variables vs. none
+    #   - --clobber-file vs. none
+    #   - none vs. --target-platform
+    #   - --extra-meta a=b c=d vs. --extra-meta a=b --extra-meta c=d
+    CONDA_SUBDIR="${BUILD_PLATFORM}" conda-build \
+        "${RECIPE_ROOT}" \
+        -m "${CI_SUPPORT}/${CONFIG}.yaml" \
+        ${EXTRA_CB_OPTIONS:-} \
+        --suppress-variables \
+        --clobber-file "${CI_SUPPORT}/clobber_${CONFIG}.yaml" \
+        --extra-meta flow_run_id="${flow_run_id:-}" remote_url="${remote_url:-}" sha="${sha:-}"
+    ( startgroup "Inspecting artifacts" ) 2> /dev/null
 
-# Build the recipe
-echo Building recipe
+    # inspect_artifacts was only added in conda-forge-ci-setup 4.9.4
+    command -v inspect_artifacts >/dev/null 2>&1 && inspect_artifacts --recipe-dir "${RECIPE_ROOT}" -m "${CONFIG_FILE}" || echo "inspect_artifacts needs conda-forge-ci-setup >=4.9.4"
 
-# differences between conda-build vs. rattler-build
-#   - recipe is positional vs. --recipe "${RECIPE_ROOT}"
-#   - --suppress-variables vs. none
-#   - --clobber-file vs. none
-#   - none vs. --target-platform
-#   - --extra-meta a=b c=d vs. --extra-meta a=b --extra-meta c=d
+    ( endgroup "Inspecting artifacts" ) 2> /dev/null
+    ( startgroup "Validating outputs" ) 2> /dev/null
 
-CONDA_SUBDIR="${BUILD_PLATFORM}" conda-build \
-    "${RECIPE_ROOT}" \
-    -m "${CONFIG_FILE}" \
-    ${EXTRA_CB_OPTIONS:-} \
-    --suppress-variables \
-    --clobber-file "${CI_SUPPORT}/clobber_${CONFIG}.yaml" \
-    --extra-meta flow_run_id="${flow_run_id:-}" remote_url="${remote_url:-}" sha="${sha:-}"
+    validate_recipe_outputs "${FEEDSTOCK_NAME}"
 
-( startgroup "Inspecting artifacts" ) 2> /dev/null
+    ( endgroup "Validating outputs" ) 2> /dev/null
 
-# inspect_artifacts was only added in conda-forge-ci-setup 4.9.4
-command -v inspect_artifacts >/dev/null 2>&1 && inspect_artifacts --recipe-dir "${RECIPE_ROOT}" -m "${CONFIG_FILE}" || echo "inspect_artifacts needs conda-forge-ci-setup >=4.9.4"
-
-( endgroup "Inspecting artifacts" ) 2> /dev/null
-( startgroup "Validating outputs" ) 2> /dev/null
-validate_recipe_outputs "${FEEDSTOCK_NAME}"
-( endgroup "Validating outputs" ) 2> /dev/null
-
-if [[ "${UPLOAD_PACKAGES}" != "False" ]] && [[ "${IS_PR_BUILD}" == "False" ]]; then
     ( startgroup "Uploading packages" ) 2> /dev/null
-    upload_package --validate --feedstock-name="${FEEDSTOCK_NAME}"  "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
+
+    if [[ "${UPLOAD_PACKAGES}" != "False" ]] && [[ "${IS_PR_BUILD}" == "False" ]]; then
+        upload_package --validate --feedstock-name="${FEEDSTOCK_NAME}"  "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
+    fi
+
     ( endgroup "Uploading packages" ) 2> /dev/null
 fi
 
-( startgroup "Leaving the Docker container" ) 2> /dev/null
+( startgroup "Final checks" ) 2> /dev/null
 
 touch "${FEEDSTOCK_ROOT}/build_artifacts/conda-forge-build-done-${CONFIG}"

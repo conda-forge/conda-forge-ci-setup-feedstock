@@ -143,4 +143,4 @@ ${DOCKER_EXECUTABLE} run ${DOCKER_RUN_ARGS} \
 test -f "$DONE_CANARY"
 
 # This closes the last group opened in `build_steps.sh`
-( endgroup "Leaving the Docker container" ) 2> /dev/null
+( endgroup "Final checks" ) 2> /dev/null
