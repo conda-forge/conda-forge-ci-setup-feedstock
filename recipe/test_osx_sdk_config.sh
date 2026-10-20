@@ -60,8 +60,10 @@ check_case() {
 check_case test_osx_sdk_stdlib 11.0
 # An explicit MACOSX_SDK_VERSION in the config wins.
 check_case test_osx_sdk_pinned 13.3
-# MACOSX_DEPLOYMENT_TARGET without c_stdlib_version is rejected.
-check_case test_osx_sdk_mdt_only error
+# MACOSX_DEPLOYMENT_TARGET without c_stdlib_version is OK.
+check_case test_osx_sdk_mdt_only 11.0
+# MACOSX_DEPLOYMENT_TARGET without c_stdlib_version but with a compiler_version errors.
+check_case test_osx_sdk_mdt_and_compiler_version error
 # No config: an exported MACOSX_SDK_VERSION is kept (test_osx_sdk.sh relies on this).
 check_case "" 14.5 MACOSX_SDK_VERSION=14.5
 # No config and nothing exported: the 10.9 default.
