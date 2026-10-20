@@ -60,7 +60,7 @@ check_case() {
 check_case test_osx_sdk_stdlib 11.0
 # An explicit MACOSX_SDK_VERSION in the config wins.
 check_case test_osx_sdk_pinned 13.3
-# MACOSX_DEPLOYMENT_TARGET without c_stdlib_version is OK.
+# MACOSX_DEPLOYMENT_TARGET without c_stdlib_version and no compiler is OK.
 check_case test_osx_sdk_mdt_only 11.0
 # MACOSX_DEPLOYMENT_TARGET without c_stdlib_version but with a compiler_version errors.
 check_case test_osx_sdk_mdt_and_compiler_version error
