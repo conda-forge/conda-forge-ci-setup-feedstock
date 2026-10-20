@@ -20,7 +20,7 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
         fi
 
         # without a compiler we default to MACOSX_DEPLOYMENT_TARGET
-        # this covers recipes built on oax but not compiled (eg non-noarch python recipes)
+        # this covers recipes built on osx but not compiled (e.g., non-noarch python recipes)
         csv=${mdt}
     fi
 fi
