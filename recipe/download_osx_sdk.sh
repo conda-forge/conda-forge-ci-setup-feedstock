@@ -2,18 +2,11 @@ set -e
 
 # We don't change the default here to a newer SDK to ensure that old, non-rerendered feedstock keep working.
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
-    echo "grep reports:"
-    grep "_compiler_version" ${CI_SUPPORT}/${CONFIG}.yaml
-    echo "return code: $?"
-    echo "done with grep"
-
-    has_compiler=0
-    while IFS= read -r line; do
-        if [[ "$line" == *"_compiler_version"* ]]; then
-            has_compiler=1
-            break
-        fi
-    done < ${CI_SUPPORT}/${CONFIG}.yaml
+    if grep -q "_compiler_version" ${CI_SUPPORT}/${CONFIG}.yaml; then
+        has_compiler=0
+    else
+        has_compiler=1
+    fi
     echo "has_compiler: ${has_compiler}"
 
     csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 "")
@@ -26,6 +19,8 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
             exit 1
         fi
 
+        # without a compiler we default to MACOSX_DEPLOYMENT_TARGET
+        # this covers recipes built on oax but not compiled (eg non-noarch python recipes)
         csv=${mdt}
     fi
 fi
