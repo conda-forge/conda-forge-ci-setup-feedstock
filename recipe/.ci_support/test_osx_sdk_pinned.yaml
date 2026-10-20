@@ -8,3 +8,5 @@ c_stdlib_version:
 - '11.0'
 target_platform:
 - osx-64
+c_compiler_version:
+- "45"
