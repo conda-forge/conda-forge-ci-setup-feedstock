@@ -9,14 +9,6 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
             break
         fi
     done < ${CI_SUPPORT}/${CONFIG}.yaml
-    echo "has_compiler: ${has_compiler}"
-    cat ${CI_SUPPORT}/${CONFIG}.yaml
-    # if grep -q "_compiler_version" ${CI_SUPPORT}/${CONFIG}.yaml; then
-    #     has_compiler=0
-    # else
-    #     has_compiler=1
-    # fi
-    # echo "has_compiler: ${has_compiler}"
 
     csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 "")
     mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 "")
