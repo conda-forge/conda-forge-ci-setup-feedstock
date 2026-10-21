@@ -93,6 +93,7 @@ def request_copy(
         "comment_on_error": comment_on_error,
         "hash_type": "sha256",
         "provider": os.environ.get("CI", None),
+        "async": True,
     }
     if git_sha is not None:
         json_data["git_sha"] = git_sha
@@ -106,6 +107,7 @@ def request_copy(
         r.raise_for_status()
         results = r.json()
     except Exception as e:
+        poll_for_copy = True  # poll if request or json parsing fails
         print(
             "ERROR failure in output copy from cf-staging to conda-forge:"
             "\n    error: %s\n    response text: %s" % (
@@ -114,6 +116,15 @@ def request_copy(
             ),
             flush=True,
         )
+    else:
+        # any status code besides 200 indicates
+        # that we need to poll for copy to finish
+        if r.status_code == 200:
+            poll_for_copy = False
+        else:
+            poll_for_copy = True
+
+    if poll_for_copy:
         print("polling anaconda.org to see if copy completes in the background...", flush=True)
         results = {"copied": {o: False for o in checksums.keys()}}
         for polling_attempt in range(num_polling_attempts):
