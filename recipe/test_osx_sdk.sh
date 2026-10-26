@@ -43,6 +43,9 @@ for version in "${versions[@]}"; do
   export MACOSX_SDK_VERSION="${version}"
   export OSX_SDK_DIR=$(mktemp -d)
   bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
+  # ensure we actually downloaded the right version; don't bother
+  # about the mapping from major-only versions to the latest minor
+  [[ "$version" == *.* ]] && test -d "$OSX_SDK_DIR/MacOSX${version}.sdk"
   # To test locally:
   # bash "recipe/download_osx_sdk.sh"
   rm -rf $OSX_SDK_DIR
