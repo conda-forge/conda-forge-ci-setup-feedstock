@@ -1,7 +1,5 @@
-c_stdlib:
-- sysroot
-c_stdlib_version:
-- '2.17'
+DOCKER_PLATFORM:
+- linux/amd64
 channel_sources:
 - conda-forge
 channel_targets:
@@ -22,6 +20,3 @@ python:
 - 3.14.* *_cp314
 target_platform:
 - linux-ppc64le
-zip_keys:
-- - c_stdlib_version
-  - cuda_compiler_version
