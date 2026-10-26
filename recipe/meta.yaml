@@ -1,5 +1,5 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.30.0" %}
+{% set version = "4.30.1" %}
 {% set build = 0 %}
 
 {% set cuda_compiler_version = cuda_compiler_version or "None" %}
@@ -56,20 +56,17 @@ build:
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
     - inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main
   ignore_run_exports_from:
-    - {{ stdlib('c') }}
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
     - {{ compiler('cxx') }}               # [cuda_compiler_version != "None"]
 
 requirements:
   build:
-    # necessary unconditionally (on osx) to populate c_stdlib_version in variant configs,
-    # since the ci-setup started validating that this is set (over MACOSX_DEPLOYMENT_TARGET)
-    - {{ stdlib('c') }}
      # ensure that all variants of cuda_compiler_version are tested
     - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
     - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
     - {{ compiler('cxx') }}               # [cuda_compiler_version != "None"]
+    - {{ stdlib('c') }}                   # [cuda_compiler_version != "None"]
     - python                              # [build_platform != target_platform]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
@@ -111,6 +108,7 @@ test:
     - .ci_support/test_osx_sdk_stdlib.yaml     # [unix]
     - .ci_support/test_osx_sdk_pinned.yaml     # [unix]
     - .ci_support/test_osx_sdk_mdt_only.yaml   # [unix]
+    - .ci_support/test_osx_sdk_cross.yaml      # [unix]
     - test_cuda_override_win.bat            # [win and cuda_compiler_version != "None"]
     - test_cuda_override_linux.sh           # [linux and cuda_compiler_version != "None"]
     - .ci_support/test_cuda_override.yaml   # [(win or linux) and cuda_compiler_version != "None"]

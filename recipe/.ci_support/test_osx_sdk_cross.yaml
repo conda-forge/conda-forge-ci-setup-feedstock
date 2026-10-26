@@ -1,0 +1,4 @@
+cross_target_platform:
+- osx-arm64
+target_platform:
+- linux-64
