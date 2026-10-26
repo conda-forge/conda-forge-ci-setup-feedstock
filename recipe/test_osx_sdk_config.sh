@@ -34,7 +34,7 @@ check_case() {
         CI_SUPPORT="${CI_SUPPORT_DIR}" \
         CONFIG="${config}" \
         OSX_SDK_DIR="${sdk_dir}" \
-        _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS=1 \
+        _CONDA_FORGE_CI_SETUP_OSX_SDK_CONFIG_TESTS=1 \
         "$@" bash "${SCRIPT}" 2>&1)
     rc=$?
     echo "${out}"

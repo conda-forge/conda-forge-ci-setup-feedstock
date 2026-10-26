@@ -12,7 +12,7 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     fi
 fi
 
-# Config values win, otherwise keep what the caller exported; except for tests on this feedstock,
+# Config values win, otherwise keep what the caller exported; except for the download tests here,
 # which need MACOSX_SDK_VERSION from test_osx_sdk.sh regardless of what's in the variant configs
 if [[ -z "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-}" ]]; then
     export MACOSX_DEPLOYMENT_TARGET=${csv:-${MACOSX_DEPLOYMENT_TARGET:-10.9}}
@@ -115,7 +115,7 @@ else
    exit 1
 fi
 
-if [ "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-0}" != "0" ]; then
+if [[ -n "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-}" || -n "${_CONDA_FORGE_CI_SETUP_OSX_SDK_CONFIG_TESTS:-}" ]]; then
     # files below are not writable during testing
     exit 0
 fi
