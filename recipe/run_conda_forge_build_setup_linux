@@ -96,7 +96,8 @@ source ${SCRIPT_DIR}/cross_compile_support.sh
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
     tgt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value target_platform.0 unset)
-    if [[ "${tgt}" == osx-* ]]; then
+    cross_tgt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value cross_target_platform.0 unset)
+    if [[ "${tgt}" == osx-* || "${cross_tgt}" == osx-* ]]; then
         OSX_SDK_DIR=$(mktemp -d)
         source ${SCRIPT_DIR}/download_osx_sdk.sh
     fi
