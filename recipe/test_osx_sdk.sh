@@ -1,51 +1,18 @@
 #!/bin/bash
 set -e
 
-# Keep it in sync with the case block in download_osx_sdk.sh
-versions=(
-    "26"
-    "26.1"
-    "26.0"
-    "15"
-    "15.5"
-    "15.4"
-    "15.2"
-    "15.1"
-    "15.0"
-    "14"
-    "14.5"
-    "14.4"
-    "14.2"
-    "14.0"
-    "13"
-    "13.3"
-    "13.1"
-    "13.0"
-    "12"
-    "12.3"
-    "12.1"
-    "12.0"
-    "11"
-    "11.3"
-    "11.1"
-    "11.0"
-    "10.15"
-    "10.14"
-    "10.13"
-    "10.12"
-    "10.11"
-    "10.10"
-    "10.9"
-)
+# Every SDK pinned in fetch_macos_sdk.py; the fallbacks for versions that are
+# not pinned are covered by test_osx_sdk_config.sh
+versions=($(python "${CONDA_PREFIX}/bin/fetch_macos_sdk.py" list | awk '{print $1}'))
+[[ ${#versions[@]} -gt 0 ]]
 export _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS=1
 for version in "${versions[@]}"; do
   echo "Testing SDK download for $version ..."
   export MACOSX_SDK_VERSION="${version}"
   export OSX_SDK_DIR=$(mktemp -d)
   bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
-  # ensure we actually downloaded the right version; don't bother
-  # about the mapping from major-only versions to the latest minor
-  [[ "$version" == *.* ]] && test -d "$OSX_SDK_DIR/MacOSX${version}.sdk"
+  # ensure we actually downloaded the right version
+  test -d "$OSX_SDK_DIR/MacOSX${version}.sdk"
   # To test locally:
   # bash "recipe/download_osx_sdk.sh"
   rm -rf $OSX_SDK_DIR
