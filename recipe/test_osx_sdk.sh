@@ -1,23 +1,35 @@
 #!/bin/bash
 set -e
 
-# Every SDK pinned in fetch_macos_sdk.py; the fallbacks for versions that are
-# not pinned are covered by test_osx_sdk_config.sh
-versions=($(python "${CONDA_PREFIX}/bin/fetch_macos_sdk.py" list | awk '{print $1}'))
-[[ ${#versions[@]} -gt 0 ]]
+# Download every SDK from each source in cdn_sdks.json and legacy_sdks.json.
+# On Linux only check one small SDK from Apple's CDN, which exercises
+# unpack_pkg.py instead of pkgutil.
+tests=()
+if [[ "$(uname)" == "Linux" ]]; then
+  tests+=("cdn 10.12")
+else
+  for source in cdn legacy; do
+    for version in $(jq -r '.sdks | keys[]' "${CONDA_PREFIX}/bin/${source}_sdks.json"); do
+      tests+=("${source} ${version}")
+    done
+  done
+fi
 export _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS=1
-for version in "${versions[@]}"; do
-  echo "Testing SDK download for $version ..."
+for test in "${tests[@]}"; do
+  read source version <<< "${test}"
+  echo "Testing SDK download for $version from $source ..."
+  export OSX_SDK_SOURCES="${source}"
   export MACOSX_SDK_VERSION="${version}"
   export OSX_SDK_DIR=$(mktemp -d)
   bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
   # ensure we actually downloaded the right version
   test -d "$OSX_SDK_DIR/MacOSX${version}.sdk"
+  test -f "$OSX_SDK_DIR/MacOSX${version}.sdk/SDKSettings.plist"
   # To test locally:
   # bash "recipe/download_osx_sdk.sh"
   rm -rf $OSX_SDK_DIR
-  unset MACOS_SDK_VERSION
+  unset MACOSX_SDK_VERSION
   unset OSX_SDK_DIR
   sleep 1
 done
-unset _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS
+unset _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS OSX_SDK_SOURCES

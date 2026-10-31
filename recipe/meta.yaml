@@ -37,7 +37,9 @@ build:
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"                     # [osx]
     - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"                   # [linux]
     - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"                                         # [unix]
-    - cp "${RECIPE_DIR}/fetch_macos_sdk.py" "${PREFIX}/bin/fetch_macos_sdk.py"                                           # [unix]
+    - cp "${RECIPE_DIR}/cdn_sdks.json" "${PREFIX}/bin/cdn_sdks.json"                                                     # [unix]
+    - cp "${RECIPE_DIR}/legacy_sdks.json" "${PREFIX}/bin/legacy_sdks.json"                                               # [unix]
+    - cp "${RECIPE_DIR}/unpack_pkg.py" "${PREFIX}/bin/unpack_pkg.py"                                                     # [unix]
     - cp "${RECIPE_DIR}/cross_compile_support.sh" "${PREFIX}/bin/cross_compile_support.sh"                               # [unix]
     - cp "${RECIPE_DIR}/get_x86_64_level.py" "${PREFIX}/bin/get_x86_64_level.py"                                         # [unix]
     - COPY "%RECIPE_DIR%\\install_cuda.bat" "%SCRIPTS%\\install_cuda.bat"                                                # [win]
@@ -104,7 +106,7 @@ requirements:
 
 test:
   files:
-    - test_osx_sdk.sh  # [osx and py==313]
+    - test_osx_sdk.sh  # [(osx or linux64) and py==313]
     - test_osx_sdk_config.sh                   # [unix]
     - .ci_support/test_osx_sdk_stdlib.yaml     # [unix]
     - .ci_support/test_osx_sdk_pinned.yaml     # [unix]
@@ -127,7 +129,7 @@ test:
     - mangle_homebrew --help
     - validate_recipe_outputs --help
     - inspect_artifacts --help
-    - bash test_osx_sdk.sh  # [osx and py==313]
+    - bash test_osx_sdk.sh  # [(osx or linux64) and py==313]
     - bash test_osx_sdk_config.sh  # [unix]
   # this is here to test that downstream test packages
   # are excluded from validation and inspection
