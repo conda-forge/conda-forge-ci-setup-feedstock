@@ -65,9 +65,15 @@ check_case test_osx_sdk_mdt_only error
 # No config: an exported MACOSX_SDK_VERSION is kept (test_osx_sdk.sh relies on this).
 check_case "" 14.5 MACOSX_SDK_VERSION=14.5
 # cross-compilation from linux to osx; ensure cross_target_platform gets picked up
-check_case test_osx_sdk_cross 10.9
-# No config and nothing exported: the 10.9 default.
-check_case "" 10.9
+check_case test_osx_sdk_cross 11.0
+# No config and nothing exported: the 11.0 default.
+check_case "" 11.0
+# Only in macosx_sdks_legacy.json
+check_case "" 10.9 MACOSX_SDK_VERSION=10.9
+# Major-only versions resolve to the newest minor in macosx_sdks_cdn.json
+data_dir="$(dirname "${SCRIPT}")/../share/conda-forge-ci-setup"
+[[ -d "${data_dir}" ]] || data_dir="$(dirname "${SCRIPT}")"
+check_case "" "$(jq -r '.aliases["15"]' "${data_dir}/macosx_sdks_cdn.json")" MACOSX_SDK_VERSION=15
 
 rm -rf "${stub_dir}"
 if [[ ${failures} -ne 0 ]]; then
