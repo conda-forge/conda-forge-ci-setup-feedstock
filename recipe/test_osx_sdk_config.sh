@@ -68,10 +68,12 @@ check_case "" 14.5 MACOSX_SDK_VERSION=14.5
 check_case test_osx_sdk_cross 11.0
 # No config and nothing exported: the 11.0 default.
 check_case "" 11.0
-# Only in legacy_sdks.json
+# Only in macosx_sdks_legacy.json
 check_case "" 10.9 MACOSX_SDK_VERSION=10.9
-# Major-only versions resolve to the newest minor in cdn_sdks.json
-check_case "" "$(jq -r '.aliases["15"]' "$(dirname "${SCRIPT}")/cdn_sdks.json")" MACOSX_SDK_VERSION=15
+# Major-only versions resolve to the newest minor in macosx_sdks_cdn.json
+data_dir="$(dirname "${SCRIPT}")/../share/conda-forge-ci-setup"
+[[ -d "${data_dir}" ]] || data_dir="$(dirname "${SCRIPT}")"
+check_case "" "$(jq -r '.aliases["15"]' "${data_dir}/macosx_sdks_cdn.json")" MACOSX_SDK_VERSION=15
 
 rm -rf "${stub_dir}"
 if [[ ${failures} -ne 0 ]]; then

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Find macOS SDKs on Apple's software update CDN and pin them (stdlib only).
 
-  discover   rescan Apple's catalogs and rewrite cdn_sdks.json (downloads
-             every SDK package, so takes a while)
+  discover   rescan Apple's catalogs and rewrite macosx_sdks_cdn.json
+             (downloads every SDK package, so takes a while)
   list       show the pinned SDKs
 
 This is a maintainer tool and is not part of the conda-forge-ci-setup package;
-download_osx_sdk.sh only reads the resulting cdn_sdks.json.
+download_osx_sdk.sh only reads the resulting macosx_sdks_cdn.json. SDKs are
+pinned per minor version, using the newest patch release (e.g. 10.15 -> 10.15.6).
 """
 
 import gzip
@@ -22,7 +23,7 @@ from pathlib import Path
 
 from unpack_pkg import cpio_entries, sdk_path, unpack_payload
 
-PINS_FILE = Path(__file__).parent / "cdn_sdks.json"
+PINS_FILE = Path(__file__).parent / "macosx_sdks_cdn.json"
 
 CHAIN = ["27", "26", "15", "14", "13", "12", "10.16", "10.15", "10.14", "10.13",
          "10.12", "10.11", "10.10", "10.9"]
@@ -52,8 +53,19 @@ def vkey(v):
     return tuple(int(x) for x in v.split("."))
 
 
+def minor(v):
+    return ".".join(v.split(".")[:2])
+
+
 def load_pins():
     return json.loads(PINS_FILE.read_text())
+
+
+def write_pins(aliases, sdks):
+    """Write the pins with the newest versions first."""
+    data = {"aliases": dict(sorted(aliases.items(), key=lambda kv: vkey(kv[0]), reverse=True)),
+            "sdks": {v: dict(sorted(sdks[v].items())) for v in sorted(sdks, key=vkey, reverse=True)}}
+    PINS_FILE.write_text(json.dumps(data, indent=2) + "\n")
 
 
 def download(url, dest):
@@ -85,8 +97,8 @@ def show_list():
     for v in sorted(pins["sdks"], key=vkey):
         p = pins["sdks"][v]
         also = [a for a, t in pins["aliases"].items() if t == v]
-        print(f"{v:<8} {p['date']:<10}  {p['product']:<10} {p['size'] / 2**20:5.1f} MiB"
-              + (f"  (also: {', '.join(also)})" if also else ""))
+        print(f"{v:<6} {p['version']:<8} {p['date']:<10}  {p['product']:<10} "
+              f"{p['size'] / 2**20:5.1f} MiB" + (f"  (also: {', '.join(also)})" if also else ""))
 
 
 def discover():
@@ -125,31 +137,35 @@ def discover():
             found.append({"version": version, "sdk": sdk, "url": url, "sha256": sha,
                           "size": size, "product": product, "date": date})
 
-    # Keep existing pins whose package still downloads, so Apple reposting a
-    # package never silently changes what CI gets; new versions take the most
-    # recently posted package.
+    # One pin per minor version: its newest patch release, from the most
+    # recently posted package. Keep an existing pin whose package still
+    # downloads and has the same SDK version, so Apple reposting a package
+    # never silently changes what CI gets.
     ok = {r["url"] for r in found}
-    pins = {v: p for v, p in old.items() if p["url"] in ok}
-    for r in sorted(found, key=lambda r: r["date"]):
-        if r["version"] not in pins or pins[r["version"]]["url"] == r["url"]:
-            pins[r["version"]] = {"kind": "pkg", **{k: r[k] for k in (
-                "sdk", "url", "sha256", "size", "product", "date")}}
+    newest = {}
+    for r in sorted(found, key=lambda r: (vkey(r["version"]), r["date"])):
+        newest[minor(r["version"])] = r
+    pins = {}
+    for v, r in newest.items():
+        p = old.get(v)
+        if p and p["url"] in ok and p["version"] == r["version"]:
+            pins[v] = p
+        else:
+            pins[v] = {"kind": "pkg", **{k: r[k] for k in (
+                "version", "sdk", "url", "sha256", "size", "product", "date")}}
     for v, p in old.items():
         if v not in pins:
             print(f"WARNING: {v} no longer downloads; keeping its old pin", file=sys.stderr)
             pins[v] = p
 
-    # "15" -> highest 15.x, "10.15" -> highest 10.15.x, when not pinned exactly.
+    # "15" -> highest 15.x
     aliases = {}
     for v in sorted(pins, key=vkey):
-        parts = v.split(".")
-        for n in range(1, len(parts)):
-            short = ".".join(parts[:n])
-            if short not in pins and short != "10":
-                aliases[short] = v
+        major = v.split(".")[0]
+        if major not in pins and major != "10":
+            aliases[major] = v
 
-    PINS_FILE.write_text(json.dumps({"aliases": aliases, "sdks": pins}, indent=2,
-                                    sort_keys=True) + "\n")
+    write_pins(aliases, pins)
     print(f"Pinned {len(pins)} SDKs: {', '.join(sorted(pins, key=vkey))}", file=sys.stderr)
 
 

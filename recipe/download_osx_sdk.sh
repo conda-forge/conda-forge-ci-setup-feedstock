@@ -19,12 +19,22 @@ if [[ -z "${_CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS:-}" ]]; then
     export MACOSX_SDK_VERSION=${msv:-${MACOSX_SDK_VERSION:-${MACOSX_DEPLOYMENT_TARGET}}}
 fi
 
-# SDK sources in order of preference: cdn_sdks.json (Apple's software update CDN,
-# see discover_macos_sdks.py) and legacy_sdks.json (GitHub mirrors).
-sdk_data_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# SDK sources in order of preference: macosx_sdks_cdn.json (Apple's software update
+# CDN, see discover_macos_sdks.py) and macosx_sdks_legacy.json (GitHub mirrors).
+# They are installed in $PREFIX/share/conda-forge-ci-setup, or next to this script
+# when running it from the recipe.
+sdk_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sdk_data_dir="${sdk_script_dir}/../share/conda-forge-ci-setup"
+if [[ ! -d "${sdk_data_dir}" ]]; then
+    sdk_data_dir="${sdk_script_dir}"
+fi
 sdk_sources=${OSX_SDK_SOURCES:-cdn legacy}
+
+# sdk_query SOURCE VERSION FILTER: run the jq FILTER, with VERSION as $v, on
+# macosx_sdks_SOURCE.json; prints nothing if the result is null.
+# e.g. `sdk_query cdn 15.5 '.sdks[$v].url'` or `sdk_query legacy 15 '.aliases[$v]'`
 sdk_query() {
-    jq -r --arg v "$2" "$3 // empty" "${sdk_data_dir}/$1_sdks.json"
+    jq -r --arg v "$2" "$3 // empty" "${sdk_data_dir}/macosx_sdks_$1.json"
 }
 
 # Exact versions first, then major-only versions like "15" (newest pinned minor)
@@ -44,7 +54,7 @@ if [[ -z "${actual_macosx_sdk_version}" ]]; then
     done
 fi
 if [[ -z "${actual_macosx_sdk_version}" ]]; then
-    echo "Unsupported SDK version (${MACOSX_SDK_VERSION}), please update conda-forge-ci-setup's cdn_sdks.json or legacy_sdks.json"
+    echo "Unsupported SDK version (${MACOSX_SDK_VERSION}), please update conda-forge-ci-setup's macosx_sdks_cdn.json or macosx_sdks_legacy.json"
     exit 1
 fi
 
@@ -76,7 +86,7 @@ download_sdk() {
                 unpacked="${tmp}/out/Payload/Library/Developer/CommandLineTools/SDKs/${sdk}"
             else
                 # unpack_pkg.py does the same as pkgutil, which only exists on macOS
-                python "${sdk_data_dir}/unpack_pkg.py" "${tmp}/sdk.pkg" "${sdk}" "${tmp}/out/${sdk}" \
+                python "${sdk_script_dir}/unpack_pkg.py" "${tmp}/sdk.pkg" "${sdk}" "${tmp}/out/${sdk}" \
                     || { rm -rf "${tmp}"; return 1; }
                 unpacked="${tmp}/out/${sdk}"
             fi
@@ -90,6 +100,8 @@ download_sdk() {
 
     # delete symlink that may exist already, e.g. MacOSX15.5.sdk -> MacOSX.sdk
     rm -rf "${CONDA_BUILD_SYSROOT}"
+    # The unpacked directory isn't always named after the version, e.g. the legacy
+    # 13.0 tarball contains MacOSX13.sdk and the CDN 10.12 package MacOSX.sdk
     mv "${unpacked}" "${CONDA_BUILD_SYSROOT}" || { rm -rf "${tmp}"; return 1; }
     rm -rf "${tmp}"
 }

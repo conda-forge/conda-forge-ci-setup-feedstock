@@ -3,15 +3,17 @@
 ## Adding a new OSX SDK
 
 SDKs are listed in two files, each mapping a version to a URL, sha256 and
-package kind. `download_osx_sdk.sh` prefers `cdn_sdks.json` and falls back to
-`legacy_sdks.json` for versions it lacks or when a download fails.
+package kind. `download_osx_sdk.sh` prefers `macosx_sdks_cdn.json` and falls back to
+`macosx_sdks_legacy.json` for versions it lacks or when a download fails. Both
+list the newest versions first.
 
-- `cdn_sdks.json`: Command Line Tools packages on Apple's software update CDN.
+- `macosx_sdks_cdn.json`: Command Line Tools packages on Apple's software update CDN,
+  one per minor version using its newest patch release.
   Regenerate it with `python recipe/discover_macos_sdks.py discover`, which
   rescans Apple's catalogs and downloads every SDK package (so takes a while);
   `python recipe/discover_macos_sdks.py list` summarises it. Existing entries
   are kept as long as they still download.
-- `legacy_sdks.json`: `.sdk.tar.xz` tarballs from GitHub mirrors such as
+- `macosx_sdks_legacy.json`: `.sdk.tar.xz` tarballs from GitHub mirrors such as
   https://github.com/joseluisq/macosx-sdks; edit it by hand.
 - `test_osx_sdk.sh` downloads every SDK in both files.
 - Temporarily test it works:

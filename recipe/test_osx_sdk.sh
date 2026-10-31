@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Download every SDK from each source in cdn_sdks.json and legacy_sdks.json.
+# Download every SDK from each source in macosx_sdks_{cdn,legacy}.json.
 # On Linux only check one small SDK from Apple's CDN, which exercises
 # unpack_pkg.py instead of pkgutil.
 tests=()
@@ -9,7 +9,7 @@ if [[ "$(uname)" == "Linux" ]]; then
   tests+=("cdn 10.12")
 else
   for source in cdn legacy; do
-    for version in $(jq -r '.sdks | keys[]' "${CONDA_PREFIX}/bin/${source}_sdks.json"); do
+    for version in $(jq -r '.sdks | keys[]' "${CONDA_PREFIX}/share/conda-forge-ci-setup/macosx_sdks_${source}.json"); do
       tests+=("${source} ${version}")
     done
   done
