@@ -99,8 +99,8 @@ def built_distribution_already_exists(cli, name, version, fname, owner, channel)
 
 def upload(token_fn, path, owner, channels, private_upload=False, force_metadata_update=True):
     cmd = ['anaconda', '--quiet', '--show-traceback', '-t', token_fn,
-           'upload', path, '--user={}'.format(owner),
-           '--channel={}'.format(channels)]
+           'upload', path, '--channel={}'.format(owner),
+           '--label={}'.format(channels)]
     if private_upload:
         cmd.append("--private")
     if force_metadata_update:
