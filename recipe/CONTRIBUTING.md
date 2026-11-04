@@ -2,10 +2,20 @@
 
 ## Adding a new OSX SDK
 
-Usually fetched from https://github.com/joseluisq/macosx-sdks.
+SDKs are listed in two files, each mapping a version to a URL, sha256 and
+package kind. `download_osx_sdk.sh` prefers `macosx_sdks_cdn.json` and falls back to
+`macosx_sdks_legacy.json` for versions it lacks or when a download fails. Both
+list the newest versions first.
 
-- Add version and its checksum to `download_osx_sdk.sh`.
-- Add version to `test_osx_sdk.sh` versions array to verify the download.
+- `macosx_sdks_cdn.json`: Command Line Tools packages on Apple's software update CDN,
+  one per minor version using its newest patch release.
+  Regenerate it with `python recipe/discover_macos_sdks.py discover`, which
+  rescans Apple's catalogs and downloads every SDK package (so takes a while);
+  `python recipe/discover_macos_sdks.py list` summarises it. Existing entries
+  are kept as long as they still download.
+- `macosx_sdks_legacy.json`: `.sdk.tar.xz` tarballs from GitHub mirrors such as
+  https://github.com/joseluisq/macosx-sdks; edit it by hand.
+- `test_osx_sdk.sh` downloads every SDK in both files.
 - Temporarily test it works:
     1. Define `MACOSX_SDK_VERSION` in `conda_build_config.yaml`; e.g. `MACOS_SDK_VERSION: ["26.1"] # [osx]`.
     2. Add a dummy variable using in it `meta.yaml`; e.g. `{% set _dummy = MACOSX_SDK_VERSION %}`.

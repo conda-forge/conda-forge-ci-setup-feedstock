@@ -1,56 +1,35 @@
 #!/bin/bash
 set -e
 
-# Keep it in sync with the case block in download_osx_sdk.sh
-versions=(
-    "26"
-    "26.1"
-    "26.0"
-    "15"
-    "15.5"
-    "15.4"
-    "15.2"
-    "15.1"
-    "15.0"
-    "14"
-    "14.5"
-    "14.4"
-    "14.2"
-    "14.0"
-    "13"
-    "13.3"
-    "13.1"
-    "13.0"
-    "12"
-    "12.3"
-    "12.1"
-    "12.0"
-    "11"
-    "11.3"
-    "11.1"
-    "11.0"
-    "10.15"
-    "10.14"
-    "10.13"
-    "10.12"
-    "10.11"
-    "10.10"
-    "10.9"
-)
+# Download every SDK from each source in macosx_sdks_{cdn,legacy}.json.
+# On Linux only check one small SDK from Apple's CDN, which exercises
+# unpack_pkg.py instead of pkgutil.
+tests=()
+if [[ "$(uname)" == "Linux" ]]; then
+  tests+=("cdn 10.12")
+else
+  for source in cdn legacy; do
+    for version in $(jq -r '.sdks | keys[]' "${CONDA_PREFIX}/share/conda-forge-ci-setup/macosx_sdks_${source}.json"); do
+      tests+=("${source} ${version}")
+    done
+  done
+fi
 export _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS=1
-for version in "${versions[@]}"; do
-  echo "Testing SDK download for $version ..."
+for test in "${tests[@]}"; do
+  read source version <<< "${test}"
+  echo "Testing SDK download for $version from $source ..."
+  export OSX_SDK_SOURCES="${source}"
   export MACOSX_SDK_VERSION="${version}"
   export OSX_SDK_DIR=$(mktemp -d)
   bash "${CONDA_PREFIX}/bin/download_osx_sdk.sh"
-  # ensure we actually downloaded the right version; don't bother
-  # about the mapping from major-only versions to the latest minor
-  [[ "$version" == *.* ]] && test -d "$OSX_SDK_DIR/MacOSX${version}.sdk"
+  # ensure we actually downloaded the right version
+  test -d "$OSX_SDK_DIR/MacOSX${version}.sdk"
+  test -f "$OSX_SDK_DIR/MacOSX${version}.sdk/SDKSettings.plist"
   # To test locally:
   # bash "recipe/download_osx_sdk.sh"
   rm -rf $OSX_SDK_DIR
-  unset MACOS_SDK_VERSION
+  unset MACOSX_SDK_VERSION
   unset OSX_SDK_DIR
   sleep 1
 done
-unset _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS
+unset _CONDA_FORGE_CI_SETUP_OSX_SDK_DOWNLOAD_TESTS OSX_SDK_SOURCES

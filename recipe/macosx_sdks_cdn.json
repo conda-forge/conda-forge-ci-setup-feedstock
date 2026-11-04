@@ -1,0 +1,193 @@
+{
+  "aliases": {
+    "27": "27.2",
+    "26": "26.5",
+    "15": "15.5",
+    "14": "14.5",
+    "13": "13.3",
+    "12": "12.3",
+    "11": "11.3"
+  },
+  "sdks": {
+    "27.2": {
+      "date": "2026-10-29",
+      "kind": "pkg",
+      "product": "142-50405",
+      "sdk": "MacOSX27.2.sdk",
+      "sha256": "1eb5196e069ad6e0abde1d750d967b7ea58f5b97f179dbf07aee2d00ca6c813e",
+      "size": 71479724,
+      "url": "https://swcdn.apple.com/content/downloads/53/49/142-50405-A_WOBLDDXP4W/wk3d2yw94ir1jieuddcu9b9tffxrb09bq8/CLTools_macOSNMOS_SDK.pkg",
+      "version": "27.2"
+    },
+    "26.5": {
+      "date": "2026-10-29",
+      "kind": "pkg",
+      "product": "142-50405",
+      "sdk": "MacOSX26.5.sdk",
+      "sha256": "bc5740627396f791c6cb85556598d48f9d6b3d25f1cec0aa6927fd34881e7c6f",
+      "size": 61624678,
+      "url": "https://swcdn.apple.com/content/downloads/53/49/142-50405-A_WOBLDDXP4W/wk3d2yw94ir1jieuddcu9b9tffxrb09bq8/CLTools_macOSLMOS_SDK.pkg",
+      "version": "26.5"
+    },
+    "15.5": {
+      "date": "2025-05-28",
+      "kind": "pkg",
+      "product": "082-41241",
+      "sdk": "MacOSX15.5.sdk",
+      "sha256": "ba3453d62b3d2babf67f3a4a44e8073d6555c85f114856f4390a1f53bd76e24a",
+      "size": 58513026,
+      "url": "https://swcdn.apple.com/content/downloads/52/01/082-41241-A_0747ZN8FHV/dectd075r63pppkkzsb75qk61s0lfee22j/CLTools_macOSNMOS_SDK.pkg",
+      "version": "15.5"
+    },
+    "15.4": {
+      "date": "2026-06-26",
+      "kind": "pkg",
+      "product": "140-17812",
+      "sdk": "MacOSX15.4.sdk",
+      "sha256": "07835d08fcdc4a57b930c9a7f5c91df18666d4fa246ae994c8850cfe5aab9753",
+      "size": 55803148,
+      "url": "https://swcdn.apple.com/content/downloads/33/19/140-17812-A_21ZLMMLY4E/zu3xwktttpoe71qiawhzgzvqss6rovawsa/CLTools_macOSLMOS_SDK.pkg",
+      "version": "15.4"
+    },
+    "15.2": {
+      "date": "2025-04-14",
+      "kind": "pkg",
+      "product": "072-44426",
+      "sdk": "MacOSX15.2.sdk",
+      "sha256": "55c193b80f3b4c5ae20b3bd926abe20e11a2933cdd1aa918a63f7e89c16dce21",
+      "size": 57160029,
+      "url": "https://swcdn.apple.com/content/downloads/61/45/072-44426-A_16242I3TPF/74lkhd4yt26hcrwgpibrqtltf7yth9kc5w/CLTools_macOSNMOS_SDK.pkg",
+      "version": "15.2"
+    },
+    "14.5": {
+      "date": "2025-05-28",
+      "kind": "pkg",
+      "product": "082-41241",
+      "sdk": "MacOSX14.5.sdk",
+      "sha256": "ee10f491e7c5518bb7346527c242ec34b2d431bb787a2ee00247553e9806ea45",
+      "size": 59460733,
+      "url": "https://swcdn.apple.com/content/downloads/52/01/082-41241-A_0747ZN8FHV/dectd075r63pppkkzsb75qk61s0lfee22j/CLTools_macOSLMOS_SDK.pkg",
+      "version": "14.5"
+    },
+    "14.4": {
+      "date": "2024-03-05",
+      "kind": "pkg",
+      "product": "052-59890",
+      "sdk": "MacOSX14.4.sdk",
+      "sha256": "6f35bd96401f2a07a8ab8f21321f2706a51d2309da7406fb81fbefd16af3c9d0",
+      "size": 59320979,
+      "url": "https://swcdn.apple.com/content/downloads/14/48/052-59890-A_I0F5YGAY0Y/p9n40hio7892gou31o1v031ng6fnm9sb3c/CLTools_macOSNMOS_SDK.pkg",
+      "version": "14.4"
+    },
+    "14.0": {
+      "date": "2023-08-22",
+      "kind": "pkg",
+      "product": "042-32697",
+      "sdk": "MacOSX14.0.sdk",
+      "sha256": "fa3eb19eceab6d27a3ff55860f6e7753bec8193845d03787fce9735e7efb7dc9",
+      "size": 57585554,
+      "url": "https://swcdn.apple.com/content/downloads/11/17/042-32697-A_1GOTVNQE4A/hy88qtn1sygbgxswlmbfdepd4pcg52xyrx/CLTools_macOSNMOS_SDK.pkg",
+      "version": "14.0"
+    },
+    "13.3": {
+      "date": "2024-03-05",
+      "kind": "pkg",
+      "product": "052-59890",
+      "sdk": "MacOSX13.3.sdk",
+      "sha256": "4a98f94497f368211223e696c8f26c208eb2dc174b6cf89f3ea846f0a2a0e89b",
+      "size": 51079417,
+      "url": "https://swcdn.apple.com/content/downloads/14/48/052-59890-A_I0F5YGAY0Y/p9n40hio7892gou31o1v031ng6fnm9sb3c/CLTools_macOSLMOS_SDK.pkg",
+      "version": "13.3"
+    },
+    "13.1": {
+      "date": "2022-12-13",
+      "kind": "pkg",
+      "product": "012-92431",
+      "sdk": "MacOSX13.1.sdk",
+      "sha256": "f3acebebdfa0e5bdedf3047a29bdcb76c01ff449d041406b765bdea3dc3ec866",
+      "size": 51817937,
+      "url": "https://swcdn.apple.com/content/downloads/03/28/012-92431-A_FKICGWU4EK/eflw1v4c64sgmvux4ljc083cfjj663wu9g/CLTools_macOSNMOS_SDK.pkg",
+      "version": "13.1"
+    },
+    "12.3": {
+      "date": "2023-06-01",
+      "kind": "pkg",
+      "product": "032-84673",
+      "sdk": "MacOSX12.3.sdk",
+      "sha256": "f646b1c530dbb39cfeb6c2b7c1f4831ebcfe74212454026a4fbc317bfd7b676c",
+      "size": 49691435,
+      "url": "https://swcdn.apple.com/content/downloads/15/62/032-84673-A_7A1TG1RF8Z/xpc8q44ggn2pkn82iwr0fi1zeb9cxi8ath/CLTools_macOSLMOS_SDK.pkg",
+      "version": "12.3"
+    },
+    "12.1": {
+      "date": "2021-12-13",
+      "kind": "pkg",
+      "product": "002-41708",
+      "sdk": "MacOSX12.1.sdk",
+      "sha256": "991297bd677abf5fad22c52c30d4bc0bc5d2fd9be96facbaef9556d0a3d6f52f",
+      "size": 49815732,
+      "url": "https://swcdn.apple.com/content/downloads/52/17/002-41708-A_E8MFK7B2PK/6p55tbmh0qttgbt4cy94uuvnacy6tkw435/CLTools_macOSNMOS_SDK.pkg",
+      "version": "12.1"
+    },
+    "11.3": {
+      "date": "2022-05-12",
+      "kind": "pkg",
+      "product": "002-83793",
+      "sdk": "MacOSX11.3.sdk",
+      "sha256": "998f584e5c93ba357a47cf5668d9a426b7ce41ab579e8496f202b19dac10cf94",
+      "size": 54906303,
+      "url": "https://swcdn.apple.com/content/downloads/24/42/002-83793-A_74JRE8GVAT/rlnkct919wgc5c0pjq986z5bb9h62uvni2/CLTools_macOSLMOS_SDK.pkg",
+      "version": "11.3"
+    },
+    "11.1": {
+      "date": "2021-04-27",
+      "kind": "pkg",
+      "product": "001-89745",
+      "sdk": "MacOSX11.1.sdk",
+      "sha256": "4e73e80b858430840417031b83f05adfbb21c6b4fc3ba4feea3b6022ab2e8258",
+      "size": 52634181,
+      "url": "https://swcdn.apple.com/content/downloads/46/21/001-89745-A_56FM390IW5/v1um2qppgfdnam2e9cdqcqu2r6k8aa3lis/CLTools_macOSNMOS_SDK.pkg",
+      "version": "11.1"
+    },
+    "10.15": {
+      "date": "2021-06-21",
+      "kind": "pkg",
+      "product": "071-54303",
+      "sdk": "MacOSX10.15.sdk",
+      "sha256": "d459ae8498deb77f290f7f3adc99a98fb488441818a90042091ee7bb78c817c3",
+      "size": 43293884,
+      "url": "https://swcdn.apple.com/content/downloads/02/62/071-54303-A_EU2CL1YVT7/943i95dpeyi2ghlnj2mgyq3t202t5gf18b/CLTools_macOSLMOS_SDK.pkg",
+      "version": "10.15.6"
+    },
+    "10.14": {
+      "date": "2019-10-14",
+      "kind": "pkg",
+      "product": "041-91747",
+      "sdk": "MacOSX.sdk",
+      "sha256": "4380fb9e9dc77c76d78f4531bbb5d1c4f5039c203b5cb761fa298675e3498c46",
+      "size": 25605433,
+      "url": "https://swcdn.apple.com/content/downloads/50/15/041-91747-A_WICZE7RNVZ/rayjnqf847xflt3tan8o8agod67eq88cav/CLTools_SDK_macOS1014.pkg",
+      "version": "10.14"
+    },
+    "10.13": {
+      "date": "2019-10-14",
+      "kind": "pkg",
+      "product": "041-90419",
+      "sdk": "MacOSX.sdk",
+      "sha256": "27678b01141739175992a9b027c875b4c4ffe704de95f743c1f3b90374029f49",
+      "size": 28071275,
+      "url": "https://swcdn.apple.com/content/downloads/33/36/041-90419-A_7JJ4H9ZHO2/xs88ob5wjz6riz7g6764twblnvksusg4ps/CLTools_SDK_macOS1013.pkg",
+      "version": "10.13"
+    },
+    "10.12": {
+      "date": "2019-10-13",
+      "kind": "pkg",
+      "product": "041-88607",
+      "sdk": "MacOSX.sdk",
+      "sha256": "724a1a41d93d0ac8ea7e1869f5113ad2772c63b2869ff751bf2f95ae9292a10d",
+      "size": 27030882,
+      "url": "https://swcdn.apple.com/content/downloads/22/62/041-88607/wg8avdk0jo75k9a13gentz9stwqgrqmcv6/CLTools_SDK_OSX1012.pkg",
+      "version": "10.12"
+    }
+  }
+}
