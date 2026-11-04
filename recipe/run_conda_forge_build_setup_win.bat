@@ -85,8 +85,7 @@ if defined CI (
 set "PATH=%PATH:ostedtoolcache=%"
 set "PATH=%PATH:xternals\git\mingw=%"
 
-:: Install CUDA drivers if needed
-for %%i in ("%~dp0.") do set "SCRIPT_DIR=%%~fi"
+:: Export CONDA_OVERRIDE_CUDA* so that __cuda is detected on CI systems without GPUs
 type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_compiler_version.0 None > cuda.version
 set /p CUDA_VERSION=<cuda.version
 del cuda.version
@@ -94,21 +93,11 @@ type .ci_support\%CONFIG%.yaml | shyaml get-value cuda_arch_version.0 999.0 > cu
 set /p CUDA_ARCH_VERSION=<cuda_arch.version
 del cuda_arch.version
 if not "%CUDA_VERSION%" == "None" (
-    if "%CUDA_VERSION:~0,2%" GEQ "12" (
-        :: Don't call install_cuda, as we'll get CUDA packages from CF
-        set "CUDA_PATH="
-        set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
-    ) else (
-        call "%SCRIPT_DIR%\install_cuda.bat" %CUDA_VERSION%
-        if errorlevel 1 (
-            echo Could not install CUDA
-            exit 1
-        )
-        :: We succeeded! Export paths
-        set "CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VERSION%"
-        set "PATH=%PATH%;%CUDA_PATH%\bin"
-        set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
+    if "%CUDA_VERSION:~0,2%" LSS "12" (
+        echo CUDA %CUDA_VERSION% is no longer supported. CUDA 12+ is required.
+        exit 1
     )
+    set "CONDA_OVERRIDE_CUDA=%CUDA_VERSION%"
 
     REM Export CONDA_OVERRIDE_CUDA_ARCH to allow __cuda_arch to report the arch on CI
     REM systems without GPUs. Like __glibc, the default is set high, so that dependencies
@@ -175,10 +164,6 @@ mkdir "%CONDA_PREFIX%\etc\conda\activate.d"
 echo set "CONDA_BLD_PATH=%CONDA_BLD_PATH%"         > "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "PYTHONUNBUFFERED=%PYTHONUNBUFFERED%"    >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 echo set "PATH=%PATH%"                            >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-if not "%CUDA_PATH%" == "" (
-    echo set "CUDA_PATH=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-    echo set "CUDA_HOME=%CUDA_PATH%"              >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
-)
 if not "%CONDA_OVERRIDE_CUDA%" == "" (
     echo set "CONDA_OVERRIDE_CUDA=%CONDA_OVERRIDE_CUDA%"           >> "%CONDA_PREFIX%\etc\conda\activate.d\conda-forge-ci-setup-activate.bat"
 )
