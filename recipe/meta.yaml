@@ -1,12 +1,6 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.30.1" %}
+{% set version = "4.31.0" %}
 {% set build = 0 %}
-
-{% set cuda_compiler_version = cuda_compiler_version or "None" %}
-{% if cuda_compiler_version == "None" %}
-# prioritize non-CUDA variant via build number
-{% set build = build + 100 %}
-{% endif %}
 
 package:
   name: {{ name|lower }}
@@ -17,8 +11,6 @@ source:
 
 build:
   number: {{ build }}
-  # For cuda support, building with one version is enough
-  skip: true  # [cuda_compiler_version not in ("None", cuda_compiler_version_min)]
   script:
     - echo "CPU Count = $CPU_COUNT"   # [unix]
     - echo "CPU Count = %CPU_COUNT%"  # [win]
@@ -39,12 +31,10 @@ build:
     - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"                                         # [unix]
     - cp "${RECIPE_DIR}/cross_compile_support.sh" "${PREFIX}/bin/cross_compile_support.sh"                               # [unix]
     - cp "${RECIPE_DIR}/get_x86_64_level.py" "${PREFIX}/bin/get_x86_64_level.py"                                         # [unix]
-    - COPY "%RECIPE_DIR%\\install_cuda.bat" "%SCRIPTS%\\install_cuda.bat"                                                # [win]
     - cd "%RECIPE_DIR%"   # [win]
     - cd "${RECIPE_DIR}"  # [unix]
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
     - echo "${RECIPE_DIR}"
-    - echo "Hey conda-smithy, don't prune {{ cuda_compiler_version_min }} from the variant files!"
   entry_points:
     - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
     - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
@@ -55,18 +45,9 @@ build:
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
     - inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main
-  ignore_run_exports_from:
-    - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
-    - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
-    - {{ compiler('cxx') }}               # [cuda_compiler_version != "None"]
 
 requirements:
   build:
-     # ensure that all variants of cuda_compiler_version are tested
-    - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
-    - {{ compiler('c') }}                 # [cuda_compiler_version != "None"]
-    - {{ compiler('cxx') }}               # [cuda_compiler_version != "None"]
-    - {{ stdlib('c') }}                   # [cuda_compiler_version != "None"]
     - python                              # [build_platform != target_platform]
     - cross-python_{{ target_platform }}  # [build_platform != target_platform]
   host:
@@ -82,7 +63,8 @@ requirements:
     - conda-env
     - click
     - jinja2
-    - anaconda-client >=1.11.2
+    # https://github.com/anaconda/anaconda-client/issues/943
+    - anaconda-client >=1.11.2,<1.16
     - shyaml
     - jq  # [unix]
     - requests
@@ -109,15 +91,15 @@ test:
     - .ci_support/test_osx_sdk_pinned.yaml     # [unix]
     - .ci_support/test_osx_sdk_mdt_only.yaml   # [unix]
     - .ci_support/test_osx_sdk_cross.yaml      # [unix]
-    - test_cuda_override_win.bat            # [win and cuda_compiler_version != "None"]
-    - test_cuda_override_linux.sh           # [linux and cuda_compiler_version != "None"]
-    - .ci_support/test_cuda_override.yaml   # [(win or linux) and cuda_compiler_version != "None"]
-    - .ci_support/test_cuda_override_default.yaml  # [(win or linux) and cuda_compiler_version != "None"]
+    - test_cuda_override_win.bat                   # [win]
+    - test_cuda_override_linux.sh                  # [linux and not ppc64le]
+    - .ci_support/test_cuda_override.yaml          # [win or (linux and not ppc64le)]
+    - .ci_support/test_cuda_override_default.yaml  # [win or (linux and not ppc64le)]
   commands:
     - if not exist "%PREFIX%\\Scripts\\run_conda_forge_build_setup.bat" exit 1    # [win]
-    - call test_cuda_override_win.bat                                            # [win and cuda_compiler_version != "None"]
+    - call test_cuda_override_win.bat                                             # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
-    - bash test_cuda_override_linux.sh                                           # [linux and cuda_compiler_version != "None"]
+    - bash test_cuda_override_linux.sh                                            # [linux and not ppc64le]
     - ff_ci_pr_build --help
     - upload_or_check_non_existence --help
     - setup_conda_rc --help
