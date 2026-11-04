@@ -66,6 +66,7 @@ requirements:
     - mamba >=1.5.2
     - conda-env
     - click
+    - curl  # [unix]
     - jinja2
     # https://github.com/anaconda/anaconda-client/issues/943
     - anaconda-client >=1.11.2,<1.16
