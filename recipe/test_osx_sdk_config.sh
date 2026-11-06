@@ -66,6 +66,8 @@ check_case test_osx_sdk_mdt_only error
 check_case "" 14.5 MACOSX_SDK_VERSION=14.5
 # cross-compilation from linux to osx; ensure cross_target_platform gets picked up
 check_case test_osx_sdk_cross 11.0
+# same, but the config carries the linux build's glibc c_stdlib_version
+check_case test_osx_sdk_cross_glibc 11.0
 # No config and nothing exported: the 11.0 default.
 check_case "" 11.0
 # Only in macosx_sdks_legacy.json
