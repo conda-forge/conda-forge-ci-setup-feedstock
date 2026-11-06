@@ -1,6 +1,7 @@
 set -e
 
 if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
+    cstd=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib.0 "")
     csv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value c_stdlib_version.0 "")
     mdt=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_DEPLOYMENT_TARGET.0 "")
     msv=$(cat ${CI_SUPPORT}/${CONFIG}.yaml | shyaml get-value MACOSX_SDK_VERSION.0 "")
@@ -8,6 +9,11 @@ if [ -f ${CI_SUPPORT}/${CONFIG}.yaml ]; then
         echo "ERROR: config has MACOSX_DEPLOYMENT_TARGET but no c_stdlib_version."
         echo "       Add {{ stdlib('c') }} to the recipe and rerender."
         exit 1
+    fi
+    # c_stdlib_version is only a deployment target for the osx stdlib; for a
+    # linux build with cross_target_platform: osx-* it is the glibc version
+    if [[ -n "${cstd}" && "${cstd}" != "macosx_deployment_target" ]]; then
+        csv=""
     fi
 fi
 
