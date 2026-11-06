@@ -1,0 +1,8 @@
+c_stdlib:
+- sysroot
+c_stdlib_version:
+- '2.17'
+cross_target_platform:
+- osx-arm64
+target_platform:
+- linux-64
