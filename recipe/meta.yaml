@@ -68,9 +68,6 @@ requirements:
     - click
     - curl  # [unix]
     - jinja2
-    # https://github.com/anaconda/anaconda-client/issues/943
-    # removed upper bound of 1.16 since we expect the next
-    # version of anaconda-client to carry the fix
     - anaconda-client >=1.11.2
     - shyaml
     - jq  # [unix]
