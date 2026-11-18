@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import contextlib
+import json
 import os
 import shutil
 import subprocess
@@ -16,7 +17,16 @@ import conda_build.api
 import conda_build.config
 
 from .feedstock_outputs import request_copy, split_pkg
-from .utils import determine_build_tool, get_built_distribution_names_and_subdirs
+from .utils import (
+    compute_sha256sum,
+    determine_build_tool,
+    get_built_distribution_names_and_subdirs,
+)
+
+# Written to the build folder after a successful copy request. The folder is
+# also visible outside of docker, so CI can create attestations for exactly
+# the packages that were sent to conda-forge.
+ATTEST_SUBJECTS_FILENAME = "attest-subjects.json"
 
 conda_subdir = context.subdir
 
@@ -122,6 +132,30 @@ def delete_dist(token_fn, path, owner, channels):
     )
 
 
+def write_attest_subjects(paths, croot=None):
+    """Write the filename and SHA-256 of each package to the build folder.
+
+    This is best effort: errors are printed and never raised, so that they
+    cannot fail or retry an upload.
+    """
+    try:
+        if croot is None:
+            croot = conda_build.config.croot
+        subjects = [
+            {"name": os.path.basename(path), "sha256": compute_sha256sum(path)}
+            for path in sorted(paths)
+        ]
+        with open(os.path.join(croot, ATTEST_SUBJECTS_FILENAME), "w") as fp:
+            json.dump(subjects, fp)
+        print(
+            "Wrote {} package(s) for attestation to {}".format(
+                len(subjects), ATTEST_SUBJECTS_FILENAME
+            )
+        )
+    except Exception as e:
+        print("WARNING: could not write the packages for attestation: {!r}".format(e))
+
+
 def upload_or_check(
     feedstock,
     recipe_dir,
@@ -222,8 +256,9 @@ def upload_or_check(
                 ):
                     raise RuntimeError(
                         "copy from staging to production channel failed")
-                else:
-                    return True
+                if to_copy_paths:
+                    write_attest_subjects(to_copy_paths)
+                return True
             else:
                 for name, version, path in built_distributions:
                     if not built_distribution_already_exists(
