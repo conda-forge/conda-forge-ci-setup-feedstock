@@ -1,8 +1,21 @@
 import os
 from setuptools import setup, find_packages
 
-# PKG_VERSION is set by both rattler-build and conda-build.
-__version__ = os.environ.get("PKG_VERSION", "0.0.1")
+# PKG_VERSION is set by rattler-build; outside of a package build (e.g. the
+# in-tree `pip install` done by .scripts/build_steps.sh) read it from the recipe.
+__version__ = os.environ.get("PKG_VERSION")
+if not __version__:
+    __version__ = "0.0.1"
+    pth = os.path.join(
+        os.environ.get("RECIPE_DIR", os.path.dirname(os.path.abspath(__file__))),
+        "recipe.yaml",
+    )
+    if os.path.exists(pth):
+        with open(pth) as fp:
+            for line in fp:
+                if line.strip().startswith("version:") and "${{" not in line:
+                    __version__ = line.split(":", 1)[1].strip().strip("\"'")
+                    break
 
 setup(
     name="conda_forge_ci_setup",
