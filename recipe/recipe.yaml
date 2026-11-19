@@ -1,0 +1,206 @@
+context:
+  version: "4.33.0"
+  # On Linux, CI builds run in docker with the recipe mounted separately from
+  # the feedstock root, so the license has to come from FEEDSTOCK_ROOT.
+  feedstock_root: ${{ env.get("FEEDSTOCK_ROOT", default="") }}
+
+package:
+  name: conda-forge-ci-setup
+  version: ${{ version }}
+
+source:
+  path: .
+
+build:
+  number: 2
+  script:
+    - if: unix
+      then:
+        - echo "CPU Count = $CPU_COUNT"
+      else:
+        - echo "CPU Count = %CPU_COUNT%"
+    - if: linux
+      then:
+        - if: feedstock_root != ""
+          then:
+            - cp ${{ feedstock_root }}/LICENSE.txt ${SRC_DIR}/LICENSE.txt
+          else:
+            - echo '${FEEDSTOCK_ROOT} is undefined. Cannot copy license file'
+            - exit 1
+    - if: osx
+      then:
+        - cp ${RECIPE_DIR}/../LICENSE.txt ${SRC_DIR}/LICENSE.txt
+    - if: win
+      then:
+        - COPY "%RECIPE_DIR%\\..\\LICENSE.txt" "%SRC_DIR%\\LICENSE.txt"
+        - if not exist "%LIBRARY_BIN%" mkdir "%LIBRARY_BIN%"
+        - if not exist "%SCRIPTS%" mkdir "%SCRIPTS%"
+        - COPY "%RECIPE_DIR%\\run_conda_forge_build_setup_win.bat" "%SCRIPTS%\\run_conda_forge_build_setup.bat"
+        - COPY "%RECIPE_DIR%\\SetPageFileSize.ps1" "%SCRIPTS%\\SetPageFileSize.ps1"
+        - "%PYTHON% -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+    - if: unix
+      then:
+        - mkdir -p "${PREFIX}/bin"
+        - mkdir -p "${PREFIX}/share/conda-forge-ci-setup"
+        - cp "${RECIPE_DIR}/download_osx_sdk.sh" "${PREFIX}/bin/download_osx_sdk.sh"
+        - cp "${RECIPE_DIR}/macosx_sdks_cdn.json" "${PREFIX}/share/conda-forge-ci-setup/macosx_sdks_cdn.json"
+        - cp "${RECIPE_DIR}/macosx_sdks_legacy.json" "${PREFIX}/share/conda-forge-ci-setup/macosx_sdks_legacy.json"
+        - cp "${RECIPE_DIR}/unpack_pkg.py" "${PREFIX}/bin/unpack_pkg.py"
+        - cp "${RECIPE_DIR}/cross_compile_support.sh" "${PREFIX}/bin/cross_compile_support.sh"
+        - cp "${RECIPE_DIR}/get_x86_64_level.py" "${PREFIX}/bin/get_x86_64_level.py"
+    - if: osx
+      then:
+        - cp "${RECIPE_DIR}/run_conda_forge_build_setup_osx" "${PREFIX}/bin/run_conda_forge_build_setup"
+    - if: linux
+      then:
+        - cp "${RECIPE_DIR}/run_conda_forge_build_setup_linux" "${PREFIX}/bin/run_conda_forge_build_setup"
+    - if: unix
+      then:
+        - ${PYTHON} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  python:
+    # helper scripts in bin/ are executed directly, don't ship bytecode for them
+    skip_pyc_compilation:
+      - bin/*.py
+    entry_points:
+      - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
+      - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
+      - setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc
+      - upload_package = conda_forge_ci_setup.build_utils:upload_package
+      - mangle_compiler = conda_forge_ci_setup.build_utils:mangle_compiler
+      - make_build_number = conda_forge_ci_setup.build_utils:make_build_number
+      - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
+      - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
+      - inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main
+
+requirements:
+  build:
+    - if: build_platform != target_platform
+      then:
+        - python
+        - cross-python_${{ target_platform }}
+  host:
+    - python
+    - pip
+    - setuptools
+  run:
+    - python
+    - conda >=23.9
+    - conda-libmamba-solver >=23.9
+    - conda-build >=3.27
+    - mamba >=1.5.2
+    - conda-env
+    - click
+    - if: unix
+      then: curl
+    - jinja2
+    - anaconda-client >=1.11.2
+    - shyaml
+    - if: unix
+      then: jq
+    - requests
+    - ruamel.yaml >=0.15
+    - pip
+    - pyyaml
+    - if: win
+      then: m2-git
+      else: git
+    - libarchive
+    - joblib >=0.12
+    - conda-forge-metadata >=0.9.2
+    - conda-package-handling >=2.3.0
+    - rattler-build-conda-compat >=0.0.2,<2.0.0a0
+    - nvidia-virtual-packages
+  run_constraints:
+    - boa >=0.8,<1.0
+
+tests:
+  # strict: every file in the package must be matched by one of these globs
+  - package_contents:
+      strict: true
+      files:
+        # fixture files shipped for the script test below
+        - etc/conda/test-files/conda-forge-ci-setup/**
+        - if: unix
+          then:
+            - bin/run_conda_forge_build_setup
+            - bin/download_osx_sdk.sh
+            - bin/unpack_pkg.py
+            - bin/cross_compile_support.sh
+            - bin/get_x86_64_level.py
+            - bin/ff_ci_pr_build
+            - bin/upload_or_check_non_existence
+            - bin/setup_conda_rc
+            - bin/upload_package
+            - bin/mangle_compiler
+            - bin/make_build_number
+            - bin/mangle_homebrew
+            - bin/validate_recipe_outputs
+            - bin/inspect_artifacts
+            - share/conda-forge-ci-setup/macosx_sdks_cdn.json
+            - share/conda-forge-ci-setup/macosx_sdks_legacy.json
+            - lib/python*/site-packages/conda_forge_ci_setup/**
+            - lib/python*/site-packages/conda_forge_ci_setup-${{ version }}.dist-info/**
+          else:
+            - Scripts/run_conda_forge_build_setup.bat
+            - Scripts/SetPageFileSize.ps1
+            - Scripts/ff_ci_pr_build*
+            - Scripts/upload_or_check_non_existence*
+            - Scripts/setup_conda_rc*
+            - Scripts/upload_package*
+            - Scripts/mangle_compiler*
+            - Scripts/make_build_number*
+            - Scripts/mangle_homebrew*
+            - Scripts/validate_recipe_outputs*
+            - Scripts/inspect_artifacts*
+            - Lib/site-packages/conda_forge_ci_setup/**
+            - Lib/site-packages/conda_forge_ci_setup-${{ version }}.dist-info/**
+  - files:
+      recipe:
+        - if: (osx or (linux and x86_64)) and match(python, "3.13.*")
+          then: test_osx_sdk.sh
+        - if: unix
+          then:
+            - test_osx_sdk_config.sh
+            - .ci_support/test_osx_sdk_stdlib.yaml
+            - .ci_support/test_osx_sdk_pinned.yaml
+            - .ci_support/test_osx_sdk_mdt_only.yaml
+            - .ci_support/test_osx_sdk_cross.yaml
+            - .ci_support/test_osx_sdk_cross_glibc.yaml
+        - if: win
+          then: test_cuda_override_win.bat
+        - if: linux and not ppc64le
+          then: test_cuda_override_linux.sh
+        - if: win or (linux and not ppc64le)
+          then:
+            - .ci_support/test_cuda_override.yaml
+            - .ci_support/test_cuda_override_default.yaml
+    script:
+      - if: win
+        then: call test_cuda_override_win.bat
+      - if: linux and not ppc64le
+        then: bash test_cuda_override_linux.sh
+      - ff_ci_pr_build --help
+      - upload_or_check_non_existence --help
+      - setup_conda_rc --help
+      - upload_package --help
+      - make_build_number --help
+      - mangle_homebrew --help
+      - validate_recipe_outputs --help
+      - inspect_artifacts --help
+      - if: (osx or (linux and x86_64)) and match(python, "3.13.*")
+        then: bash test_osx_sdk.sh
+      - if: unix
+        then: bash test_osx_sdk_config.sh
+  # this is here to test that downstream test packages
+  # are excluded from validation and inspection
+  - downstream: ngmix
+
+about:
+  homepage: https://github.com/conda-forge/conda-forge-ci-setup-feedstock
+  summary: A package installed by conda-forge each time a build is run on CI. This package has side-effects to your conda config.
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - conda-forge/core

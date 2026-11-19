@@ -1,27 +1,8 @@
 import os
-from ast import literal_eval
 from setuptools import setup, find_packages
 
-__version__ = "0.0.1"
-
-if "RECIPE_DIR" in os.environ:
-    pth = os.path.join(os.environ["RECIPE_DIR"], "meta.yaml")
-else:
-    pth = os.path.join(os.path.dirname(__file__), "meta.yaml")
-
-if os.path.exists(pth):
-    with open(pth, "r") as fp:
-        for line in fp.readlines():
-            if line.startswith("{% set version"):
-                __version__ = literal_eval(
-                    line
-                    .strip()
-                    .split("=")[1]
-                    .strip()
-                    .replace("%}", "")
-                    .strip()
-                )
-                break
+# PKG_VERSION is set by both rattler-build and conda-build.
+__version__ = os.environ.get("PKG_VERSION", "0.0.1")
 
 setup(
     name="conda_forge_ci_setup",
