@@ -41,19 +41,25 @@ CONDARC
 
 ( endgroup "Configuring build environment" ) 2> /dev/null
 
-( startgroup "Provisioning base env with micromamba" ) 2> /dev/null
+( startgroup "Provisioning base env with pixi" ) 2> /dev/null
 
-MAMBA_ROOT_PREFIX=~/.conda
-MICROMAMBA_EXE=micromamba
+pushd "${FEEDSTOCK_ROOT}"
+echo Installing environment
+arch=$(uname -m)
+if [[ "$arch" == "x86_64" ]]; then
+  arch="64"
+fi
+PIXI_ENV=docker-build-linux-${arch}
+sed -i.bak -e "s/platforms = .*/platforms = [\"linux-${arch}\"]/" -e "s/# __PLATFORM_SPECIFIC_ENV__ =/${PIXI_ENV} =/" pixi.toml
+pixi install --environment "${PIXI_ENV}"
+pixi list --environment "${PIXI_ENV}"
 
-echo Creating environment
-mv "${MINIFORGE_HOME}"/conda-meta/history "${MINIFORGE_HOME}"/conda-meta/history.$(date +%Y-%m-%d-%H-%M-%S)
-echo > "${MINIFORGE_HOME}"/conda-meta/history
-"${MICROMAMBA_EXE}" install --yes --root-prefix "${MAMBA_ROOT_PREFIX}" --prefix "${MINIFORGE_HOME}" \
-    --override-channels --channel conda-forge --strict-channel-priority \
-    pip  python=3.14 conda-build conda-forge-ci-setup=4
+echo Activating environment
+eval "$(pixi shell-hook --environment "${PIXI_ENV}")"
+mv pixi.toml.bak pixi.toml
+popd
 
-( endgroup "Provisioning base env with micromamba" ) 2> /dev/null
+( endgroup "Provisioning base env with pixi" ) 2> /dev/null
 
 ( startgroup "Configuring conda" ) 2> /dev/null
 export CONDA_LIBMAMBA_SOLVER_NO_CHANNELS_FROM_INSTALLED=1
@@ -75,7 +81,7 @@ source ${RECIPE_ROOT}/run_conda_forge_build_setup_linux
 
 
 if [[ "${HOST_PLATFORM}" != "${BUILD_PLATFORM}" ]] && [[ "${HOST_PLATFORM}" != linux-* ]] && [[ "${BUILD_WITH_CONDA_DEBUG:-0}" != 1 ]]; then
-    EXTRA_CB_OPTIONS="${EXTRA_CB_OPTIONS:-} --no-test"
+    EXTRA_CB_OPTIONS="${EXTRA_CB_OPTIONS:-} --test skip"
 fi
 
 
@@ -93,15 +99,17 @@ if [[ "${BUILD_WITH_CONDA_DEBUG:-0}" == 1 ]]; then
     #   - --output-id vs. --output-name
     #   - --clobber-file vs. none
     #   - none vs. --target-platform
-    CONDA_SUBDIR="${BUILD_PLATFORM}" conda debug \
-        "${RECIPE_ROOT}" \
+    export CONDA_BLD_PATH="${CONDA_BLD_PATH:-${FEEDSTOCK_ROOT}/build_artifacts}"
+    rattler-build debug setup \
+        --recipe "${RECIPE_ROOT}" \
         -m "${CONFIG_FILE}" \
         ${EXTRA_CB_OPTIONS:-} \
-        ${BUILD_OUTPUT_ID:+--output-id "${BUILD_OUTPUT_ID}"} \
-        --clobber-file "${CI_SUPPORT}/clobber_${CONFIG}.yaml"
+        ${BUILD_OUTPUT_ID:+--output-name "${BUILD_OUTPUT_ID}"} \
+        --build-platform "${BUILD_PLATFORM}" \
+        --target-platform "${HOST_PLATFORM}"
 
-    # Drop into an interactive shell
-    /bin/bash
+    rattler-build debug shell
+    exit 0
 fi
 
 # Build the recipe
@@ -114,13 +122,15 @@ echo Building recipe
 #   - none vs. --target-platform
 #   - --extra-meta a=b c=d vs. --extra-meta a=b --extra-meta c=d
 
-CONDA_SUBDIR="${BUILD_PLATFORM}" conda-build \
-    "${RECIPE_ROOT}" \
+rattler-build build \
+    --recipe "${RECIPE_ROOT}" \
     -m "${CONFIG_FILE}" \
     ${EXTRA_CB_OPTIONS:-} \
-    --suppress-variables \
-    --clobber-file "${CI_SUPPORT}/clobber_${CONFIG}.yaml" \
-    --extra-meta flow_run_id="${flow_run_id:-}" remote_url="${remote_url:-}" sha="${sha:-}"
+    --build-platform "${BUILD_PLATFORM}" \
+    --target-platform "${HOST_PLATFORM}" \
+    --extra-meta flow_run_id="${flow_run_id:-}" \
+    --extra-meta remote_url="${remote_url:-}" \
+    --extra-meta sha="${sha:-}"
 
 ( startgroup "Inspecting artifacts" ) 2> /dev/null
 

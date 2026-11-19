@@ -13,7 +13,11 @@
 setlocal enableextensions enabledelayedexpansion
 
 FOR %%A IN ("%~dp0.") DO SET "REPO_ROOT=%%~dpA"
-if "%MINIFORGE_HOME%"=="" set "MINIFORGE_HOME=%USERPROFILE%\Miniforge3"
+if "%MINIFORGE_HOME%"=="" (
+    set "MINIFORGE_HOME=%REPO_ROOT%\.pixi\envs\default"
+) else (
+    set "PIXI_CACHE_DIR=%MINIFORGE_HOME%"
+)
 :: Remove trailing backslash, if present
 if "%MINIFORGE_HOME:~-1%"=="\" set "MINIFORGE_HOME=%MINIFORGE_HOME:~0,-1%"
 
@@ -36,40 +40,46 @@ if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
     set "MINIFORGE_SHA256=4cbb52ff0239488723f5e7ed0f362d393fc471a733dcd5ee9b03c74f188010c4"
 )
 
-call :start_group "Provisioning base env with micromamba"
+call :start_group "Provisioning base env with pixi"
 
-set "MAMBA_ROOT_PREFIX=%MINIFORGE_HOME%-micromamba-%RANDOM%"
-set "MICROMAMBA_URL=https://github.com/mamba-org/micromamba-releases/releases/download/%MICROMAMBA_VERSION%/micromamba-win-%short_arch%"
-set "MICROMAMBA_TMPDIR=%TMP%\micromamba-%RANDOM%"
-set "MICROMAMBA_EXE=%MICROMAMBA_TMPDIR%\micromamba.exe"
+echo Installing pixi
+powershell -NoProfile -ExecutionPolicy unrestricted -Command "iwr -useb https://pixi.sh/install.ps1 | iex"
+if !errorlevel! neq 0 exit /b !errorlevel!
+set "PATH=%USERPROFILE%\.pixi\bin;%PATH%"
 
-echo Downloading micromamba %MICROMAMBA_VERSION% from %MICROMAMBA_URL%
-if not exist "%MICROMAMBA_TMPDIR%" mkdir "%MICROMAMBA_TMPDIR%"
-powershell -ExecutionPolicy Bypass -Command "(New-Object Net.WebClient).DownloadFile('%MICROMAMBA_URL%', '%MICROMAMBA_EXE%')"
+echo Installing environment
+if "%PIXI_CACHE_DIR%"=="%MINIFORGE_HOME%" (
+    mkdir "%MINIFORGE_HOME%"
+    copy /Y pixi.toml "%MINIFORGE_HOME%"
+    pushd "%MINIFORGE_HOME%"
+) else (
+    pushd "%REPO_ROOT%"
+)
+set PIXI_ENV=build
+move /y pixi.toml pixi.toml.bak
+powershell -NoProfile -ExecutionPolicy unrestricted -Command "(Get-Content pixi.toml.bak -Encoding UTF8) -replace 'platforms = .*', 'platforms = [''win-%short_arch%'']' | Out-File pixi.toml -Encoding UTF8"
+:: Git on Windows needs to run post link scripts to properly set up SSL certificates
+pixi config set --global run-post-link-scripts insecure
+if !errorlevel! neq 0 exit /b !errorlevel!
+pixi install --environment %PIXI_ENV%
+if !errorlevel! neq 0 exit /b !errorlevel!
+pixi list --environment %PIXI_ENV%
 if !errorlevel! neq 0 exit /b !errorlevel!
 
-if "%MICROMAMBA_SHA256%"=="" exit /b 1
-powershell -ExecutionPolicy Bypass -Command "$h = Get-FileHash '%MICROMAMBA_EXE%' -ErrorAction Stop; if ($h.Hash -ne $env:MICROMAMBA_SHA256) { Write-Error "SHA256 mismatch:`n  Expected: $env:MICROMAMBA_SHA256`n  Actual:   $($h.Hash)"; exit 1 }"
+echo Activating environment
+set "ACTIVATE_PIXI=%TMP%\pixi-activate-%RANDOM%.bat"
+pixi shell-hook --environment %PIXI_ENV% > "%ACTIVATE_PIXI%"
 if !errorlevel! neq 0 exit /b !errorlevel!
-
-echo Creating environment
-call "%MICROMAMBA_EXE%" create --yes --root-prefix "%MAMBA_ROOT_PREFIX%" --prefix "%MINIFORGE_HOME%" ^
-    --channel conda-forge ^
-    pip python=3.14 conda-build conda-forge-ci-setup=4
+call "%ACTIVATE_PIXI%"
 if !errorlevel! neq 0 exit /b !errorlevel!
-
-echo Cleaning up micromamba
-del /S /Q "%MAMBA_ROOT_PREFIX%" >nul
-del /S /Q "%MICROMAMBA_TMPDIR%" >nul
+move /y pixi.toml.bak pixi.toml
+popd
 
 call :end_group
 
 call :start_group "Configuring conda"
 
 :: Activate the base conda environment
-echo Activating environment
-set "CONDA_EXE=%MINIFORGE_HOME%\Scripts\conda.exe"
-call "%MINIFORGE_HOME%\condabin\conda.bat" activate "%MINIFORGE_HOME%"
 :: Configure the solver
 set "CONDA_SOLVER=libmamba"
 if !errorlevel! neq 0 exit /b !errorlevel!
@@ -97,22 +107,22 @@ if EXIST %FEEDSTOCK_ROOT%\LICENSE.txt (
 )
 if NOT [%HOST_PLATFORM%] == [%BUILD_PLATFORM%] (
     if [%CROSSCOMPILING_EMULATOR%] == [] (
-        set "EXTRA_CB_OPTIONS=%EXTRA_CB_OPTIONS% --no-test"
+        set "EXTRA_CB_OPTIONS=%EXTRA_CB_OPTIONS% --test skip"
     )
 )
 
 if NOT [%flow_run_id%] == [] (
-        set "EXTRA_CB_OPTIONS=%EXTRA_CB_OPTIONS% --extra-meta flow_run_id=%flow_run_id% remote_url=%remote_url% sha=%sha%"
+        set "EXTRA_CB_OPTIONS=%EXTRA_CB_OPTIONS% --extra-meta flow_run_id=%flow_run_id% --extra-meta remote_url=%remote_url% --extra-meta sha=%sha%"
 )
 
 :: Build the recipe
 echo Building recipe
 
-conda-build.exe ^
-    "%RECIPE_ROOT%" ^
+rattler-build.exe build ^
+    --recipe "%RECIPE_ROOT%" ^
     -m %CONFIG_FILE% ^
     %EXTRA_CB_OPTIONS% ^
-    --suppress-variables
+    --target-platform %HOST_PLATFORM%
 
 if !errorlevel! neq 0 exit /b !errorlevel!
 
