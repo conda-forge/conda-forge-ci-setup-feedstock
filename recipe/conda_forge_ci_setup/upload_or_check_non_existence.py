@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import contextlib
+import datetime
 import json
 import os
 import shutil
@@ -23,10 +24,11 @@ from .utils import (
     get_built_distribution_names_and_subdirs,
 )
 
-# Written to the build folder after a successful copy request. The folder is
-# also visible outside of docker, so CI can create attestations for exactly
-# the packages that were sent to conda-forge.
-ATTEST_SUBJECTS_FILENAME = "attest-subjects.json"
+# A file named like this is written to the build folder after each successful
+# copy request. The folder is also visible outside of docker, so CI can create
+# attestations for exactly the packages that were sent to conda-forge.
+ATTEST_SUBJECTS_PREFIX = "attest-subjects-"
+CHANNEL_ALIAS = "https://conda.anaconda.org"
 
 conda_subdir = context.subdir
 
@@ -132,28 +134,45 @@ def delete_dist(token_fn, path, owner, channels):
     )
 
 
-def write_attest_subjects(paths, croot=None):
+def target_channel_url(owner, label):
+    """The URL of the channel that packages uploaded to `owner/label` end up in."""
+    if label == "main":
+        return "{}/{}".format(CHANNEL_ALIAS, owner)
+    return "{}/{}/label/{}".format(CHANNEL_ALIAS, owner, label)
+
+
+def write_attest_subjects(paths, target_channel, croot=None):
     """Write the filename and SHA-256 of each package to the build folder.
 
-    This is best effort: errors are printed and never raised, so that they
-    cannot fail or retry an upload.
+    Every call writes a new file, named by the current time, so that several
+    uploads in one job (e.g. to more than one label) do not overwrite each
+    other. Returns the path of the file.
     """
-    try:
-        if croot is None:
-            croot = conda_build.config.croot
-        subjects = [
-            {"name": os.path.basename(path), "sha256": compute_sha256sum(path)}
-            for path in sorted(paths)
-        ]
-        with open(os.path.join(croot, ATTEST_SUBJECTS_FILENAME), "w") as fp:
-            json.dump(subjects, fp)
-        print(
-            "Wrote {} package(s) for attestation to {}".format(
-                len(subjects), ATTEST_SUBJECTS_FILENAME
-            )
+    if croot is None:
+        croot = conda_build.config.croot
+    subjects = [
+        {
+            "name": os.path.basename(path),
+            "sha256": compute_sha256sum(path),
+            "target_channel": target_channel,
+        }
+        for path in sorted(paths)
+    ]
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime(
+        "%Y%m%dT%H%M%S%fZ"
+    )
+    filename = os.path.join(
+        croot, "{}{}.json".format(ATTEST_SUBJECTS_PREFIX, timestamp)
+    )
+    # never replace an existing file
+    with open(filename, "x") as fp:
+        json.dump(subjects, fp)
+    print(
+        "Wrote {} package(s) for attestation to {}".format(
+            len(subjects), os.path.basename(filename)
         )
-    except Exception as e:
-        print("WARNING: could not write the packages for attestation: {!r}".format(e))
+    )
+    return filename
 
 
 def upload_or_check(
@@ -168,7 +187,13 @@ def upload_or_check(
     prod_owner="conda-forge",
     comment_on_error=True,
     feedstock_root=None,
+    copied_paths=None,
 ):
+    """Upload the built packages, or check that they exist.
+
+    With `validate`, the paths of the packages that were sent to the copy to
+    `prod_owner` are appended to `copied_paths`, if given.
+    """
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
         print("Using STAGING_BINSTAR_TOKEN for anaconda.org uploads to %s." % owner)
@@ -256,8 +281,8 @@ def upload_or_check(
                 ):
                     raise RuntimeError(
                         "copy from staging to production channel failed")
-                if to_copy_paths:
-                    write_attest_subjects(to_copy_paths)
+                if copied_paths is not None:
+                    copied_paths.extend(to_copy_paths)
                 return True
             else:
                 for name, version, path in built_distributions:
@@ -296,6 +321,7 @@ def retry_upload_or_check(
     # issues with the Anaconda api
     n_try = 10
     for i in range(1, n_try):
+        copied_paths = []
         try:
             res = upload_or_check(
                 feedstock, recipe_dir, owner, channel, variant,
@@ -303,8 +329,9 @@ def retry_upload_or_check(
                 comment_on_error=True if i == n_try-1 else False,
                 private_upload=private_upload,
                 feedstock_root=feedstock_root,
+                copied_paths=copied_paths,
             )
-            return res
+            break
         except Exception as e:
             # exponential backoff, wait at least 10 seconds
             timeout = max(1.75 ** i, 10)
@@ -312,7 +339,15 @@ def retry_upload_or_check(
                 "Failed to upload due to {}. Trying again in {} seconds".format(
                     e, timeout))
             time.sleep(timeout)
-    raise TimeoutError("Did not manage to upload package.  Failing.")
+    else:
+        raise TimeoutError("Did not manage to upload package.  Failing.")
+
+    # Outside of the retry loop: a failure here must not upload again.
+    if copied_paths:
+        write_attest_subjects(
+            copied_paths, target_channel_url("conda-forge", channel)
+        )
+    return res
 
 
 @click.command()
