@@ -152,8 +152,14 @@ tests:
             - Scripts/mangle_homebrew*
             - Scripts/validate_recipe_outputs*
             - Scripts/inspect_artifacts*
-            - Lib/site-packages/conda_forge_ci_setup/**
-            - Lib/site-packages/conda_forge_ci_setup-${{ version }}.dist-info/**
+            # Python >=3.15 on Windows uses lib/python/site-packages
+            - if: match(python, ">=3.15")
+              then:
+                - lib/python/site-packages/conda_forge_ci_setup/**
+                - lib/python/site-packages/conda_forge_ci_setup-${{ version }}.dist-info/**
+              else:
+                - Lib/site-packages/conda_forge_ci_setup/**
+                - Lib/site-packages/conda_forge_ci_setup-${{ version }}.dist-info/**
   - files:
       recipe:
         - if: (osx or (linux and x86_64)) and match(python, "3.13.*")
