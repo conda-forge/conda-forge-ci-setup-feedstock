@@ -183,10 +183,16 @@ class AttestSubjects:
         """Remember the paths that are about to be sent in a copy request."""
         self.requested.update(paths)
 
-    def record_copied(self, attempts=1, wait=10):
-        """Add the requested packages that are on production with our hash."""
+    def record_copied(self, paths=None, attempts=1, wait=10):
+        """Add the packages that are on production with our label and hash.
+
+        `paths` are the packages that a copy request reported as copied. By
+        default, all requested packages that are not listed yet are checked,
+        for copies that finished after `request_copy` stopped polling.
+        """
+        candidates = set(self.requested if paths is None else paths)
         for attempt in range(attempts):
-            missing = sorted(self.requested - set(self.subjects))
+            missing = sorted(candidates - set(self.subjects))
             if not missing:
                 return
             if attempt:
@@ -194,7 +200,7 @@ class AttestSubjects:
             for path in missing:
                 sha256 = compute_sha256sum(path)
                 try:
-                    copied = _check_dist_with_label_and_hash_on_prod(
+                    on_prod = _check_dist_with_label_and_hash_on_prod(
                         _unix_dist_path(path),
                         self.label,
                         "sha256",
@@ -207,14 +213,14 @@ class AttestSubjects:
                             path, self.prod_owner, e
                         )
                     )
-                    copied = False
-                if copied:
-                    self.subjects[path] = {
-                        "name": os.path.basename(path),
-                        "sha256": sha256,
-                        "target_channel": self.target_channel,
-                    }
-        for path in sorted(self.requested - set(self.subjects)):
+                else:
+                    if on_prod:
+                        self.subjects[path] = {
+                            "name": os.path.basename(path),
+                            "sha256": sha256,
+                            "target_channel": self.target_channel,
+                        }
+        for path in sorted(candidates - set(self.subjects)):
             print(
                 "WARNING: {} is not on {} with this build's SHA-256, so it is "
                 "not listed for attestation".format(path, self.target_channel)
@@ -336,7 +342,7 @@ def upload_or_check(
                 if to_copy_paths:
                     if attest_subjects is not None:
                         attest_subjects.request(to_copy_paths)
-                    copied = request_copy(
+                    ok, copied = request_copy(
                         feedstock,
                         to_copy_paths,
                         channel,
@@ -344,10 +350,16 @@ def upload_or_check(
                         comment_on_error=comment_on_error,
                     )
                     # also after a failed request, as some packages may have
-                    # been copied anyway; a retry would skip those
+                    # been copied anyway and a retry would skip them. The
+                    # hash is checked because the webservice also reports a
+                    # package as copied when one with that filename was
+                    # already on conda-forge.
                     if attest_subjects is not None:
-                        attest_subjects.record_copied()
-                    if not copied:
+                        attest_subjects.record_copied([
+                            path for path in to_copy_paths
+                            if copied.get(_unix_dist_path(path))
+                        ])
+                    if not ok:
                         raise RuntimeError(
                             "copy from staging to production channel failed")
                 return True
