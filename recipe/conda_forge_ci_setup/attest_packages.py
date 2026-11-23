@@ -19,8 +19,8 @@ It only runs in GitHub Actions, in a job with the `id-token: write` and
 - `GITHUB_TOKEN`: must be passed by the workflow (`${{ github.token }}`); used
   to store the attestations.
 
-sigstore is not a dependency of conda-forge-ci-setup, because the builds do
-not need it. Install it next to conda-forge-ci-setup to run this command.
+sigstore is imported only when there is something to sign, so that the other
+commands of conda-forge-ci-setup do not pay for importing it.
 """
 
 import json
