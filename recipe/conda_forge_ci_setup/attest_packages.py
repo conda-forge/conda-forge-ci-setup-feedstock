@@ -1,63 +1,63 @@
-"""Sign a CEP-27 publish attestation for every package copied to conda-forge.
+"""Sign CEP-27 publish attestations for packages copied to conda-forge.
 
-Reads the attest-subjects-*.json files that `upload_or_check_non_existence`
-writes after each copy to the production channel
-(`[{"name", "sha256", "target_channel"}]`), signs one Sigstore attestation per
-package with the OIDC identity of the GitHub Actions job, and stores it in the
-GitHub attestation API of the repository, where it can be looked up by the
-package's SHA-256.
+`upload_or_check_non_existence` calls `attest_packages` right after it copied
+packages to the production channel, if conda-forge.yml enables
+`github_actions: {attest_packages: true}`. Each package gets one Sigstore
+attestation, signed with the OIDC identity of the GitHub Actions workflow and
+stored in the GitHub attestation API of the feedstock, where it can be looked
+up by the package's SHA-256.
 
-It only runs in GitHub Actions, in a job with the `id-token: write` and
-`attestations: write` permissions, and reads these environment variables:
+The workflow needs the `id-token: write` and `attestations: write`
+permissions, and these environment variables (forwarded into docker on linux):
 
-- `GITHUB_ACTIONS`: set by GitHub Actions; the command refuses to run without it.
+- `GITHUB_ACTIONS`: set by GitHub Actions.
 - `ACTIONS_ID_TOKEN_REQUEST_URL` and `ACTIONS_ID_TOKEN_REQUEST_TOKEN`: set by
-  GitHub Actions when the job has `id-token: write`; used by sigstore to get
-  the OIDC identity token that the attestations are signed with.
+  GitHub Actions with `id-token: write`; used by sigstore to get the OIDC
+  identity token that the attestations are signed with.
 - `GITHUB_REPOSITORY`: set by GitHub Actions; the repository that the
   attestations are stored in.
-- `GITHUB_TOKEN`: must be passed by the workflow (`${{ github.token }}`); used
-  to store the attestations.
-
-sigstore is imported only when there is something to sign, so that the other
-commands of conda-forge-ci-setup do not pay for importing it.
+- `GITHUB_TOKEN`: passed by the workflow (`${{ github.token }}`); used to store
+  the attestations.
 """
 
 import json
 import os
-import sys
-from pathlib import Path
 
-import click
 import requests
+from sigstore import dsse
+from sigstore.models import ClientTrustConfig
+from sigstore.oidc import IdentityToken, detect_credential
+from sigstore.sign import SigningContext
 
 PREDICATE_TYPE = "https://schemas.conda.org/attestations-publish-1.schema.json"
+REQUIRED_ENV = (
+    "ACTIONS_ID_TOKEN_REQUEST_URL",
+    "ACTIONS_ID_TOKEN_REQUEST_TOKEN",
+    "GITHUB_REPOSITORY",
+    "GITHUB_TOKEN",
+)
 
 
-def read_subjects(directory):
-    subjects = {}
-    for path in sorted(Path(directory).rglob("attest-subjects*.json")):
-        for entry in json.loads(path.read_text()):
-            key = (entry["name"], entry["sha256"], entry["target_channel"])
-            subjects[key] = entry
-    return list(subjects.values())
+def missing_environment():
+    """The environment variables that are needed to attest but not set."""
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return ["GITHUB_ACTIONS"]
+    return [name for name in REQUIRED_ENV if not os.environ.get(name)]
 
 
-def statement(entry):
-    from sigstore import dsse
-
+def statement(subject):
     return (
         dsse.StatementBuilder()
         .subjects(
             [
                 dsse.Subject(
-                    name=entry["name"],
-                    digest=dsse.DigestSet(root={"sha256": entry["sha256"]}),
+                    name=subject["name"],
+                    digest=dsse.DigestSet(root={"sha256": subject["sha256"]}),
                 )
             ]
         )
         .predicate_type(PREDICATE_TYPE)
-        .predicate({"targetChannel": entry["target_channel"]})
+        .predicate({"targetChannel": subject["target_channel"]})
         .build()
     )
 
@@ -77,46 +77,48 @@ def store_on_github(bundle):
     return response.json()["id"]
 
 
-def attest_packages(directory):
-    if os.environ.get("GITHUB_ACTIONS") != "true":
-        print("This command signs with the OIDC identity of a GitHub Actions job")
-        print("and only runs in GitHub Actions.")
-        return 1
+def attest_packages(subjects):
+    """Sign and store one attestation per subject.
 
-    subjects = read_subjects(directory)
+    `subjects` are dicts with the `name` (filename), `sha256` and
+    `target_channel` of a package. Never raises: attestations are best effort
+    and must not fail an upload. Returns the number of packages that were not
+    attested.
+    """
     if not subjects:
-        print("No packages to attest")
         return 0
 
-    from sigstore.models import ClientTrustConfig
-    from sigstore.oidc import IdentityToken, detect_credential
-    from sigstore.sign import SigningContext
+    missing = missing_environment()
+    if missing:
+        print(
+            "WARNING: not attesting {} package(s), because {} not set. The "
+            "workflow needs the `id-token: write` and `attestations: write` "
+            "permissions.".format(
+                len(subjects),
+                ", ".join(missing) + (" is" if len(missing) == 1 else " are"),
+            )
+        )
+        return len(subjects)
 
-    context = SigningContext.from_trust_config(ClientTrustConfig.production())
+    try:
+        context = SigningContext.from_trust_config(ClientTrustConfig.production())
+    except Exception as e:
+        print("WARNING: could not set up signing, no attestations: {!r}".format(e))
+        return len(subjects)
+
     failed = 0
-    for entry in subjects:
+    for subject in subjects:
         try:
             # a fresh identity token per package, as they expire quickly
             with context.signer(IdentityToken(detect_credential())) as signer:
-                bundle = signer.sign_dsse(statement(entry))
+                bundle = signer.sign_dsse(statement(subject))
             attestation_id = store_on_github(bundle)
             print(
-                f"Attested {entry['name']} for {entry['target_channel']}: "
+                f"Attested {subject['name']} for {subject['target_channel']}: "
                 f"https://github.com/{os.environ['GITHUB_REPOSITORY']}"
                 f"/attestations/{attestation_id}"
             )
         except Exception as e:
-            print(f"Failed to attest {entry['name']}: {e!r}")
-            failed = 1
-
+            print(f"WARNING: failed to attest {subject['name']}: {e!r}")
+            failed += 1
     return failed
-
-
-@click.command()
-@click.argument(
-    "directory",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-)
-def main(directory):
-    """Attest the packages listed in the attest-subjects-*.json files in DIRECTORY."""
-    sys.exit(attest_packages(directory))

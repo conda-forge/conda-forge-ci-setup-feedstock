@@ -2,8 +2,6 @@
 from __future__ import print_function
 
 import contextlib
-import datetime
-import json
 import os
 import shutil
 import subprocess
@@ -17,6 +15,7 @@ from conda.base.context import context
 import conda_build.api
 import conda_build.config
 
+from .attest_packages import attest_packages
 from .feedstock_outputs import (
     _check_dist_with_label_and_hash_on_prod,
     _unix_dist_path,
@@ -30,11 +29,6 @@ from .utils import (
     is_package_attestation_on,
 )
 
-# If conda-forge.yml enables `github_actions: {attest_packages: true}`, a file
-# named like this is written to the build folder after each upload that
-# copied packages to conda-forge. The folder is also visible outside of docker,
-# so CI can create attestations for exactly the packages that were copied.
-ATTEST_SUBJECTS_PREFIX = "attest-subjects-"
 CHANNEL_ALIAS = "https://conda.anaconda.org"
 
 conda_subdir = context.subdir
@@ -155,24 +149,10 @@ class AttestSubjects:
     `prod_owner` with the requested label and the SHA-256 of the local file.
     The webservice also reports a copy as done when a package with that
     filename already exists, so the hash check is what makes sure we only
-    list what this upload published.
-
-    The entries (filename, SHA-256 and target channel) are kept in memory and
-    written once by `write`, so that errors with the file never fail or retry
-    an upload.
+    attest what this upload published.
     """
 
-    def __init__(self, label, prod_owner="conda-forge", croot=None):
-        if croot is None:
-            croot = conda_build.config.croot
-        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%S%fZ"
-        )
-        # one file per upload, so that uploads to several labels in one job
-        # do not overwrite each other
-        self.filename = os.path.join(
-            croot, "{}{}.json".format(ATTEST_SUBJECTS_PREFIX, timestamp)
-        )
+    def __init__(self, label, prod_owner="conda-forge"):
         self.label = label
         self.prod_owner = prod_owner
         self.target_channel = target_channel_url(prod_owner, label)
@@ -226,20 +206,16 @@ class AttestSubjects:
                 "not listed for attestation".format(path, self.target_channel)
             )
 
-    def write(self):
-        """Write the entries to the JSON file, if there are any."""
-        if not self.subjects:
-            return
+    def attest(self):
+        """Sign an attestation for each listed package. Never raises."""
         subjects = [self.subjects[path] for path in sorted(self.subjects)]
-        tmp = self.filename + ".tmp"
-        with open(tmp, "w") as fp:
-            json.dump(subjects, fp)
-        os.replace(tmp, self.filename)
-        print(
-            "Wrote {} package(s) for attestation to {}".format(
-                len(subjects), os.path.basename(self.filename)
+        failed = attest_packages(subjects)
+        if subjects:
+            print(
+                "Attested {} of {} package(s)".format(
+                    len(subjects) - failed, len(subjects)
+                )
             )
-        )
 
 
 def upload_or_check(
@@ -429,8 +405,12 @@ def retry_upload_or_check(
         # on conda-forge after request_copy gave up polling, so check the
         # packages that are still missing a few more times.
         if attest_subjects is not None:
-            attest_subjects.record_copied(attempts=4, wait=30)
-            attest_subjects.write()
+            try:
+                attest_subjects.record_copied(attempts=4, wait=30)
+                attest_subjects.attest()
+            except Exception as e:
+                # attestations are best effort and never fail the upload
+                print("WARNING: could not attest packages: {!r}".format(e))
 
 
 @click.command()
