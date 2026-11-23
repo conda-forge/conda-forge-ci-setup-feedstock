@@ -42,6 +42,7 @@ setup(
             "mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main",
             "validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main",  # noqa
             "inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main",
+            "attest_packages = conda_forge_ci_setup.attest_packages:main",
         ]
     },
 )

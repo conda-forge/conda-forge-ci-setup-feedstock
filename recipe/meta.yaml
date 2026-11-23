@@ -49,6 +49,7 @@ build:
     - mangle_homebrew = conda_forge_ci_setup.mangle_homebrew:main
     - validate_recipe_outputs = conda_forge_ci_setup.feedstock_outputs:main
     - inspect_artifacts = conda_forge_ci_setup.inspect_artifacts:main
+    - attest_packages = conda_forge_ci_setup.attest_packages:main
 
 requirements:
   build:
@@ -86,6 +87,8 @@ requirements:
 
   run_constrained:
     - boa >=0.8,<1.0
+    # only needed by attest_packages, which is not run during builds
+    - sigstore >=4.5.1,<5
 
 test:
   files:
@@ -113,6 +116,7 @@ test:
     - mangle_homebrew --help
     - validate_recipe_outputs --help
     - inspect_artifacts --help
+    - attest_packages --help
     - bash test_osx_sdk.sh  # [(osx or linux64) and py==313]
     - bash test_osx_sdk_config.sh  # [unix]
   # this is here to test that downstream test packages
