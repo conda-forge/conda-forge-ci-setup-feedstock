@@ -47,7 +47,9 @@ def _get_ac_api(timeout=30):
     return ac
 
 
-def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
+def _check_dist_with_label_and_hash_on_prod(
+    dist, label, hash_type, hash_value, owner="conda-forge"
+):
     try:
         _, name, version, _ = split_pkg(dist)
     except RuntimeError:
@@ -57,7 +59,7 @@ def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
     try:
         ac = _get_ac_api()
         data = ac.distribution(
-            "conda-forge",
+            owner,
             name,
             version,
             basename=urllib.parse.quote(dist, safe=""),
