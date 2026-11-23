@@ -27,9 +27,11 @@ from .utils import (
     compute_sha256sum,
     determine_build_tool,
     get_built_distribution_names_and_subdirs,
+    is_package_attestation_on,
 )
 
-# A file named like this is written to the build folder after each upload that
+# If conda-forge.yml enables `github_actions: {attest_packages: true}`, a file
+# named like this is written to the build folder after each upload that
 # copied packages to conda-forge. The folder is also visible outside of docker,
 # so CI can create attestations for exactly the packages that were copied.
 ATTEST_SUBJECTS_PREFIX = "attest-subjects-"
@@ -386,7 +388,9 @@ def retry_upload_or_check(
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
     n_try = 10
-    attest_subjects = AttestSubjects(channel, prod_owner=prod_owner)
+    attest_subjects = None
+    if validate and is_package_attestation_on(feedstock_root):
+        attest_subjects = AttestSubjects(channel, prod_owner=prod_owner)
     try:
         for i in range(1, n_try):
             try:
@@ -412,8 +416,9 @@ def retry_upload_or_check(
         # that the webservice finishes in the background (HTTP 202) can land
         # on conda-forge after request_copy gave up polling, so check the
         # packages that are still missing a few more times.
-        attest_subjects.record_copied(attempts=4, wait=30)
-        attest_subjects.write()
+        if attest_subjects is not None:
+            attest_subjects.record_copied(attempts=4, wait=30)
+            attest_subjects.write()
 
 
 @click.command()
