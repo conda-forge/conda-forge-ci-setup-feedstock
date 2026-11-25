@@ -22,10 +22,8 @@ set +u
 # configured in a way that Python reports the host CPU number, not the guest. We provide some
 # overrides based on known properties of CI providers.
 case "$CI" in
-    travis|azure|circle)
+    azure)
         # Azure Linux workers have 2 cores: https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml#hardware
-        # Travis CI Linux workers have 2 cores: https://docs.travis-ci.com/user/reference/overview/#virtualization-environment-vs-operating-system
-        # 2 cores available on CircleCI workers: https://discuss.circleci.com/t/what-runs-on-the-node-container-by-default/1443
         export CPU_COUNT="${CPU_COUNT:-2}"
     ;;
 esac

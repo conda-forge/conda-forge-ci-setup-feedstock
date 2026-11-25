@@ -1,6 +1,6 @@
 {% set name = "conda-forge-ci-setup" %}
-{% set version = "4.33.0" %}
-{% set build = 1 %}
+{% set version = "4.34.0" %}
+{% set build = 0 %}
 
 package:
   name: {{ name|lower }}
@@ -40,7 +40,6 @@ build:
     - "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
     - echo "${RECIPE_DIR}"
   entry_points:
-    - ff_ci_pr_build = conda_forge_ci_setup.ff_ci_pr_build:main
     - upload_or_check_non_existence = conda_forge_ci_setup.upload_or_check_non_existence:main
     - setup_conda_rc = conda_forge_ci_setup.build_utils:setup_conda_rc
     - upload_package = conda_forge_ci_setup.build_utils:upload_package
@@ -105,7 +104,6 @@ test:
     - call test_cuda_override_win.bat                                             # [win]
     - test -f "${PREFIX}/bin/run_conda_forge_build_setup"                         # [unix]
     - bash test_cuda_override_linux.sh                                            # [linux and not ppc64le]
-    - ff_ci_pr_build --help
     - upload_or_check_non_existence --help
     - setup_conda_rc --help
     - upload_package --help
