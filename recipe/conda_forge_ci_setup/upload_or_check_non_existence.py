@@ -15,8 +15,21 @@ from conda.base.context import context
 import conda_build.api
 import conda_build.config
 
-from .feedstock_outputs import request_copy, split_pkg
-from .utils import determine_build_tool, get_built_distribution_names_and_subdirs
+from .attest_packages import attest_packages
+from .feedstock_outputs import (
+    _check_dist_with_label_and_hash_on_prod,
+    _unix_dist_path,
+    request_copy,
+    split_pkg,
+)
+from .utils import (
+    compute_sha256sum,
+    determine_build_tool,
+    get_built_distribution_names_and_subdirs,
+    is_package_attestation_on,
+)
+
+CHANNEL_ALIAS = "https://conda.anaconda.org"
 
 conda_subdir = context.subdir
 
@@ -122,6 +135,89 @@ def delete_dist(token_fn, path, owner, channels):
     )
 
 
+def target_channel_url(owner, label):
+    """The URL of the channel that packages uploaded to `owner/label` end up in."""
+    if label == "main":
+        return "{}/{}".format(CHANNEL_ALIAS, owner)
+    return "{}/{}/label/{}".format(CHANNEL_ALIAS, owner, label)
+
+
+class AttestSubjects:
+    """The packages that one upload copied to production, for attestations.
+
+    A package is only listed once it was sent in a copy request and is on
+    `prod_owner` with the requested label and the SHA-256 of the local file.
+    The webservice also reports a copy as done when a package with that
+    filename already exists, so the hash check is what makes sure we only
+    attest what this upload published.
+    """
+
+    def __init__(self, label, prod_owner="conda-forge"):
+        self.label = label
+        self.prod_owner = prod_owner
+        self.target_channel = target_channel_url(prod_owner, label)
+        self.requested = set()
+        self.subjects = {}
+
+    def request(self, paths):
+        """Remember the paths that are about to be sent in a copy request."""
+        self.requested.update(paths)
+
+    def record_copied(self, paths=None, attempts=1, wait=10):
+        """Add the packages that are on production with our label and hash.
+
+        `paths` are the packages that a copy request reported as copied. By
+        default, all requested packages that are not listed yet are checked,
+        for copies that finished after `request_copy` stopped polling.
+        """
+        candidates = set(self.requested if paths is None else paths)
+        for attempt in range(attempts):
+            missing = sorted(candidates - set(self.subjects))
+            if not missing:
+                return
+            if attempt:
+                time.sleep(wait)
+            for path in missing:
+                sha256 = compute_sha256sum(path)
+                try:
+                    on_prod = _check_dist_with_label_and_hash_on_prod(
+                        _unix_dist_path(path),
+                        self.label,
+                        "sha256",
+                        sha256,
+                        owner=self.prod_owner,
+                    )
+                except Exception as e:
+                    print(
+                        "Could not check {} on {}: {!r}".format(
+                            path, self.prod_owner, e
+                        )
+                    )
+                else:
+                    if on_prod:
+                        self.subjects[path] = {
+                            "name": os.path.basename(path),
+                            "sha256": sha256,
+                            "target_channel": self.target_channel,
+                        }
+        for path in sorted(candidates - set(self.subjects)):
+            print(
+                "WARNING: {} is not on {} with this build's SHA-256, so it is "
+                "not listed for attestation".format(path, self.target_channel)
+            )
+
+    def attest(self):
+        """Sign an attestation for each listed package. Never raises."""
+        subjects = [self.subjects[path] for path in sorted(self.subjects)]
+        failed = attest_packages(subjects)
+        if subjects:
+            print(
+                "Attested {} of {} package(s)".format(
+                    len(subjects) - failed, len(subjects)
+                )
+            )
+
+
 def upload_or_check(
     feedstock,
     recipe_dir,
@@ -134,7 +230,13 @@ def upload_or_check(
     prod_owner="conda-forge",
     comment_on_error=True,
     feedstock_root=None,
+    attest_subjects=None,
 ):
+    """Upload the built packages, or check that they exist.
+
+    With `validate`, the packages sent in a copy request to `prod_owner` are
+    passed to `attest_subjects` (an `AttestSubjects`), if given.
+    """
     if validate and "STAGING_BINSTAR_TOKEN" in os.environ:
         token = os.environ["STAGING_BINSTAR_TOKEN"]
         print("Using STAGING_BINSTAR_TOKEN for anaconda.org uploads to %s." % owner)
@@ -213,17 +315,30 @@ def upload_or_check(
                     if need_copy:
                         to_copy_paths.append(path)
 
-                if to_copy_paths and not request_copy(
-                    feedstock,
-                    to_copy_paths,
-                    channel,
-                    git_sha=git_sha,
-                    comment_on_error=comment_on_error,
-                ):
-                    raise RuntimeError(
-                        "copy from staging to production channel failed")
-                else:
-                    return True
+                if to_copy_paths:
+                    if attest_subjects is not None:
+                        attest_subjects.request(to_copy_paths)
+                    ok, copied = request_copy(
+                        feedstock,
+                        to_copy_paths,
+                        channel,
+                        git_sha=git_sha,
+                        comment_on_error=comment_on_error,
+                    )
+                    # also after a failed request, as some packages may have
+                    # been copied anyway and a retry would skip them. The
+                    # hash is checked because the webservice also reports a
+                    # package as copied when one with that filename was
+                    # already on conda-forge.
+                    if attest_subjects is not None:
+                        attest_subjects.record_copied([
+                            path for path in to_copy_paths
+                            if copied.get(_unix_dist_path(path))
+                        ])
+                    if not ok:
+                        raise RuntimeError(
+                            "copy from staging to production channel failed")
+                return True
             else:
                 for name, version, path in built_distributions:
                     if not built_distribution_already_exists(
@@ -256,28 +371,46 @@ def retry_upload_or_check(
     git_sha=None,
     private_upload=False,
     feedstock_root=None,
+    prod_owner="conda-forge",
 ):
     # perform a backoff in case we fail.  THis should limit the failures from
     # issues with the Anaconda api
     n_try = 10
-    for i in range(1, n_try):
-        try:
-            res = upload_or_check(
-                feedstock, recipe_dir, owner, channel, variant,
-                validate=validate, git_sha=git_sha,
-                comment_on_error=True if i == n_try-1 else False,
-                private_upload=private_upload,
-                feedstock_root=feedstock_root,
-            )
-            return res
-        except Exception as e:
-            # exponential backoff, wait at least 10 seconds
-            timeout = max(1.75 ** i, 10)
-            print(
-                "Failed to upload due to {}. Trying again in {} seconds".format(
-                    e, timeout))
-            time.sleep(timeout)
-    raise TimeoutError("Did not manage to upload package.  Failing.")
+    attest_subjects = None
+    if validate and is_package_attestation_on(feedstock_root):
+        attest_subjects = AttestSubjects(channel, prod_owner=prod_owner)
+    try:
+        for i in range(1, n_try):
+            try:
+                return upload_or_check(
+                    feedstock, recipe_dir, owner, channel, variant,
+                    validate=validate, git_sha=git_sha,
+                    comment_on_error=True if i == n_try-1 else False,
+                    private_upload=private_upload,
+                    prod_owner=prod_owner,
+                    feedstock_root=feedstock_root,
+                    attest_subjects=attest_subjects,
+                )
+            except Exception as e:
+                # exponential backoff, wait at least 10 seconds
+                timeout = max(1.75 ** i, 10)
+                print(
+                    "Failed to upload due to {}. Trying again in {} seconds".format(
+                        e, timeout))
+                time.sleep(timeout)
+        raise TimeoutError("Did not manage to upload package.  Failing.")
+    finally:
+        # Outside of the retry loop, so that it never uploads again. A copy
+        # that the webservice finishes in the background (HTTP 202) can land
+        # on conda-forge after request_copy gave up polling, so check the
+        # packages that are still missing a few more times.
+        if attest_subjects is not None:
+            try:
+                attest_subjects.record_copied(attempts=4, wait=30)
+                attest_subjects.attest()
+            except Exception as e:
+                # attestations are best effort and never fail the upload
+                print("WARNING: could not attest packages: {!r}".format(e))
 
 
 @click.command()

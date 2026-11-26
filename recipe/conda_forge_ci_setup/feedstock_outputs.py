@@ -47,7 +47,9 @@ def _get_ac_api(timeout=30):
     return ac
 
 
-def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
+def _check_dist_with_label_and_hash_on_prod(
+    dist, label, hash_type, hash_value, owner="conda-forge"
+):
     try:
         _, name, version, _ = split_pkg(dist)
     except RuntimeError:
@@ -57,7 +59,7 @@ def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
     try:
         ac = _get_ac_api()
         data = ac.distribution(
-            "conda-forge",
+            owner,
             name,
             version,
             basename=urllib.parse.quote(dist, safe=""),
@@ -73,6 +75,14 @@ def _check_dist_with_label_and_hash_on_prod(dist, label, hash_type, hash_value):
 def request_copy(
     feedstock, dists, channel, git_sha=None, comment_on_error=True, num_polling_attempts=5
 ):
+    """Ask the webservice to copy `dists` from cf-staging to conda-forge.
+
+    Returns whether the copy succeeded, and a dict that maps each dist
+    (`<subdir>/<filename>`) to whether it was reported as copied. With an
+    HTTP 200 response, that is the webservice's answer, which is also True if
+    a dist with that filename already existed on conda-forge. Otherwise it
+    comes from polling conda-forge for the label and SHA-256.
+    """
     checksums = {}
     for path in dists:
         dist = _unix_dist_path(path)
@@ -138,7 +148,9 @@ def request_copy(
                 break
 
     print("copy results:\n%s" % json.dumps(results, indent=2), flush=True)
-    return (r.status_code == 200) or all(v for v in results["copied"].values())
+    copied = results.get("copied") or {}
+    ok = (r.status_code == 200) or all(v for v in copied.values())
+    return ok, copied
 
 
 def is_valid_feedstock_output(project, outputs):

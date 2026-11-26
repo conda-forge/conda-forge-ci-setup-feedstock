@@ -178,6 +178,24 @@ def determine_build_tool(feedstock_root):
     return build_tool
 
 
+def is_package_attestation_on(feedstock_root):
+    """Whether conda-forge.yml sets `github_actions: {attest_packages: true}`.
+
+    conda-smithy then adds a job that signs an attestation for every package
+    that was copied to conda-forge, which reads the files that
+    `upload_or_check_non_existence.AttestSubjects` writes.
+    """
+    if not feedstock_root:
+        return False
+    path = os.path.join(feedstock_root, "conda-forge.yml")
+    if not os.path.exists(path):
+        return False
+    with open(path) as f:
+        config = safe_load(f) or {}
+    github_actions = config.get("github_actions") or {}
+    return github_actions.get("attest_packages", False) is True
+
+
 def is_conda_forge_output_validation_on():
     feedstock_root = os.environ.get("FEEDSTOCK_ROOT", os.getcwd())
     ison = False
